@@ -2,10 +2,9 @@
 // MEDIA — reactions after every decision: a cable-news chyron and two posts.
 // All outlets and personas are fictional.
 //
-// Reactions are chosen by "tags" computed from a decision's effects (see reactionTags in game.js):
-//   rino, maga, online, faith, guns, liberty, chamber, farm, attack, fail, neutral
-// SPECIFIC_REACTIONS['id:answerIndex'] overrides the pools for particular decisions.
-// Text may use {last} (your last name) and {rival} (the rival you attacked, if any).
+// SPECIFIC_REACTIONS['id:answerIndex'] overrides the generic posts for particular decisions.
+// Text may use {last} (your last name), {rival} (the rival you attacked, if any)
+// and {quote} (a short quote of your decision).
 // ============================================================
 
 const OUTLETS = {
@@ -20,46 +19,25 @@ const PERSONAS = {
     bio: 'Western civ enjoyer. Account #4. The others were "suspended."' },
 };
 
-// The first tag in this order that a decision has decides the reaction.
-const BOOMER_ORDER = ['fail', 'rino', 'attack', 'faith', 'guns', 'maga', 'farm', 'liberty', 'chamber', 'online', 'neutral'];
-const GROYPER_ORDER = ['fail', 'rino', 'online', 'attack', 'chamber', 'liberty', 'maga', 'faith', 'guns', 'farm', 'neutral'];
-
+// Each persona takes a stance on a decision, based on its effects (see postStance in game.js).
+// Generic posts quote the decision itself ({quote}), so they always match what you did.
+// They never name a topic of their own.
 const BOOMER_POSTS = {
-  maga: [
-    'FINALLY a Governor with a SPINE!!! {last} 2030 🇺🇸🇺🇸🇺🇸',
-    'This is what we voted for. God Bless {last} and God Bless the USA 🙏🇺🇸',
-    'Watched this on Fax News with my wife. We both stood up and clapped. {last} gets it!!',
-    'The liberal media is going to HATE this. Good!!! SHARE if you agree 🦅',
+  approve: [
+    'FINALLY a Governor with a SPINE!!! 🇺🇸🇺🇸 "{quote}"',
+    '"{quote}" THIS is what we voted for. God Bless {last} 🙏🇺🇸',
+    'Watched this on Fax News with my wife. "{quote}" We both stood up and clapped!!',
+    '"{quote}" The liberal media is going to HATE this. Good!!! SHARE if you agree 🦅',
+    'Common sense!! "{quote}" Why is that so hard for the other side to understand??',
   ],
-  faith: [
-    'Amen!!! A Governor who is not ashamed of the Lord 🙏',
-    'Our pastor talked about this on Sunday. Proud to be a Cimarronian today 🙏🇺🇸',
-    'FINALLY someone standing up for FAITH and FAMILY. {last} has my vote.',
+  disapprove: [
+    '"{quote}"?? Very disappointed in {last} today. This is NOT what we sent you there for 😡',
+    '"{quote}" Sounds like something a DEMOCRAT would say. Unfollowing.',
+    'I have voted Republican for 45 years. "{quote}" I am starting to wonder about {last}.',
   ],
-  guns: [
-    'Shall NOT be infringed!!! {last} understands the 2nd Amendment 🇺🇸',
-    'As a veteran and a gun owner I say THANK YOU {last}!!!',
-  ],
-  farm: [
-    'My brother-in-law farms in Sumner. He says {last} is the only one who listens. Good enough for me.',
-    'Stand with our farmers!!! They feed America 🌽🇺🇸',
-  ],
-  liberty: [
-    'Lower taxes, less government. That is the Reagan way!! 👍',
-    'Keep your hands OFF my wallet, government!! Good call {last}.',
-  ],
-  chamber: [
-    'Common sense. Business keeps this state running. Good job {last}.',
-    'Not everything has to be a fight. This was a smart move.',
-  ],
-  online: [
-    'Not sure what all the young people are talking about but I trust {last} 🤷‍♂️',
-    'My grandson says this is "based." I had to look it up. Good job I guess!!',
-  ],
-  rino: [
-    'Very disappointed in {last} today. This is NOT what we sent you there for 😡',
-    'Sounds like something a DEMOCRAT would say. Unfollowing.',
-    'I have voted Republican for 45 years. I am starting to wonder about {last}.',
+  confused: [
+    'Not sure what all the young people are so excited about, but I trust {last} 🤷‍♂️',
+    'My grandson says "{quote}" is "based." I had to look it up. Good job I guess!!',
   ],
   attack: [
     'Two Republicans fighting on TV. This is EXACTLY what the Democrats want!! Knock it off!!',
@@ -70,46 +48,28 @@ const BOOMER_POSTS = {
     'Who is advising {last}?? FIRE THEM!!',
   ],
   neutral: [
-    'OK but what about the roads in my county?? Potholes EVERYWHERE!!',
-    'Good. Now do something about gas prices!!',
-    'Watching Fax News. Still undecided. Everybody is a politician these days.',
+    '"{quote}" OK. Fine. Now what about the potholes in my county??',
+    '"{quote}" Good I guess. Still waiting on gas prices!!',
+    'Watching Fax News. "{quote}" Still undecided. Everybody is a politician these days.',
   ],
 };
 
 const GROYPER_POSTS = {
-  online: [
-    '{last} might actually be based. We are so back.',
-    'The Overton window just moved. Conservative Inc. is screeching. Good.',
-    'Normies cannot handle this. That is how you know it is working. 🏛️',
+  approve: [
+    '"{quote}" {last} might actually be based. We are so back.',
+    'The Overton window just moved. "{quote}" Conservative Inc. is screeching. Good.',
+    '"{quote}" Normies cannot handle this. That is how you know it is working. 🏛️',
   ],
-  maga: [
-    'Fine. Now say it again without the donor-approved wording.',
-    'Words are cheap. Deport them all, then we talk.',
-    'Mid. Boomer-coded. But better than nothing.',
+  meh: [
+    '"{quote}" Fine. Now say it again without the donor-approved wording.',
+    '"{quote}" Words are cheap. Show me the numbers.',
+    '"{quote}" Mid. Boomer-coded. Better than nothing.',
   ],
-  chamber: [
-    'Conservative Inc. doing what it does best: selling you out for cheap labor. ngmi.',
-    '{last} works for the donor class. Always has.',
-    'Imagine being this owned by the Chamber of Commerce.',
-  ],
-  liberty: [
-    'Libertarians are just liberals who want to pay less tax.',
-    '"Muh free market." This is how you lost the country.',
-  ],
-  faith: [
-    'Megachurch Republicanism. Soft. Weak. Next.',
-    'Church-lady politics will not save the West.',
-  ],
-  guns: [
-    'Rifles are nice. They will not fix what is actually happening to this country.',
-  ],
-  farm: [
-    'Farmers crying for subsidies again. Learn to hire Americans.',
-  ],
-  rino: [
-    'It is over. {last} folded like a lawn chair.',
-    'Another uniparty grifter. Primary all of them.',
-    'Cope. {last} was never one of us.',
+  disapprove: [
+    '"{quote}" Conservative Inc. doing what it does best. ngmi.',
+    '"{quote}" {last} works for the donor class. Always has.',
+    '"{quote}" It is over. {last} folded like a lawn chair.',
+    '"{quote}" Another uniparty grifter. Primary all of them.',
   ],
   attack: [
     'Finally some infighting. Let the weak candidates die.',
@@ -120,8 +80,8 @@ const GROYPER_POSTS = {
     'Total collapse. Screenshotting this for the archive.',
   ],
   neutral: [
-    'Nobody cares about this. Talk about immigration.',
-    'Boring. Where is the fight?',
+    '"{quote}" Nobody cares. Talk about immigration.',
+    '"{quote}" Boring. Where is the fight?',
   ],
 };
 

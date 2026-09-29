@@ -312,15 +312,27 @@ function reactionTags(fx, outcome) {
   if (!t.size) t.add('neutral');
   return t;
 }
-function pickPost(s, pools, order, tags) {
-  const tag = order.find(x => tags.has(x)) || 'neutral';
+// Each persona's stance on a decision.
+function postStance(who, tags, fx) {
+  if (tags.has('fail')) return 'fail';
+  if (tags.has('rino')) return 'disapprove';
+  if (tags.has('attack')) return 'attack';
+  if (who === 'boomer') {
+    if (['maga', 'faith', 'guns', 'liberty', 'farm', 'chamber'].some(t => tags.has(t))) return 'approve';
+    return tags.has('online') ? 'confused' : 'neutral';
+  }
+  if (tags.has('online') || (fx.maga || 0) >= 4) return 'approve';
+  if (tags.has('chamber') || tags.has('liberty')) return 'disapprove';
+  return ['maga', 'faith', 'guns', 'farm'].some(t => tags.has(t)) ? 'meh' : 'neutral';
+}
+function pickPost(s, pool) {
   s.usedPosts = s.usedPosts || [];
-  const pool = pools[tag], fresh = pool.filter(p => !s.usedPosts.includes(p));
+  const fresh = pool.filter(p => !s.usedPosts.includes(p));
   const post = pick(fresh.length ? fresh : pool);
   s.usedPosts.push(post);
   return post;
 }
-function buildReactions(s, key, fx, text, outcome) {
+function buildReactions(s, key, fx, text, outcome, context = '') {
   const tags = reactionTags(fx || {}, outcome), spec = SPECIFIC_REACTIONS[key] || {};
   const last = shortName(s, 'you'), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
   const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, last.toUpperCase()).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy');
@@ -335,10 +347,21 @@ function buildReactions(s, key, fx, text, outcome) {
       : tags.has('fail') ? 'GOV. {LAST} CAMPAIGN IN DAMAGE CONTROL'
       : `GOV. {LAST}: "${quote.toUpperCase()}"`;
   }
+  // A short quote of the decision, for quote-posts.
+  const qWords = text.replace(/^[\s"']+|[\s"'.]+$/g, '').replace(/^Turn to [^:]+:\s*"?/, '').split(/\s+/);
+  let short = qWords.slice(0, 10).join(' ') + (qWords.length > 10 ? '…' : '');
+  // A very short answer ("Yes.") needs its subject to make sense in a post.
+  if (qWords.length < 4 && context) {
+    const quoted = context.match(/"([^"]{12,})"/);   // use the quoted question itself when there is one
+    const c = (quoted ? quoted[1] : context).replace(/^[\s"']+/, '').split(/\s+/);
+    const lead = c.slice(0, 11).join(' ').replace(/[?.,:;"]+$/, '');
+    short += ` — ${lead.charAt(0).toLowerCase() + lead.slice(1)}${c.length > 11 ? '…' : ''}`;
+  }
+  const fillQ = t => fill(t).replace(/\{quote\}/g, short);
   return {
     chyron: { outlet, text: fill(chyron) },
-    boomer: fill(spec.boomer || pickPost(s, BOOMER_POSTS, BOOMER_ORDER, tags)),
-    groyper: fill(spec.groyper || pickPost(s, GROYPER_POSTS, GROYPER_ORDER, tags)),
+    boomer: fillQ(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})])),
+    groyper: fillQ(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})])),
   };
 }
 
@@ -361,7 +384,7 @@ function answer() {
     if (q.region) s.bonus.you[q.region] = (s.bonus.you[q.region] || 0) + 1;
     recordPromise(s, `${q.id}:${c.sel}`);
     s.log.push({ q: q.setting, a: a.text });
-    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text);
+    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text, null, q.text);
     opponentNews(s);
     if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
   } else if (c.type === 'event' || c.type === 'revent') {
@@ -378,7 +401,7 @@ function answer() {
     if (e.special === 'war') startWar(s);
     recordPromise(s, `${e.id}:${c.sel}`);
     s.log.push({ q: `${c.type === 'revent' ? 'Runoff' : e.kind}: ${e.title}`, a: ch.text + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
-    c.reactions = buildReactions(s, `${e.id}:${c.sel}`, c.fx, ch.text, c.outcome);
+    c.reactions = buildReactions(s, `${e.id}:${c.sel}`, c.fx, ch.text, c.outcome, e.title);
     if (c.type === 'event') {
       opponentNews(s);
       if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
@@ -386,7 +409,7 @@ function answer() {
   } else if (c.type === 'debate') {
     const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), a = c.opts[c.sel];
     applyFx(s, a.fx);
-    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text);
+    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text, null, q.text);
     const round = [];
     const myPerf = perfOf(a.fx);
     c.scores.you += myPerf;
@@ -606,7 +629,7 @@ function courtAnswer() {
   const line = c.result === 'none' ? `${CAND[c.who].name} declines to endorse in the runoff.` : `${CAND[c.who].name} endorses ${displayName(s, s.runoff.endorse[c.who])} in the runoff.`;
   s.wire.unshift({ who: c.who, text: line });
   s.log.push({ q: `Runoff: ${COURT[c.who].title}`, a: `${ch.text} (${RUNOFF_TEXT.endorsed[c.result]})` });
-  c.reactions = buildReactions(s, `court_${c.who}:${c.sel}`, ch.fx, ch.text);
+  c.reactions = buildReactions(s, `court_${c.who}:${c.sel}`, ch.fx, ch.text, null, COURT[c.who].title);
   c.answered = c.sel;
   save(); render();
 }
