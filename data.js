@@ -137,7 +137,7 @@ const CANDIDATES = [
 // ---------- Scenarios (chosen by the game seed) ----------
 // field = candidates on the ballot from the start. enter = { id: step } for a late entry.
 // turnout = change to a faction's turnout rate in this scenario (for example, new young voters).
-// warAt = the war with Iran is certain and starts at this step.
+// warAt = the war in the Middle East is certain and starts at this step.
 // oppFx = a rival's starting support by faction. favors = a rival this scenario is built around (Whitlock can then grow).
 // presOverride = the President's opinion of a rival. oppAll / youAll = starting support in every faction.
 const BASE_FIELD = ['you', 'dunmore', 'rick', 'krantz', 'vaskel', 'whitlock'];
@@ -161,7 +161,7 @@ const SCENARIOS = [
     desc: 'In January, your former Chief of Staff was indicted for steering state contracts to a donor. You were not charged, but every rival will use it.',
     field: BASE_FIELD, youAll: -3, flag: 'indicted' },
   { id: 'reckoning', weight: 4, name: 'The Reckoning',
-    desc: 'Tension with Iran is rising, and oil is already at $110. Many older and business Republicans who stopped voting in primaries say they will come back. MAGA voters are tired and divided. If a war starts, this could be the year the old party returns.',
+    desc: 'Tension in the Middle East is rising, and oil is already at $110. Many older and business Republicans who stopped voting in primaries say they will come back. MAGA voters are tired and divided. If a war starts, this could be the year the old party returns.',
     field: BASE_FIELD, warAt: 3, favors: 'whitlock', oppAll: { dunmore: -2 },
     oppFx: { whitlock: { seniors: 37, chamber: 31, farm: 31, faith: 19, liberty: 19, guns: 12 } },
     turnout: { seniors: .08, chamber: .12, maga: -.08, online: -.06 } },

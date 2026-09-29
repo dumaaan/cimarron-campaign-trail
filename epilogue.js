@@ -97,6 +97,12 @@ const PROMISES = {
   'medicaid:1': 'Funded emergency grants for rural hospitals.',
   'medicaid:2': 'Expanded Medicaid with work requirements.',
   'medicaid:3': 'Proposed replacing Medicaid with health savings accounts.',
+  'raw_milk_fda:0': 'Sent state troopers to block federal agents from enforcing food rules on Cimarron farms.',
+  'raw_milk_fda:1': 'Signed the Food Freedom Act, making in-state raw milk sales legal.',
+  'raw_milk_fda:3': 'Called on Congress to abolish the FDA and give its food powers to the states.',
+  'h1b:0': 'Asked the President to end the H-1B program, and barred state contractors from using it.',
+  'h1b:1': 'Supported H-1B visas for the Pratt Junction data centers.',
+  'h1b:2': 'Signed a state tax penalty on companies that replace American workers with H-1B workers.',
   // events
   'judge_blocks:1': 'Continued to enforce the state immigration law in defiance of the federal court.',
   'right_to_life:0': 'Removed the rape and incest exceptions from the abortion ban.',
@@ -285,10 +291,11 @@ const EPILOGUE = [
   { flag: 'no_prop_tax', text: 'The promise to abolish property taxes leads to a constitutional amendment fight. Rural school districts warn that dozens of schools could close.' },
   { flag: 'defy', text: 'Your defiance of the federal court becomes a model for other Republican governors, and a central case in a growing conflict between the states and the federal judiciary.' },
   { flag: 'donor_deal', text: 'Harold Voigt\'s companies leave 1,200 abandoned wells unplugged. Panhandle farmers file a class-action lawsuit.' },
-  { flag: 'war', text: 'The war with Iran lasts eleven weeks. Gas prices stay above $5 until the following spring. In Cimarron, the war and the oil shock become the main issue of the fall, and several Republican legislators close to the President lose their primaries two years later.' },
+  { flag: 'war', text: 'The war in the Middle East lasts eleven weeks. Gas prices stay above $5 until the following spring. In Cimarron, the war and the oil shock become the main issue of the fall, and several Republican legislators close to the President lose their primaries two years later.' },
   { flag: 'war_hawk', text: 'You stood with the President on the war. His strongest supporters remember it. So do the farmers who paid $7 for diesel.' },
   { flag: 'war_dove', text: 'You opposed the war from the first day. The New Right now counts you as one of its own, and the President\'s team does not.' },
   { flag: 'indicted', text: 'Your former Chief of Staff is convicted the following year. The trial keeps your name in the news for months.' },
+  { flag: 'hale_out', text: 'Dr. Priya Hale and her husband leave the Republican Party. She later testifies before the legislature about the online attacks against her, which continued for months.' },
   { flag: 'oppo_war', text: 'The negative campaign between you and Dunmore leaves lasting damage. The two factions of the state party do not cooperate for years.' },
 ];
 const EPILOGUE_RINO_HIGH = 'The RINO label stays with you. Dunmore\'s movement continues to treat you as an enemy of the base, and you will likely face a primary challenge in any future race.';

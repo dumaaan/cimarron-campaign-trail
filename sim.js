@@ -62,7 +62,7 @@ function simGame(strategy, seed, scenario, war) {
       } else runoffAdvance();
     }
     else if (c.type === 'rintro') runoffAdvance();
-    else if (c.type === 'debate') { if (c.idx >= 0 && c.idx < 99 && c.answered == null) { c.sel = choose(DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]).answers); answer(); } else debateNext(); }
+    else if (c.type === 'debate') { if (c.idx >= 0 && c.idx < 99 && c.answered == null) { c.sel = choose(c.opts); answer(); } else debateNext(); }
     else if (c.type === 'stop') { if (!c.done) { c.region = pick(REGIONS).id; c.action = pick(['rally', 'gotv', 'ads']); doStop(); } else advance(); }
     else advance();
   }

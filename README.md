@@ -90,12 +90,12 @@ Every game has a seed. It is shown on the field screen and on the ending screen.
 | The Streamer | 11% | 100034 | Mason Pike, an America First streamer, replaces Whitlock. Young voters turn out. |
 | The Heir Apparent | 8% | 100007 | The President favors Dunmore from the start. |
 | The Wounded Incumbent | 7% | 100002 | Your former Chief of Staff has been indicted. |
-| The Reckoning | 4% | 100006 | The war with Iran starts early. Older and business Republicans return. This is Whitlock's best chance. |
+| The Reckoning | 4% | 100006 | A war in the Middle East starts early. Older and business Republicans return. This is Whitlock's best chance. |
 | The Boom | 4% | 100025 | Vaskel's data centers brought 6,000 jobs. This is Vaskel's best chance. |
 
 The seed decides the scenario and the random events. Your choices still decide the outcome.
 
-In about 5% of the other games, the President starts a war with Iran and an oil shock follows (seed 100023 is a standard game with a war). Together with the Reckoning, about 9% of all games have a war. Candidates tied to the President, especially the one he endorsed, lose support among the New Right, farmers and older voters. Evangelicals move the other way.
+In about 5% of the other games, the President starts a war in the Middle East and an oil shock follows (seed 100023 is a standard game with a war). Together with the Reckoning, about 9% of all games have a war. Candidates tied to the President, especially the one he endorsed, lose support among the New Right, farmers and older voters. Evangelicals move the other way.
 
 ### Who wins
 

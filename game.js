@@ -302,6 +302,46 @@ function startWar(s) {
   for (const line of WAR_NEWS.slice().reverse()) s.wire.unshift({ who: null, text: line });
 }
 
+// ---------- media reactions ----------
+function reactionTags(fx, outcome) {
+  const t = new Set();
+  if (outcome === 'lose') t.add('fail');
+  if ((fx.rino || 0) > 0) t.add('rino');
+  for (const f of ['maga', 'online', 'faith', 'guns', 'liberty', 'chamber', 'farm']) if ((fx[f] || 0) >= 3) t.add(f);
+  if (Object.values(fx.opp || {}).some(v => v < 0) || fx.oppRival < 0 || fx.oppLeader < 0) t.add('attack');
+  if (!t.size) t.add('neutral');
+  return t;
+}
+function pickPost(s, pools, order, tags) {
+  const tag = order.find(x => tags.has(x)) || 'neutral';
+  s.usedPosts = s.usedPosts || [];
+  const pool = pools[tag], fresh = pool.filter(p => !s.usedPosts.includes(p));
+  const post = pick(fresh.length ? fresh : pool);
+  s.usedPosts.push(post);
+  return post;
+}
+function buildReactions(s, key, fx, text, outcome) {
+  const tags = reactionTags(fx || {}, outcome), spec = SPECIFIC_REACTIONS[key] || {};
+  const last = shortName(s, 'you'), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
+  const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, last.toUpperCase()).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy');
+  s.mediaTurn = (s.mediaTurn || 0) + 1;
+  let outlet = s.mediaTurn % 2 ? 'fax' : 'max', chyron;
+  if (spec.chyron) { outlet = spec.chyron.outlet; chyron = spec.chyron.text; }
+  else {
+    const words = text.replace(/^[\s"']+|[\s"'.]+$/g, '').split(/\s+/);
+    const quote = words.slice(0, 9).join(' ') + (words.length > 9 ? '…' : '');
+    chyron = outlet === 'max' && tags.has('rino') ? 'IS GOV. {LAST} GOING SOFT?'
+      : outlet === 'max' && (fx?.maga || 0) >= 4 ? 'GOV. {LAST} GOES FULL AMERICA FIRST'
+      : tags.has('fail') ? 'GOV. {LAST} CAMPAIGN IN DAMAGE CONTROL'
+      : `GOV. {LAST}: "${quote.toUpperCase()}"`;
+  }
+  return {
+    chyron: { outlet, text: fill(chyron) },
+    boomer: fill(spec.boomer || pickPost(s, BOOMER_POSTS, BOOMER_ORDER, tags)),
+    groyper: fill(spec.groyper || pickPost(s, GROYPER_POSTS, GROYPER_ORDER, tags)),
+  };
+}
+
 function recordPromise(s, key) { const p = PROMISES[key]; if (p && !s.promises.includes(p)) s.promises.push(p); }
 
 function perfOf(fx) {
@@ -321,6 +361,7 @@ function answer() {
     if (q.region) s.bonus.you[q.region] = (s.bonus.you[q.region] || 0) + 1;
     recordPromise(s, `${q.id}:${c.sel}`);
     s.log.push({ q: q.setting, a: a.text });
+    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text);
     opponentNews(s);
     if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
   } else if (c.type === 'event' || c.type === 'revent') {
@@ -337,13 +378,15 @@ function answer() {
     if (e.special === 'war') startWar(s);
     recordPromise(s, `${e.id}:${c.sel}`);
     s.log.push({ q: `${c.type === 'revent' ? 'Runoff' : e.kind}: ${e.title}`, a: ch.text + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
+    c.reactions = buildReactions(s, `${e.id}:${c.sel}`, c.fx, ch.text, c.outcome);
     if (c.type === 'event') {
       opponentNews(s);
       if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
     }
   } else if (c.type === 'debate') {
-    const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), a = q.answers[c.sel];
+    const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), a = c.opts[c.sel];
     applyFx(s, a.fx);
+    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text);
     const round = [];
     const myPerf = perfOf(a.fx);
     c.scores.you += myPerf;
@@ -389,9 +432,48 @@ function runStrawPoll(s, c) {
   addAll(s, c.straw[0][0], 2);
 }
 
+// The rival closest to you in the polls, and the gap (positive = they are ahead).
+function nearestRival(s) {
+  const sh = stateShares(s), mine = sh.you;
+  const id = Object.keys(sh).filter(c => c !== 'you').sort((a, b) => Math.abs(sh[a] - mine) - Math.abs(sh[b] - mine))[0];
+  return id ? { id, gap: sh[id] - mine } : null;
+}
+const factionFx = fx => Object.fromEntries(FKEYS.filter(f => fx[f]).map(f => [f, fx[f]]));
+function attackOption(s) {
+  const n = nearestRival(s);
+  if (!n || Math.abs(n.gap) > CLOSE_RACE || !ATTACK_LINES[n.id]) return null;
+  const who = CAND[n.id].short;
+  return { text: `Turn to ${who}: ${pick(ATTACK_LINES[n.id])}`, fx: { ...ATTACK_FX[n.id], opp: { [n.id]: -3 } }, attackOpt: true,
+    fb: `${displayName(s, n.id)} is ${n.gap > 0 ? `ahead of you by ${n.gap.toFixed(1)}` : `behind you by ${(-n.gap).toFixed(1)}`} points. In a close race, the voters you take from your nearest rival count twice.` };
+}
+// Closing statements depend on your record, your position in the race and your strongest faction.
+function closingOptions(s, which) {
+  const lead = sorted(stateShares(s))[0][0] === 'you';
+  const topF = FKEYS.map(f => [f, s.delta.you[f] || 0]).sort((a, b) => b[1] - a[1])[0][0];
+  const intro = which === 2 ? 'This is the last time we will stand on this stage together. ' : '';
+  const say = t => t.replace(/^"/, `"${intro}`);
+  const rec = RECORDS.find(r => r.id === s.record);
+  return [
+    { text: say(RECORD_CLOSE[s.record]), fx: factionFx(rec.fx), fb: 'You closed on your record. Voters who liked your first term hear a reason to stay with you.' },
+    { text: say(POSITION_CLOSE[lead ? 'leading' : 'behind'].text), fx: POSITION_CLOSE[lead ? 'leading' : 'behind'].fx,
+      fb: lead ? 'A front-runner\'s close: steady and confident.' : 'A challenger\'s close, from an incumbent. It fires up your supporters.' },
+    { text: say(FACTION_CLOSE[topF].text), fx: FACTION_CLOSE[topF].fx, fb: `A closing aimed at your strongest group, ${FACTIONS[topF].name}.` },
+  ];
+}
+function buildDebateOptions(s, q, which) {
+  const opts = q.id === 'd_closing' ? closingOptions(s, which) : q.answers.slice();
+  const atk = attackOption(s);
+  if (atk) opts.push(atk);
+  if (q.id === 'd_closing') opts.push(MODERATE_CLOSE);
+  return opts;
+}
+
 function debateNext() {
   const c = S.cur;
-  if (c.idx < c.qs.length - 1) { c.idx++; c.sel = null; c.answered = null; c.round = null; }
+  if (c.idx < c.qs.length - 1) {
+    c.idx++; c.sel = null; c.answered = null; c.round = null; c.reactions = null;
+    c.opts = buildDebateOptions(S, DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), c.which);
+  }
   else if (c.idx === c.qs.length - 1) {
     c.idx = 99;
     const ids = Object.keys(c.scores).filter(id => active(S).includes(id));
@@ -518,11 +600,13 @@ function courtAnswer() {
   const s = S, c = s.cur, ch = COURT[c.who].choices[c.sel];
   applyFx(s, ch.fx);
   const p = typeof ch.p === 'function' ? ch.p(s) : ch.p;
-  c.result = rand() < p ? 'you' : rand() < .6 ? 'rival' : 'none';
+  // Staying away: their voters decide alone, so neutral is as likely as backing your rival.
+  c.result = rand() < p ? 'you' : rand() < (ch.stayAway ? .5 : .6) ? 'rival' : 'none';
   s.runoff.endorse[c.who] = c.result === 'you' ? 'you' : c.result === 'rival' ? s.runoff.rival : 'none';
   const line = c.result === 'none' ? `${CAND[c.who].name} declines to endorse in the runoff.` : `${CAND[c.who].name} endorses ${displayName(s, s.runoff.endorse[c.who])} in the runoff.`;
   s.wire.unshift({ who: c.who, text: line });
   s.log.push({ q: `Runoff: ${COURT[c.who].title}`, a: `${ch.text} (${RUNOFF_TEXT.endorsed[c.result]})` });
+  c.reactions = buildReactions(s, `court_${c.who}:${c.sel}`, ch.fx, ch.text);
   c.answered = c.sel;
   save(); render();
 }
@@ -649,6 +733,16 @@ function chips(s, fx) {
   return `<div class="chips">${out.map(([t, c]) => `<span class="chip ${c}">${t}</span>`).join('')}</div>`;
 }
 
+function reactionsBox(s, r) {
+  if (!r) return '';
+  const o = OUTLETS[r.chyron.outlet];
+  const post = (id, text) => { const p = PERSONAS[id], removed = text.startsWith('[This post was removed');
+    return `<div class="post ${removed ? 'removed' : ''}"><span class="portrait" style="--c:${p.color};width:30px;height:30px;font-size:12px">${p.initials}</span>
+      <div><div class="post-head"><b>${esc(p.name)}</b> <span class="muted">${esc(p.handle)}</span></div><div class="post-text">${esc(text)}</div></div></div>`; };
+  return `<div class="reactions">
+    <div class="chyron" style="--oc:${o.color};--ac:${o.accent}"><span class="outlet">${o.name}</span><span class="clabel">${o.label}</span><span class="ctext">${esc(r.chyron.text)}</span></div>
+    <div class="posts">${post('boomer', r.boomer)}${post('groyper', r.groyper)}</div></div>`;
+}
 const breakingBox = c => c?.breaking?.length ? c.breaking.map(b => `<div class="breaking"><b>BREAKING:</b> ${esc(b)}</div>`).join('') : '';
 
 function answersList(list, c, riskOf = () => false) {
@@ -666,6 +760,7 @@ function renderQuestion(s) {
   else {
     const a = q.answers[c.answered];
     h += `<div class="feedback"><div class="fb-head">Campaign Manager's Assessment</div><p>${esc(a.fb)}</p>${chips(s, a.fx)}</div>
+      ${reactionsBox(s, c.reactions)}
       ${breakingBox(c)}<button class="btn" id="next">Continue</button>`;
   }
   return h;
@@ -682,7 +777,7 @@ function renderEvent(s) {
   h += answersList(e.choices, c, a => !!a.risk);
   if (c.answered == null) h += `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Decide</button>`;
   else {
-    h += `<div class="feedback ${c.outcome === 'lose' ? 'fail' : c.outcome === 'win' ? 'success' : ''}"><div class="fb-head">${c.outcome === 'win' ? 'The Gamble Paid Off' : c.outcome === 'lose' ? 'The Gamble Failed' : 'Result'}</div><p>${esc(c.fb)}</p>${chips(s, c.fx)}</div>`;
+    h += `<div class="feedback ${c.outcome === 'lose' ? 'fail' : c.outcome === 'win' ? 'success' : ''}"><div class="fb-head">${c.outcome === 'win' ? 'The Gamble Paid Off' : c.outcome === 'lose' ? 'The Gamble Failed' : 'Result'}</div><p>${esc(c.fb)}</p>${chips(s, c.fx)}</div>${reactionsBox(s, c.reactions)}`;
     if (c.straw) h += `<div class="panel-title">Straw Poll Result · 2,400 delegates</div>` + c.straw.map(([id, v]) => `<div class="poll-row">${portrait(s, id, 24)}
       <div class="poll-main"><div class="poll-name">${nameLink(s, id)}</div><div class="pbar"><div style="width:${v}%;background:${colorOf(id)}"></div></div></div><div class="poll-num">${v.toFixed(1)}%</div></div>`).join('')
       + `<p class="muted small">${displayName(s, c.straw[0][0])} wins the straw poll and gains momentum. Delegates are more online and more religious than primary voters, so the result is not a forecast.</p>`;
@@ -721,12 +816,13 @@ function renderDebate(s) {
   let h = `<div class="q-meta"><span>Debate #${c.which} · Question ${c.idx + 1} of ${c.qs.length}</span><span>${venue}</span></div>
     <div class="stage small-stage">${stage}</div>
     <div class="q-text">${esc(q.text)}</div>`;
-  if (c.answered == null) h += answersList(q.answers, c) + `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Answer</button>`;
+  if (c.answered == null) h += answersList(c.opts, c) + `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Answer</button>`;
   else {
     h += `<div class="round">${c.round.map(r => `<div class="round-row ${r.id === 'you' ? 'mine' : ''}">${portrait(s, r.id, 32)}
         <div class="round-main"><div><b>${displayName(s, r.id)}</b> <span class="grade g-${grade(r.perf).toLowerCase()}">${grade(r.perf)}</span>${r.attack ? ` <span class="atk">attacks ${esc(shortName(s, r.attack))}</span>` : ''}</div>
         <div class="round-text">${esc(r.text)}</div></div></div>`).join('')}</div>
-      <div class="feedback"><div class="fb-head">From the Spin Room</div><p>${esc(q.answers[c.answered].fb)}</p>${chips(s, q.answers[c.answered].fx)}</div>
+      <div class="feedback"><div class="fb-head">From the Spin Room</div><p>${esc(c.opts[c.answered].fb)}</p>${chips(s, c.opts[c.answered].fx)}</div>
+      ${reactionsBox(s, c.reactions)}
       <button class="btn" id="dnext">Continue</button>`;
   }
   return h;
@@ -773,6 +869,11 @@ function renderRunoffIntro(s) {
     <button class="btn" id="rnext">Begin the Runoff Campaign</button>`;
 }
 
+// Offers that cost you with other factions are marked, so the trade is visible.
+function dealCost(fx) {
+  const lost = FKEYS.filter(f => (fx[f] || 0) <= -2).map(f => FACTIONS[f].name);
+  return lost.length ? ` <span class="risk-tag" style="background:#8d1820">DEAL WITH THE DEVIL · costs you with ${lost.join(', ')}</span>` : '';
+}
 function renderCourt(s) {
   const c = s.cur, C = COURT[c.who], e = s.election;
   let h = `<div class="q-meta"><span class="kind" style="background:${colorOf(c.who)}">Endorsement</span><span>Runoff · ${fmtDate(runoffDate(s))}</span></div>
@@ -781,11 +882,12 @@ function renderCourt(s) {
     <div class="q-text">${esc(C.text)}</div>`;
   h += `<div class="answers">${C.choices.map((a, i) => `<label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
       <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
-      <span>${esc(a.text)} <span class="risk-tag" style="background:#1f6b3a">${Math.round((typeof a.p === 'function' ? a.p(s) : a.p) * 100)}% chance of endorsement</span></span></label>`).join('')}</div>`;
+      <span>${esc(a.text)} <span class="risk-tag" style="background:#1f6b3a">${Math.round((typeof a.p === 'function' ? a.p(s) : a.p) * 100)}% chance of endorsement</span>${dealCost(a.fx)}</span></label>`).join('')}</div>`;
   if (c.answered == null) h += `<button class="btn" id="court-submit" ${c.sel == null ? 'disabled' : ''}>Make the Offer</button>`;
   else {
     const ch = C.choices[c.answered];
     h += `<div class="feedback ${c.result === 'you' ? 'success' : c.result === 'rival' ? 'fail' : ''}"><div class="fb-head">${CAND[c.who].short}: ${RUNOFF_TEXT.endorsed[c.result]}</div><p>${esc(ch.fb)}</p>${chips(s, ch.fx)}</div>
+      ${reactionsBox(s, c.reactions)}
       <button class="btn" id="rnext">Continue</button>`;
   }
   return h;
@@ -910,7 +1012,7 @@ function renderEnding(s) {
     <div class="ending-body">
       <div class="endorse-card">${portrait(s, w, 72)}<div><b>${displayName(s, w)}</b>${rr ? ' (after a runoff)' : ''}
         <div class="muted">${sorted(final).map(([id, v]) => `${esc(shortName(s, id))} ${v.toFixed(1)}%`).join(' · ')}</div></div></div>
-      <div class="muted small">Seed ${s.seed} · Scenario: ${esc(scenarioOf(s).name)}${s.war ? ' · The war with Iran' : ''}</div>
+      <div class="muted small">Seed ${s.seed} · Scenario: ${esc(scenarioOf(s).name)}${s.war ? ' · The war in the Middle East' : ''}</div>
       ${sections}
       ${rr ? `<div class="panel-title">The Runoff</div>${resultRows(s, rr.total, rr.totalVotes)}
         ${s.runoff.live ? `<ul class="epilogue">${Object.entries(s.runoff.endorse).map(([id, t]) => `<li>${esc(CAND[id].name)}: ${t === 'none' ? 'stayed neutral' : `endorsed ${esc(displayName(s, t))}`}.</li>`).join('')}</ul>` : ''}` : ''}

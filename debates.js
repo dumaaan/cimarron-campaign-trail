@@ -243,3 +243,59 @@ for (const q of DEBATE_QUESTIONS) Object.assign(q.rivals, DEBATE_OUTSIDERS[q.id]
 // Questions that are about a specific rival are asked only when that rival is in the race.
 const DEBATE_NEEDS = { d_carpet: ['vaskel'], d_arrest: ['krantz'], d_compromise: ['whitlock'] };
 for (const q of DEBATE_QUESTIONS) q.needs = DEBATE_NEEDS[q.id] || [];
+
+// ---------- Dynamic debate options ----------
+// When the race with your nearest rival is close, every debate question gets an extra option to attack that rival.
+const CLOSE_RACE = 6;   // points
+const ATTACK_LINES = {
+  dunmore: ['"Travis has been Lieutenant Governor for four years and passed nothing. A podcast is not a record."',
+    '"Travis sells hats made in Vietnam and calls it America First."',
+    '"Travis wants a promotion. He never wanted to do the job he already has."'],
+  rick: ['"Pastor Rick preaches small government, and his church took two million dollars in federal loans."',
+    '"Rick, a private jet is not a ministry."',
+    '"Rick has never run anything but a church budget. This is a state of three million people."'],
+  krantz: ['"Bo refuses to enforce laws he does not like. What happens when he is governor and you are the one he disagrees with?"',
+    '"A man died in Bo\'s jail, and he has never explained it."',
+    '"Bo is the sheriff of one county. This is a state of three million."'],
+  vaskel: ['"Brent gave four hundred thousand dollars to California Democrats. Now he wants to run Cimarron like a startup."',
+    '"Brent wants his own city with his own laws. That is not freedom. That is a fiefdom."',
+    '"Brent could not name the largest crop in this state."'],
+  whitlock: ['"Carol says the party lost its way. The party moved on because Carol stopped listening."',
+    '"Carol voted for every budget increase for twenty years."'],
+  coburn: ['"Jake, this is not a football game. You voted in three of the last ten primaries."',
+    '"Jake cannot tell you the size of the state budget. You cannot run a state on name recognition."'],
+  albright: ['"Dr. Albright wants to end vaccine requirements for children in the middle of a measles outbreak."',
+    '"Renee lost her hospital privileges. Now she wants the whole state."'],
+  pike: ['"Mason has never held a job outside a livestream."',
+    '"Mason, the things you say on your stream are not conservative. They are ugly, and every pastor in this state knows it."'],
+};
+// Which voters like each attack.
+const ATTACK_FX = {
+  dunmore: { chamber: 1, seniors: 2 }, rick: { liberty: 2, maga: 1 }, krantz: { seniors: 2, chamber: 1 },
+  vaskel: { farm: 2, maga: 1 }, whitlock: { maga: 2, online: 1 }, coburn: { seniors: 1, faith: 1 },
+  albright: { seniors: 2, faith: 1 }, pike: { faith: 2, seniors: 2 },
+};
+
+// Closing statements are built from your record, your position in the race and your strongest faction.
+const RECORD_CLOSE = {
+  income: '"Four years ago I promised to end the income tax. I did it. Give me four more years and I will finish the job."',
+  rifle: '"I made Cimarron a Second Amendment sanctuary. Nobody on this stage has done more to protect your rights."',
+  commandments: '"I put God back in our classrooms, and I will defend that law all the way to the Supreme Court."',
+  heartland: '"I did not talk about deportations. I did them. Four thousand so far, and I am not finished."',
+  dictionary: '"I gave parents control of what their children read. I will never give it back to the bureaucrats."',
+};
+const POSITION_CLOSE = {
+  leading: { text: '"You know my record, and that is why I am leading this race. Do not trade a proven fighter for a promise."', fx: { seniors: 2, maga: 1, chamber: 1 } },
+  behind: { text: '"The polls said I was behind four years ago too. The only poll that counts is on August 4."', fx: { maga: 2, online: 1, seniors: 1 } },
+};
+const FACTION_CLOSE = {
+  maga: { text: '"This movement did not start with any of us. I will fight for it every day that I am governor."', fx: { maga: 3, online: 1 } },
+  faith: { text: '"I ask for your vote, and I ask for your prayers. This state belongs to God before it belongs to any of us."', fx: { faith: 4 } },
+  guns: { text: '"Your rights do not come from Washington. While I am governor, Washington will not take them."', fx: { guns: 3, maga: 1 } },
+  liberty: { text: '"Every dollar the government does not take is a dollar that belongs to you. I will keep cutting."', fx: { liberty: 3, chamber: 1 } },
+  online: { text: '"The institutions were turned against us. I will take them back, one by one."', fx: { online: 3, maga: 1 } },
+  farm: { text: '"I will stand with the people who feed this country: their land, their water and their future."', fx: { farm: 3, seniors: 1 } },
+  chamber: { text: '"I will make Cimarron the best state in America to build something and hire someone."', fx: { chamber: 3, liberty: 1 } },
+  seniors: { text: '"You built this state. I will protect your home, your savings and your safety."', fx: { seniors: 3, faith: 1 } },
+};
+const MODERATE_CLOSE = { text: '"I will be governor for every Cimarronian, not only the loudest ones."', fx: { rino: 3, chamber: 2, maga: -3 }, fb: 'A general-election message in a primary.' };

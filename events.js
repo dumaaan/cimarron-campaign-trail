@@ -246,6 +246,25 @@ const EVENTS = [
         fb: 'Respectful. The question will return.' },
     ] },
 
+  { id: 'donor_wife', kind: 'Crisis', title: 'Dr. Priya Hale', minStep: 4,
+    text: s => `Richard Hale, a Fort Eisenhower banker and the state party's finance chair, is your largest donor. His wife, Dr. Priya Hale, is a cardiologist who was born in Pune, India, and has been a U.S. citizen for twenty years. She co-chairs your finance committee. After she speaks at one of your rallies, anonymous accounts flood social media with racist attacks on her and on Indian Americans, calling her an "H-1B invader." Some of the accounts have your campaign logo in their profile pictures.${inRace(s, 'pike') ? ' Mason Pike shares several of the posts with his two million followers.' : ''} The Hales ask what you will say.`,
+    advice: [
+      ['tom', 'This is wrong, and our pastors will say so from the pulpit. You should say it first.'],
+      ['kyle', 'If you condemn it by name, part of the online base will turn on you. They are loud, and they vote in primaries.'],
+      ['pryce', 'Richard has raised four million dollars for this campaign. If you say nothing, he will leave, and his friends will leave with him.'],
+      ['dana', 'Older voters, evangelicals and business Republicans all say racist attacks are unacceptable. The online right is the only group that disagrees.'],
+    ],
+    choices: [
+      { text: 'Condemn the attacks by name, and appear with Dr. Hale at your next rally.', fx: { seniors: 2, faith: 2, chamber: 4, online: -6, maga: -2, money: .5 },
+        fb: 'The Hales are grateful, and Richard raises another half-million dollars. Parts of the online right call you "anti-white." Church leaders across the state thank you.' },
+      { text: 'Issue a statement against "all forms of hate," without naming anyone.', fx: { seniors: 1, online: -1, chamber: -2, money: -.3 },
+        fb: 'A safe statement. The Hales are disappointed that you did not name what happened to Priya.' },
+      { text: 'Say nothing. Online fights are not the Governor\'s business.', fx: { online: 1, chamber: -5, faith: -1, money: -1.5 },
+        fb: 'Richard Hale resigns as finance chair and stops raising money for you. The attacks continue, and some of them now use your silence as permission.' },
+      { text: 'Ask Dr. Hale to step back from the campaign "for her own safety."', fx: { online: 3, maga: 1, chamber: -6, seniors: -2, faith: -2, money: -2, flag: 'hale_out' },
+        fb: 'She resigns. Richard calls the decision "cowardice" in the Ledger. The people who attacked her celebrate, and many of your own supporters are ashamed.' },
+    ] },
+
   // ---------------- TRAGEDIES ----------------
   { id: 'shooting', kind: 'Tragedy', title: 'Grace Christian Academy', minStep: 6,
     text: 'A gunman kills six people, including three children, at Grace Christian Academy in Osgood. He bought the rifle legally at age 19. National media arrive in Cimarron.',
@@ -500,7 +519,7 @@ const EVENTS = [
       { text: 'Pryce\'s plan: a statewide turnout operation.', fx: { money: -.8, gotvAll: .06 }, fb: 'Your field team triples in size.' },
     ] },
   { id: 'fox_townhall', kind: 'Media', title: 'The National Town Hall', minStep: 9,
-    text: 'A national cable network offers you a one-hour town hall. The audience will be Republican primary voters from Cimarron. The host is known for asking about loyalty to the President.',
+    text: 'Fax News offers you a one-hour town hall. The audience will be Republican primary voters from Cimarron. The host is known for asking about loyalty to the President.',
     advice: [
       ['kyle', 'Clips from this will run for weeks. Say something memorable.'],
       ['pryce', 'Every answer you give will be used in the general election, and after.'],
@@ -515,15 +534,15 @@ const EVENTS = [
   // ---------------- THE WAR (rare) ----------------
   { id: 'mideast_war', kind: 'Crisis', title: 'The Strait of Hormuz', priority: true, special: 'war',
     cond: s => s.warPlanned != null && s.step >= s.warPlanned && !s.war,
-    text: 'After a drone attack kills 14 American service members in Iraq, the President orders strikes on Iran. Iran closes the Strait of Hormuz. Oil passes $140 a barrel. Gasoline in Cimarron reaches $6.20 a gallon, and diesel for the harvest reaches $7.40. The President calls on "every patriot" to stand with him.',
+    text: 'After a drone attack kills 14 American service members, the President orders strikes, and a war in the Middle East begins. The Strait of Hormuz is closed to shipping. Oil passes $140 a barrel. Gasoline in Cimarron reaches $6.20 a gallon, and diesel for the harvest reaches $7.40. The President calls on "every patriot" to stand with him.',
     advice: [
       ['wade', 'The base will rally to the President. For now.'],
       ['dana', 'Gas prices move older and rural voters more than any issue we test. If this lasts, whoever stands closest to the President will pay for it.'],
       ['kyle', 'The New Right is furious. They supported him to end wars, not to start them.'],
-      ['tom', 'Our pastors will support action against Iran. Many of them see it through their support for Israel.'],
+      ['tom', 'Our pastors will support the war. Many of them see it through their support for Israel.'],
     ],
     choices: [
-      { text: 'Stand fully with the President: "Iran attacked America. We will finish this."', fx: { pres: 8, maga: 3, faith: 3, online: -5, flag: 'war_hawk' },
+      { text: 'Stand fully with the President: "They attacked Americans. We will finish this."', fx: { pres: 8, maga: 3, faith: 3, online: -5, flag: 'war_hawk' },
         fb: 'The President thanks you by name. You are now tied to the war, for better or worse.' },
       { text: 'Support the troops, but call for a short campaign and no ground war.', fx: { seniors: 2, faith: 1, maga: 1 },
         fb: 'A careful position. Neither the hawks nor the doves are satisfied, but you are not tied to the outcome.' },

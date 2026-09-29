@@ -21,6 +21,7 @@
 <script src="events.js"></script>
 <script src="epilogue.js"></script>
 <script src="runoff.js"></script>
+<script src="media.js"></script>
 <script src="game.js"></script>
 <script>
 // Keep the game from writing to storage or the page while the checks run.
@@ -145,6 +146,30 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S.war = { start: 12 }; const ramp1 = warPenalty(S, 'dunmore', 'online'); S.war = { start: 8 }; const ramp4 = warPenalty(S, 'dunmore', 'online');
   ok('War: the oil shock grows over the first weeks', ramp4 > ramp1 && ramp1 > 0);
   ok('War: evangelicals move the other way', warPenalty(S, 'dunmore', 'faith') < 0);
+}
+
+// --- Debates, runoff meetings, media ---
+{
+  standardGame(41); S.record = 'income'; S.screen = 'campaign';
+  const q = DEBATE_QUESTIONS.find(x => x.id === 'd_prove'), closing = DEBATE_QUESTIONS.find(x => x.id === 'd_closing');
+  const n = nearestRival(S);
+  S.delta.you = {}; addAll(S, n.id, 0);
+  const near = nearestRival(S), opts = buildDebateOptions(S, q, 1);
+  ok('Debate: an attack on the nearest rival is offered when the race is close', Math.abs(near.gap) <= CLOSE_RACE ? opts.some(o => o.attackOpt && o.fx.opp[near.id] < 0) : !opts.some(o => o.attackOpt), `${CAND[near.id].short} gap ${near.gap.toFixed(1)}`);
+  addAll(S, 'you', 40);
+  ok('Debate: no attack option when you are far ahead', !buildDebateOptions(S, q, 1).some(o => o.attackOpt));
+  S.delta.you = {};
+  const c1 = buildDebateOptions(S, closing, 1).map(o => o.text), c2 = buildDebateOptions(S, closing, 2).map(o => o.text);
+  S.record = 'heartland'; const c3 = buildDebateOptions(S, closing, 1).map(o => o.text);
+  ok('Closing statements differ between the two debates', c1.join() !== c2.join());
+  ok('Closing statements change with your record', c1[0] !== c3[0]);
+  ok('Every runoff meeting has a stay-away option', Object.values(COURT).every(C => C.choices.some(ch => ch.stayAway)));
+  ok('Strong runoff offers cost you with other factions', Object.values(COURT).every(C => C.choices.some(ch => FKEYS.some(f => (ch.fx[f] || 0) <= -2))));
+  const r = buildReactions(S, 'donor_wife:0', { chamber: 4, online: -6 }, 'test');
+  ok('Media: every decision gets a chyron and two posts', r.chyron.text && r.boomer && r.groyper && OUTLETS[r.chyron.outlet]);
+  const content = JSON.stringify([QUESTIONS, EVENTS, DEBATE_QUESTIONS, COURT, RUNOFF_EVENTS, SCENARIOS, WAR_NEWS, NEWS, EPILOGUE, RIVAL_OUTCOMES, BOOMER_POSTS, GROYPER_POSTS, SPECIFIC_REACTIONS, TEXT], (k, v) => typeof v === 'function' ? v.toString() : v);
+  ok('No real network names or "Iran" in the game text', !/Iran|Fox News|Newsmax/.test(content));
+  S = null;
 }
 
 // --- General election bar ---
