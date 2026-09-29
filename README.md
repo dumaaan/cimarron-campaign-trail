@@ -4,6 +4,8 @@ A political strategy game in the style of *The Campaign Trail*. You are the incu
 
 This is a work of political fiction. The state, the candidates and the events are fictional.
 
+**Play it in your browser: https://dumaaan.github.io/cimarron-campaign-trail/**
+
 ## How to play
 
 You need Python 3 and a web browser. There is nothing to install.
