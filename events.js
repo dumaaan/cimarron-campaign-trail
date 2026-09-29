@@ -11,7 +11,7 @@
 // ============================================================
 
 const since = (s, f) => s.flags[f] ? s.step + 1 - s.flags[f] : -1;
-const inRace = (s, id) => !s.dropped.includes(id);
+const inRace = (s, id) => active(s).includes(id);
 const topRival = s => sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you');
 
 const EVENT_KINDS = {
@@ -319,7 +319,7 @@ const EVENTS = [
     cond: s => !s.endorsements.farm,
     text: 'Farm Bureau PAC holds its endorsement meeting in Sumner. Members have three demands: a state relief fund for tariff losses, an exemption for agriculture from state immigration enforcement, and a ban on eminent domain for private pipelines.',
     advice: [
-      ['dana', 'Farmers are 10% of registered Republicans, but they vote at high rates.'],
+      ['dana', 'Farmers are only 9% of registered Republicans, but they are organized and they vote at above-average rates.'],
       ['wade', 'The immigration exemption is poison. Dunmore will call it amnesty for farms.'],
     ],
     choices: [
@@ -364,7 +364,7 @@ const EVENTS = [
       { text: '"Children need trained counselors. Chaplains can volunteer."', fx: { faith: -2, seniors: 1 }, fb: 'The room is polite, and cold.' },
     ] },
   { id: 'growth_club', kind: 'Endorsement', title: 'Club for Growth', minStep: 5, maxStep: 20,
-    cond: s => !s.endorsements.growth,
+    cond: s => !s.endorsements.growth && inRace(s, 'vaskel'),
     text: 'Club for Growth Action is deciding between you and Vaskel. Its price is a public promise to cut the sales tax by two points and to veto any new spending. The state already has a structural deficit because of your income tax repeal.',
     advice: [
       ['pryce', 'Two more points off the sales tax means cutting schools or roads. There is no third option.'],
@@ -400,7 +400,7 @@ const EVENTS = [
           lose: { fx: { liberty: -2 }, fb: 'The complaint is dismissed. Vaskel calls it "a politician using bureaucracy against a job creator."' } } },
       { text: 'Ignore the ads.', fx: { liberty: -3, chamber: -1 }, fb: 'The number "140" is now in every voter\'s head.' },
     ] },
-  { id: 'oppo_file', kind: 'Opposition', title: 'The Research Files', minStep: 6,
+  { id: 'oppo_file', kind: 'Opposition', title: 'The Research Files', minStep: 6, cond: s => ['dunmore', 'rick', 'vaskel'].every(id => inRace(s, id)),
     text: 'Your research team has finished files on three rivals. Dunmore did not file state tax returns for three years before the income tax was repealed. Pastor Rick\'s church received $2.1 million in federal COVID loans that were forgiven. Vaskel gave $400,000 to Democratic candidates in California. You can release one this week.',
     advice: [
       ['wade', 'Hit the leader. Nothing else matters.'],
@@ -413,7 +413,7 @@ const EVENTS = [
       { text: 'Release the Vaskel donations file.', fx: { opp: { vaskel: -6 } }, fb: 'Vaskel says he "evolved." The base does not believe in evolution of that kind.' },
       { text: 'Hold all three files for the final weeks.', fx: { flag: 'oppo_hold' }, fb: 'The files go into the safe.' },
     ] },
-  { id: 'oppo_release', kind: 'Opposition', title: 'The Files, Again', priority: true, cond: s => since(s, 'oppo_hold') >= 1 && s.step >= 22,
+  { id: 'oppo_release', kind: 'Opposition', title: 'The Files, Again', priority: true, cond: s => since(s, 'oppo_hold') >= 1 && s.step >= 22 && ['dunmore', 'rick', 'vaskel'].every(id => inRace(s, id)),
     text: 'The primary is close. The research files are still in the safe. It is the last week in which a story can break before early voting ends.',
     advice: [['wade', 'This is why we waited. Use one now.']],
     choices: [
@@ -458,7 +458,7 @@ const EVENTS = [
   { id: 'whitlock_offer', kind: 'Party', title: 'Whitlock\'s Offer', minStep: 12, cond: s => inRace(s, 'whitlock'),
     text: 'Carol Whitlock asks for a private meeting. She will withdraw and endorse you if you promise to restore state aid to rural counties and reappoint her ally as Agriculture Secretary. Her voters are few, but they are older and reliable.',
     advice: [
-      ['dana', 'She has 4 to 6%, mostly business Republicans and older voters. Most would come to you.'],
+      ['dana', 'She has about 5 or 6%, mostly business Republicans and older voters. Most of them would come to you.'],
       ['wade', 'Her endorsement is poison. Dunmore will call you "Carol\'s candidate."'],
     ],
     choices: [
@@ -510,5 +510,43 @@ const EVENTS = [
       { text: 'Accept, and make it about your record in Cimarron.', fx: { seniors: 3, chamber: 1, maga: 1 }, fb: 'A solid hour. Few clips, but good ones.' },
       { text: 'Accept, and attack Dunmore by name for the full hour.', fx: { maga: 1, seniors: -1, opp: { dunmore: -3 } }, fb: 'Effective, but some viewers find it petty.' },
       { text: 'Decline. You are busy governing.', fx: { maga: -2, online: -2 }, fb: 'The network offers the hour to Dunmore. He accepts.' },
+    ] },
+
+  // ---------------- THE WAR (rare) ----------------
+  { id: 'mideast_war', kind: 'Crisis', title: 'The Strait of Hormuz', priority: true, special: 'war',
+    cond: s => s.warPlanned != null && s.step >= s.warPlanned && !s.war,
+    text: 'After a drone attack kills 14 American service members in Iraq, the President orders strikes on Iran. Iran closes the Strait of Hormuz. Oil passes $140 a barrel. Gasoline in Cimarron reaches $6.20 a gallon, and diesel for the harvest reaches $7.40. The President calls on "every patriot" to stand with him.',
+    advice: [
+      ['wade', 'The base will rally to the President. For now.'],
+      ['dana', 'Gas prices move older and rural voters more than any issue we test. If this lasts, whoever stands closest to the President will pay for it.'],
+      ['kyle', 'The New Right is furious. They supported him to end wars, not to start them.'],
+      ['tom', 'Our pastors will support action against Iran. Many of them see it through their support for Israel.'],
+    ],
+    choices: [
+      { text: 'Stand fully with the President: "Iran attacked America. We will finish this."', fx: { pres: 8, maga: 3, faith: 3, online: -5, flag: 'war_hawk' },
+        fb: 'The President thanks you by name. You are now tied to the war, for better or worse.' },
+      { text: 'Support the troops, but call for a short campaign and no ground war.', fx: { seniors: 2, faith: 1, maga: 1 },
+        fb: 'A careful position. Neither the hawks nor the doves are satisfied, but you are not tied to the outcome.' },
+      { text: 'Oppose the war: "America First means no new wars in the Middle East."', fx: { online: 5, liberty: 3, pres: -10, faith: -3, maga: -2, flag: 'war_dove' },
+        fb: 'The New Right celebrates. The President\'s allies call you disloyal. If the war goes badly, you were right first.' },
+      { text: 'Focus on prices: suspend the state gas tax for 90 days.', fx: { farm: 3, seniors: 3, liberty: 1, chamber: -1 },
+        fb: 'Gas falls 29 cents a gallon. Voters notice who is talking about their costs.' },
+    ] },
+  { id: 'oil_shock', kind: 'Crisis', title: 'The Oil Shock', priority: true, cond: s => s.war && s.step >= s.war.start + 3,
+    text: 'Six weeks into the war, the Strait of Hormuz is still closed. Gas is $6.80. Two ethanol plants in Sumner Valley have closed, farm bankruptcies are rising, and retirees on fixed incomes are cutting back. A majority of Cimarron Republicans now tell pollsters the war "is not going well." The candidates most closely tied to the President are falling.',
+    advice: [
+      ['dana', 'Loyalty to the President is now a cost, not a benefit, with farmers, older voters and the New Right. Evangelicals are the exception.'],
+      ['wade', 'The base does not forgive a candidate who abandons the President in a war.'],
+      ['pryce', 'Farmers need diesel. Talk about diesel.'],
+    ],
+    choices: [
+      { text: 'Stay loyal: "Wars are won by the side that does not waver."', fx: { maga: 2, faith: 2, pres: 4, seniors: -3, online: -3 },
+        fb: 'The President\'s strongest supporters respect it. Everyone paying for gas notices.' },
+      { text: 'Call for a ceasefire and negotiations.', fx: { online: 3, seniors: 2, farm: 2, pres: -6, faith: -2 },
+        fb: 'A break with the President. The New Right and many farmers agree with you.' },
+      { text: 'Blame the Pentagon and "the generals," not the President.', fx: { maga: 2, seniors: 1 },
+        fb: 'A way to criticize the war without criticizing him. Some voters accept it.' },
+      { text: 'Announce emergency fuel aid for farmers and seniors.', fx: { farm: 3, seniors: 3, liberty: -3 },
+        fb: 'The aid program is popular and expensive. Budget hawks object, quietly.' },
     ] },
 ];

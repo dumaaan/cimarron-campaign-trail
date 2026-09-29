@@ -5,29 +5,25 @@
 
 const STATE_NAME = 'Cimarron';
 
+// Registration numbers are real counts. Turnout and vote totals are calculated from them in game.js.
 const STATE_PROFILE = {
-  pop: '3.1 million', registeredR: '1.06 million', registeredD: '0.41 million', unaffiliated: '0.52 million',
-  expectedTurnout: 'About 390,000 votes (37% of registered Republicans)',
-  primary: 'Closed primary. Only registered Republicans may vote. If no candidate receives 40%, the top two go to a runoff.',
+  pop: 3100000, adults: 2390000,
+  registeredR: 980000, registeredD: 380000, unaffiliated: 440000,
+  primary: 'Closed primary. Only registered Republicans may vote. If no candidate receives 40%, the top two go to a runoff three weeks later.',
   lastResults: '2026 Governor: Republican 62%, Democrat 36%. 2028 President: Republican 66%, Democrat 32%.',
-  notes: [
-    'Older voters and evangelicals decide Cimarron primaries. They are about a third of registered Republicans, but closer to 40% of the people who actually vote.',
-    'Young online activists are loud but unreliable. Fewer than half of them usually vote in a primary.',
-    'Fort Eisenhower and the Osgood Exurbs together cast almost a third of the primary vote.',
-  ],
 };
 
 // ---------- Factions of the GOP primary electorate ----------
 // turnout = share of that faction's registered voters who usually vote in a primary.
 const FACTIONS = {
-  maga:    { name: 'MAGA Base',             turnout: .58, blurb: 'Loyal to the President first and the party second. Want deportations, tariffs, and a fighter.' },
-  faith:   { name: 'Evangelicals',          turnout: .70, blurb: 'Organized through churches. Abortion, religious liberty and schools come first.' },
-  guns:    { name: 'Gun Owners & Sheriffs', turnout: .62, blurb: 'Second Amendment absolutists and law-enforcement conservatives. Trust sheriffs more than Washington.' },
-  liberty: { name: 'Liberty Caucus',        turnout: .48, blurb: 'Libertarian-leaning. Want lower taxes and less government, including less government surveillance.' },
-  online:  { name: 'New Right',             turnout: .40, blurb: 'Younger, online, post-liberal. Want the state to actively use its power against progressive institutions.' },
-  farm:    { name: 'Farm Bureau',           turnout: .66, blurb: 'Agricultural producers. Want export markets, water rights and a reliable labor supply.' },
-  chamber: { name: 'Business Republicans',  turnout: .60, blurb: 'Chamber of Commerce conservatives. A shrinking faction, but it still funds campaigns.' },
-  seniors: { name: 'Older Conservatives',   turnout: .78, blurb: 'The most reliable primary voters. Care about property taxes, Social Security, and order.' },
+  maga:    { name: 'MAGA Base',             turnout: .38, blurb: 'Loyal to the President first and the party second. Want deportations, tariffs, and a fighter.' },
+  faith:   { name: 'Evangelicals',          turnout: .50, blurb: 'Organized through churches. Abortion, religious liberty and schools come first.' },
+  guns:    { name: 'Gun Owners & Sheriffs', turnout: .42, blurb: 'Second Amendment absolutists and law-enforcement conservatives. Trust sheriffs more than Washington.' },
+  liberty: { name: 'Liberty Caucus',        turnout: .30, blurb: 'Libertarian-leaning. Want lower taxes and less government, including less government surveillance.' },
+  online:  { name: 'New Right',             turnout: .22, blurb: 'Younger, online, post-liberal. Want the state to actively use its power against progressive institutions.' },
+  farm:    { name: 'Farm Bureau',           turnout: .46, blurb: 'Agricultural producers. Want export markets, water rights and a reliable labor supply.' },
+  chamber: { name: 'Business Republicans',  turnout: .42, blurb: 'Chamber of Commerce conservatives. A shrinking faction, but it still funds campaigns.' },
+  seniors: { name: 'Older Conservatives',   turnout: .60, blurb: 'The most reliable primary voters. Care about property taxes, Social Security, and order.' },
 };
 
 // ---------- Regions (the map) ----------
@@ -61,7 +57,7 @@ const REGIONS = [
     path: 'M0,112 L160,112 L150,200 L162,300 L0,300 Z',
     demo: { pop: '340,000', age: 42, rural: 55, evangelical: 61, hispanic: 5, college: 20, income: '$55,000' },
     economy: 'Small towns, schools, churches, a Christian university',
-    desc: 'The most religious region of the state and home of Pastor Rick\'s Cornerstone Church. Church networks here produce the highest primary turnout in Cimarron.',
+    desc: 'The most religious region of the state and home of Pastor Rick\'s Cornerstone Church. Church networks here produce the highest primary turnout of any region except the retirement communities of Lake Cheney.',
     mix: { faith: .50, maga: .20, seniors: .15, farm: .10, guns: .05 } },
   { id: 'pratt', name: 'Pratt Junction', seat: 'Pratt Junction', voters: 10, turnoutMod: .9, label: [228, 158],
     path: 'M160,112 L332,108 L318,160 L305,205 L150,200 Z',
@@ -94,32 +90,98 @@ const REGIONS = [
 const CANDIDATES = [
   { id: 'you', name: 'You', short: 'You', color: '#b3202a', pres: 50, title: 'Incumbent Governor',
     base: { maga: 55, faith: 55, guns: 57, liberty: 52, online: 42, farm: 60, chamber: 60, seniors: 60 } },
-  { id: 'dunmore', name: 'Lt. Gov. Travis Dunmore', short: 'Dunmore', color: '#e07b1a', pres: 62,
+  { id: 'dunmore', name: 'Lt. Gov. Travis Dunmore', short: 'Dunmore', color: '#e07b1a', hawk: 0, pres: 62,
     title: 'MAGA Populist', initials: 'TD', age: 41, home: 'Osgood',
     blurb: 'Your own Lieutenant Governor, elected separately. Built a large following through a political podcast. Campaigns on mass deportation, tariffs and "ending the uniparty." Says you have governed like an establishment Republican.',
     positions: ['Deport every illegal immigrant within one year, using the National Guard', 'End all cooperation with "hostile" federal agencies', 'Ban new wind and solar projects', 'Full hand counts of all ballots'],
     base: { maga: 64, faith: 46, guns: 52, liberty: 38, online: 62, farm: 45, chamber: 25, seniors: 50 } },
-  { id: 'rick', name: 'Pastor Rick Dollins', short: 'Pastor Rick', color: '#6b3fa0', pres: 42,
+  { id: 'rick', name: 'Pastor Rick Dollins', short: 'Pastor Rick', color: '#6b3fa0', hawk: 0.2, pres: 42,
     title: 'Christian Nationalist', initials: 'RD', age: 56, home: 'Caney',
     blurb: 'Senior pastor of Cornerstone Church, a 9,000-member congregation in Caney Ridge. Argues that the state should be governed by "biblical principles." Has never held office. His church network is the best-organized ground game in the state.',
     positions: ['Criminal penalties for helping anyone obtain an abortion out of state', 'Daily prayer and Bible reading in public schools', 'End state recognition of same-sex marriage if the Supreme Court allows it', 'Close businesses on Sundays'],
     base: { maga: 46, faith: 70, guns: 44, liberty: 22, online: 36, farm: 47, chamber: 30, seniors: 54 } },
-  { id: 'krantz', name: 'Sheriff Bo Krantz', short: 'Sheriff Krantz', color: '#6d5a2c', pres: 45,
+  { id: 'krantz', name: 'Sheriff Bo Krantz', short: 'Sheriff Krantz', color: '#6d5a2c', hawk: 0, pres: 45,
     title: 'Constitutional Sheriff', initials: 'BK', age: 61, home: 'Harlan',
     blurb: 'Sheriff of Harlan County for 16 years. A leader of the "constitutional sheriff" movement, which holds that the county sheriff may refuse to enforce laws he considers unconstitutional. Has refused to enforce two state laws you signed.',
     positions: ['Sheriffs as the final authority on constitutionality in their counties', 'Arrest federal agents who enforce gun laws in Cimarron', 'Transfer federal land to the state', 'Audit the Federal Reserve\'s dealings with state banks'],
     base: { maga: 50, faith: 46, guns: 70, liberty: 44, online: 40, farm: 55, chamber: 30, seniors: 55 } },
-  { id: 'vaskel', name: 'Brent Vaskel', short: 'Vaskel', color: '#138a8a', pres: 50,
+  { id: 'vaskel', name: 'Brent Vaskel', short: 'Vaskel', color: '#138a8a', hawk: 0, pres: 50,
     title: 'Tech-Right Investor', initials: 'BV', age: 47, home: 'Pratt Junction (formerly Palo Alto)',
     blurb: 'Venture capitalist who moved to Cimarron from California four years ago. Largest donor to the state party. Promotes a "charter city" with its own regulations and wants to run the state "like a startup." Can self-fund without limit.',
     positions: ['Replace state agencies with "AI-first" digital services', 'Charter cities exempt from state labor and zoning law', 'A state Bitcoin reserve', 'Eliminate the sales tax and cut the state workforce by 30%'],
     base: { maga: 38, faith: 26, guns: 40, liberty: 70, online: 58, farm: 26, chamber: 50, seniors: 26 } },
-  { id: 'whitlock', name: 'Fmr. Sen. Carol Whitlock', short: 'Whitlock', color: '#6f86a6', pres: 0,
+  { id: 'whitlock', name: 'Fmr. Sen. Carol Whitlock', short: 'Whitlock', color: '#6f86a6', hawk: 0.3, pres: 0,
     title: 'Traditional Conservative', initials: 'CW', age: 67, home: 'Fort Eisenhower',
     blurb: 'Former State Senate Majority Leader. A Reagan-era conservative who says the party has "lost its way." Respected in the capital. Has almost no support among today\'s primary voters.',
     positions: ['Balanced budgets and restored county aid', 'Legal immigration reform with a guest-worker program', 'Support for Ukraine and NATO', 'Accept the 2020 election result'],
     base: { maga: 10, faith: 25, guns: 25, liberty: 35, online: 5, farm: 35, chamber: 68, seniors: 40 } },
+
+  // ---- Outsiders: they appear only in some scenarios (see SCENARIOS) ----
+  { id: 'coburn', name: 'Jake Coburn', short: 'Coburn', color: '#a8781c', hawk: 0, pres: 72, outsider: true,
+    title: 'Celebrity Outsider', initials: 'JC', age: 44, home: 'Harlan',
+    blurb: 'Former Cimarron State quarterback, Heisman winner and ten-year NFL starter. Now a national television analyst and a friend of the President. Has never held office and has voted in only three of the last ten Republican primaries. Everyone in the state knows his name.',
+    positions: ['Cut the state gas tax to zero', 'State trooper checkpoints on every interstate to check immigration status', 'Ban transgender athletes from all sports, including adult leagues', '"Make Cimarron Win Again": a sports and fitness program in every school'],
+    base: { maga: 60, faith: 40, guns: 53, liberty: 40, online: 45, farm: 50, chamber: 44, seniors: 57 } },
+  { id: 'albright', name: 'Dr. Renee Albright', short: 'Dr. Albright', color: '#2e7d5b', hawk: 0, pres: 55, outsider: true, fringe: true,
+    title: 'MAHA Doctor', initials: 'RA', age: 49, home: 'Sumner',
+    blurb: 'A family physician from Sumner who lost her hospital privileges after she refused to follow COVID rules and spoke against vaccine mandates. Her documentary about "the COVID cartel" made her a national figure in the health-freedom movement. Mainstream doctors say many of her claims are false.',
+    positions: ['End all vaccine mandates, including for health care workers', 'Ban fluoride in water and seed oils in school meals', 'Legalize raw milk sales statewide', 'A "COVID Truth Commission" with subpoena power'],
+    base: { maga: 64, faith: 62, guns: 46, liberty: 60, online: 68, farm: 66, chamber: 25, seniors: 46 } },
+  { id: 'pike', name: 'Mason Pike', short: 'Pike', color: '#37474f', hawk: -.4, pres: 30, outsider: true, fringe: true,
+    title: 'America First Streamer', initials: 'MP', age: 31, home: 'Lawrenceville',
+    blurb: 'A political livestreamer with two million followers, most of them young men. Calls for an end to all immigration and to American involvement in foreign wars. Critics have documented antisemitic tropes in his content; he calls this "a smear." Older Republicans and church leaders distrust him. Young activists are registering as Republicans to vote for him.',
+    positions: ['A moratorium on all immigration, legal and illegal', 'No American involvement in foreign wars', 'Remove "disloyal" teachers and professors', 'Ban foreign lobbying of the legislature'],
+    base: { maga: 68, faith: 42, guns: 56, liberty: 48, online: 86, farm: 36, chamber: 5, seniors: 26 } },
 ];
+
+// ---------- Scenarios (chosen by the game seed) ----------
+// field = candidates on the ballot from the start. enter = { id: step } for a late entry.
+// turnout = change to a faction's turnout rate in this scenario (for example, new young voters).
+// warAt = the war with Iran is certain and starts at this step.
+// oppFx = a rival's starting support by faction. favors = a rival this scenario is built around (Whitlock can then grow).
+// presOverride = the President's opinion of a rival. oppAll / youAll = starting support in every faction.
+const BASE_FIELD = ['you', 'dunmore', 'rick', 'krantz', 'vaskel', 'whitlock'];
+const SCENARIOS = [
+  { id: 'standard', weight: 42, name: 'The Expected Field',
+    desc: 'Five challengers, each from a known faction of the party. No surprises, yet.',
+    field: BASE_FIELD },
+  { id: 'celebrity', weight: 13, name: 'The Celebrity',
+    desc: 'Jake Coburn, a former NFL quarterback and a Cimarron State legend, has been hinting at a run. He has not filed yet. If he enters, the race will change.',
+    field: BASE_FIELD, enter: { coburn: 7 }, turnout: { maga: .03, seniors: .02 } },
+  { id: 'maha', weight: 11, name: 'The Doctor',
+    desc: 'Brent Vaskel decided not to run. In his place, Dr. Renee Albright, a physician who became famous fighting COVID mandates, leads a health-freedom insurgency. Many of the activists who backed Dunmore have moved to her.',
+    field: ['you', 'dunmore', 'rick', 'krantz', 'albright', 'whitlock'], turnout: { online: .08, farm: .03, faith: .02 }, oppAll: { dunmore: -4, albright: -2 } },
+  { id: 'streamer', weight: 11, name: 'The Streamer',
+    desc: 'Carol Whitlock decided not to run. Mason Pike, a 31-year-old America First streamer, filed instead. Thousands of young activists are registering as Republicans to vote for him, and many of them came from Dunmore\'s movement.',
+    field: ['you', 'dunmore', 'rick', 'krantz', 'vaskel', 'pike'], turnout: { online: .16, maga: .03 }, oppAll: { dunmore: -8, pike: 6 } },
+  { id: 'heir', weight: 8, name: 'The Heir Apparent',
+    desc: 'The President has signaled that he favors Travis Dunmore. Donors and activists are moving to Dunmore before the campaign begins.',
+    field: BASE_FIELD, presOverride: { dunmore: 88 }, oppAll: { dunmore: 3 } },
+  { id: 'wounded', weight: 7, name: 'The Wounded Incumbent',
+    desc: 'In January, your former Chief of Staff was indicted for steering state contracts to a donor. You were not charged, but every rival will use it.',
+    field: BASE_FIELD, youAll: -3, flag: 'indicted' },
+  { id: 'reckoning', weight: 4, name: 'The Reckoning',
+    desc: 'Tension with Iran is rising, and oil is already at $110. Many older and business Republicans who stopped voting in primaries say they will come back. MAGA voters are tired and divided. If a war starts, this could be the year the old party returns.',
+    field: BASE_FIELD, warAt: 3, favors: 'whitlock', oppAll: { dunmore: -2 },
+    oppFx: { whitlock: { seniors: 37, chamber: 31, farm: 31, faith: 19, liberty: 19, guns: 12 } },
+    turnout: { seniors: .08, chamber: .12, maga: -.08, online: -.06 } },
+  { id: 'boom', weight: 4, name: 'The Boom',
+    desc: 'Brent Vaskel\'s data centers have brought 6,000 jobs to Pratt Junction, and the President has praised him twice. For many voters he is no longer a Californian. He is the man who brought the jobs.',
+    field: BASE_FIELD, favors: 'vaskel', presOverride: { vaskel: 70 },
+    oppFx: { vaskel: { liberty: 25, online: 25, chamber: 30, maga: 25, farm: 15, seniors: 15 } },
+    turnout: { liberty: .08, online: .04, chamber: .04 } },
+];
+
+// ---------- The war (a rare random shock) ----------
+// If it happens, candidates close to the President lose support in the factions below.
+// Loyalty = President's endorsement + the President's opinion + MAGA identity + war stance (hawk).
+const WAR = {
+  chance: .05,              // probability per game
+  earliest: 9, latest: 17,  // the step range in which the war can start
+  pivot: .55,               // loyalty above this loses support, below it gains
+  rampSteps: 4,             // steps until the oil shock reaches full effect
+  weights: { online: 16, farm: 13, seniors: 10, liberty: 9, chamber: 8, maga: 7, guns: 3, faith: -4 },
+};
 
 // ---------- Endorsing organizations ----------
 // holder = starting holder (null = open). fx = faction bonus for the holder.
@@ -192,6 +254,9 @@ const ENDORSE_TEXT = {
   rick: 'The President posts: "Pastor Rick Dollins is a great man of Faith and a strong supporter of MAGA. He has my Complete and Total Endorsement!"',
   krantz: 'The President posts: "Sheriff Bo Krantz is tough on Crime and tough on the Border. He has my Complete and Total Endorsement!"',
   vaskel: 'The President posts: "Brent Vaskel is a brilliant businessman who will bring jobs to Cimarron. He has my Complete and Total Endorsement!"',
+  coburn: 'The President posts: "Jake Coburn, a Great Champion and a total Winner, has my Complete and Total Endorsement for Governor of Cimarron!"',
+  albright: 'The President posts: "Dr. Renee Albright, a brave Doctor who stood up to the COVID Tyrants, has my Complete and Total Endorsement!"',
+  pike: 'The President posts: "Mason Pike, a strong young voice for America First, has my Complete and Total Endorsement!"',
 };
 
 
@@ -207,11 +272,11 @@ const STOP_ACTIONS = [
 const TEXT = {
   title: [
     'It is 2030. Cimarron is one of the most conservative states in the country. Democrats have not won a statewide office in twenty years. You are its Republican Governor, elected four years ago on a promise to cut taxes, secure the border and fight the left.',
-    'The only election that matters is the <b>Republican primary</b>. Five challengers are on the ballot. Each one represents a different faction of the modern right, and each one says you have not gone far enough. In this primary, voters punish any sign of moderation.',
+    'The only election that matters is the <b>Republican primary</b>. Several challengers are on the ballot. Each one represents a different faction of the modern right, and each one says you have not gone far enough. In this primary, voters punish any sign of moderation.',
   ],
   mateIntro: 'Your Lieutenant Governor is running against you, so you need a new running mate. Your choice will bring one faction closer to your campaign.',
   recordIntro: 'Every incumbent runs on a record. Which achievement from your first term will be the center of your campaign?',
-  fieldIntro: 'The filing deadline has passed. Five challengers are on the ballot against you. The primary is on August 4. Click any candidate, at any time, to see their profile.',
+  fieldIntro: 'The filing deadline has passed. The primary is on August 4. Click any candidate, at any time, to see their profile.',
   debateIntro: {
     1: 'The first debate is at the Harlan County Fairgrounds, broadcast statewide. The moderator is Dale Pruitt of the Cimarron Ledger. After each of your answers you will hear your rivals answer the same question. Four questions.',
     2: 'The final debate is at the Fort Eisenhower Civic Center, two weeks before the primary. Undecided voters are watching closely. Four questions.',
@@ -230,5 +295,9 @@ const TEXT = {
     vaskel: ' He says he will continue to fund conservative causes in the state.',
     krantz: ' He says he will return to his duties in Harlan County.',
     dunmore: ' He says the movement "is bigger than one election."',
+    coburn: ' "I gave it everything," he says. "Sometimes the other team wins."',
+    albright: ' She says she will continue her work "outside a corrupt system."',
+    pike: ' He tells his viewers that "the uniparty rigged the field" and that he will be back.',
+    whitlock: ' She says she hopes the party "finds its way home."',
   },
 };

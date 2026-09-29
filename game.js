@@ -5,14 +5,18 @@
 const TUNE = {
   T: 9,               // softmax temperature: lower = more decisive faction swings
   posMult: .8,        // how much of an answer's gains you keep (voters remember losses in full)
-  oppMomentum: .2,    // per step, rivals grow in their two core factions
+  oppMomentum: .15,   // per step, rivals grow in the two factions where they can win the most new votes
   clawback: .15,      // rivals regain ground in factions you lead
   rivalDebate: .5,    // share of their debate gains that rivals keep
   runoffGangup: 6,    // eliminated campaigns consolidate against you in a runoff
+  runoffMomentum: 1.5, // per runoff step, your rival gains in every faction (anti-incumbent consolidation)
+  endorseTop: 5,      // runoff endorsement: bonus in the endorser's two strongest factions
+  endorseAll: 1,      // runoff endorsement: bonus in every faction
+  fringeRunoff: 8,    // in a runoff, older, evangelical, business and farm voters unite against a fringe outsider
 };
 const RUNOFF_LINE = 40;      // a candidate needs this % to avoid a runoff
 const DROPOUT_LINE = 9;      // rivals below this % may drop out (after the President's endorsement)
-const SAVE_KEY = 'cimarron_campaign_trail_save_v2';
+const SAVE_KEY = 'cimarron_campaign_trail_save_v4';
 const FKEYS = Object.keys(FACTIONS);
 const CAND = Object.fromEntries(CANDIDATES.map(c => [c.id, c]));
 const REG = Object.fromEntries(REGIONS.map(r => [r.id, r]));
@@ -23,14 +27,30 @@ let electionTimer = null;
 const UI = { tab: 'state' };
 const $ = sel => document.querySelector(sel);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const pick = a => a[Math.floor(Math.random() * a.length)];
-const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+// Seeded random numbers (mulberry32). The seed is stored in the game state, so a game can be replayed.
+function rand() {
+  if (!S) return Math.random();
+  let t = (S.rng = (S.rng + 0x6D2B79F5) >>> 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+const pick = a => a[Math.floor(rand() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // ---------- state ----------
-function newState(name) {
-  return {
-    name, screen: 'record', record: null, mate: null,
+const URLQ = new URLSearchParams(location.search);   // testing: ?scenario=celebrity&war=1
+function pickScenario() {
+  const forced = SCENARIOS.find(x => x.id === URLQ.get('scenario'));
+  if (forced) return forced;
+  let r = rand() * SCENARIOS.reduce((a, x) => a + x.weight, 0);
+  return SCENARIOS.find(x => (r -= x.weight) < 0) || SCENARIOS[0];
+}
+function newState(name, seed) {
+  seed = (seed >>> 0) || Math.floor(Math.random() * 900000) + 100000;
+  S = {
+    name, seed, rng: seed, screen: 'record', record: null, mate: null,
     step: 0, rino: 0, pres: CAND.you.pres, money: 2.0,
     delta: Object.fromEntries(CANDIDATES.map(c => [c.id, {}])),
     bonus: Object.fromEntries(CANDIDATES.map(c => [c.id, {}])),
@@ -38,8 +58,27 @@ function newState(name) {
     endorsements: Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder])),
     flags: {}, asked: [], dAsked: [], seenEvents: [], usedNews: [], wire: [], log: [], promises: [],
     dropped: [], endorsed: null, cur: null, lastPoll: null, election: null, concession: null,
+    runoff: null, runoffResult: null, electionPhase: 'primary', finalWinner: null, war: null,
   };
+  const warRoll = rand(), warStep = WAR.earliest + Math.floor(rand() * (WAR.latest - WAR.earliest + 1));
+  S.warPlanned = URLQ.get('war') === '1' || warRoll < WAR.chance ? warStep : null;
+  applyScenario(S, pickScenario());
+  return S;
 }
+// Set up the field and starting conditions of a scenario. Used by newState and by the simulator.
+function applyScenario(s, sc) {
+  s.scenario = sc.id;
+  s.field = sc.field.slice();
+  s.presOverride = { ...(sc.presOverride || {}) };
+  for (const id in sc.oppAll || {}) addAll(s, id, sc.oppAll[id]);
+  for (const id in sc.oppFx || {}) addDelta(s, id, sc.oppFx[id]);
+  if (sc.youAll) addAll(s, 'you', sc.youAll);
+  if (sc.flag) s.flags[sc.flag] = 1;
+  if (sc.warAt != null) s.warPlanned = sc.warAt;
+  // Endorsements held by candidates who are not in this field become open.
+  for (const org in s.endorsements) if (s.endorsements[org] && !s.field.includes(s.endorsements[org])) s.endorsements[org] = null;
+}
+const scenarioOf = s => SCENARIOS.find(x => x.id === s.scenario) || SCENARIOS[0];
 const displayName = (s, id) => id === 'you' ? `Gov. ${s.name}` : CAND[id].name;
 const shortName = (s, id) => id === 'you' ? s.name.split(' ').slice(-1)[0] : CAND[id].short;
 const initials = (s, id) => id === 'you' ? (s ? s.name : 'You').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : CAND[id].initials;
@@ -57,7 +96,7 @@ function applyFx(s, fx) {
   if (fx.pres) s.pres = clamp(s.pres + fx.pres, 0, 100);
   if (fx.money) s.money = Math.max(0, s.money + fx.money);
   if (fx.flag) s.flags[fx.flag] = s.step + 1;
-  for (const id in fx.opp || {}) if (!s.dropped.includes(id)) addAll(s, id, fx.opp[id]);
+  for (const id in fx.opp || {}) if (active(s).includes(id)) addAll(s, id, fx.opp[id]);
   if (fx.oppLeader) { const r = sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you'); if (r) addAll(s, r, fx.oppLeader); }
   for (const org in fx.endorse || {}) {
     const to = fx.endorse[org];
@@ -65,11 +104,31 @@ function applyFx(s, fx) {
   }
   for (const r in fx.gotv || {}) s.gotv[r] = (s.gotv[r] || 0) + fx.gotv[r];
   if (fx.gotvAll) for (const r of REGIONS) s.gotv[r.id] = (s.gotv[r.id] || 0) + fx.gotvAll;
-  if (fx.drop && !s.dropped.includes(fx.drop.id)) dropOut(s, fx.drop.id, fx.drop.to);
+  if (fx.drop && active(s).includes(fx.drop.id)) dropOut(s, fx.drop.id, fx.drop.to);
+  if (fx.oppRival && s.runoff) addAll(s, s.runoff.rival, fx.oppRival);
+  // The President never endorses the traditional conservative.
+  if (fx.presEndorse && s.runoff && !(fx.presEndorse === 'rival' && s.runoff.rival === 'whitlock')) s.endorsed = fx.presEndorse === 'you' ? 'you' : s.runoff.rival;
 }
 
 // ---------- vote model ----------
-const active = s => CANDIDATES.map(c => c.id).filter(id => !s.dropped.includes(id));
+// Candidates in the race. During a live runoff, only the two finalists.
+const active = s => s.runoff?.live ? s.runoff.two : s.field.filter(id => !s.dropped.includes(id));
+const FRINGE_OPPONENTS = ['seniors', 'faith', 'chamber', 'farm'];
+const presOf = (s, id) => id === 'you' ? s.pres : (s.presOverride?.[id] ?? CAND[id].pres);
+const topFactions = id => FKEYS.slice().sort((a, b) => CAND[id].base[b] - CAND[id].base[a]).slice(0, 2);
+
+// War: how closely a candidate is tied to the President and his war (0 = not at all, about 1.2 = fully).
+function warLoyalty(s, cid) {
+  const endorsed = s.endorsed === cid ? .5 : 0;
+  const maga = cid === 'you' ? CAND.you.base.maga + Math.min(s.delta.you.maga || 0, 30) : CAND[cid].base.maga;
+  const stance = cid === 'you' ? (s.flags.war_hawk ? .25 : 0) - (s.flags.war_dove ? .3 : 0) : (CAND[cid].hawk || 0);
+  return endorsed + presOf(s, cid) / 200 + maga / 200 + stance;
+}
+function warPenalty(s, cid, f) {
+  if (!s.war) return 0;
+  const ramp = Math.min(1, (s.step - s.war.start + 1) / WAR.rampSteps);
+  return (warLoyalty(s, cid) - WAR.pivot) * (WAR.weights[f] || 0) * ramp;
+}
 function score(s, cid, f, rid) {
   let v = CAND[cid].base[f] + (s.delta[cid][f] || 0);
   if (cid === 'you') {
@@ -79,6 +138,10 @@ function score(s, cid, f, rid) {
   if (s.endorsed === cid) v += ({ maga: 8, online: 3, seniors: 3 })[f] || 0;
   for (const org in s.endorsements) if (s.endorsements[org] === cid) v += ENDORSERS[org].fx[f] || 0;
   if (rid) v += s.bonus[cid][rid] || 0;
+  v -= warPenalty(s, cid, f);
+  // Runoff endorsements: the endorser's two strongest factions +5, every faction +1.
+  if (CAND[cid].fringe && s.runoff && FRINGE_OPPONENTS.includes(f)) v -= TUNE.fringeRunoff;
+  for (const e in s.runoff?.endorse || {}) if (s.runoff.endorse[e] === cid) v += (topFactions(e).includes(f) ? TUNE.endorseTop : 0) + TUNE.endorseAll;
   return v;
 }
 function softmax(s, f, rid, cands, noise) {
@@ -86,39 +149,48 @@ function softmax(s, f, rid, cands, noise) {
   const sum = ex.reduce((a, b) => a + b, 0);
   return ex.map(e => e / sum);
 }
-// Region result: faction mix weighted by each faction's turnout, plus your GOTV operation.
-function regionShares(s, rid, cands = active(s), noise) {
+// ---- Vote model (all numbers are vote counts) ----
+// A faction's expected votes in a region = registered Republicans in the region × faction share × faction turnout × regional turnout.
+const REGISTERED_R = STATE_PROFILE.registeredR;
+// Turnout rate of a faction: the base rate plus any change from the scenario (for example, a surge of young voters).
+const turnoutOf = f => FACTIONS[f].turnout + (S ? scenarioOf(S).turnout?.[f] || 0 : 0);
+const factionVotes = (r, f) => REGISTERED_R * r.voters / 100 * (r.mix[f] || 0) * turnoutOf(f) * r.turnoutMod;
+const sumVals = o => Object.values(o).reduce((a, b) => a + b, 0);
+const toShares = votes => { const t = sumVals(votes); return Object.fromEntries(Object.entries(votes).map(([c, v]) => [c, v / t * 100])); };
+const gotvMult = (s, c, rid) => c === 'you' ? 1 + (s.gotv[rid] || 0) : 1;   // GOTV: more of your supporters vote
+
+// Votes for each candidate in one region. Each faction splits its votes by the softmax of candidate appeal.
+function regionVotes(s, rid, cands = active(s), noise) {
   const r = REG[rid], out = Object.fromEntries(cands.map(c => [c, 0]));
   for (const f in r.mix) {
-    const w = r.mix[f] * FACTIONS[f].turnout, sm = softmax(s, f, rid, cands, noise);
-    cands.forEach((c, i) => out[c] += w * sm[i]);
+    const v = factionVotes(r, f), sm = softmax(s, f, rid, cands, noise);
+    cands.forEach((c, i) => out[c] += v * sm[i] * gotvMult(s, c, rid));
   }
-  if (out.you != null) out.you *= 1 + (s.gotv[rid] || 0);
-  const tot = Object.values(out).reduce((a, b) => a + b, 0);
-  for (const c in out) out[c] = out[c] / tot * 100;
   return out;
 }
-const regionTurnout = r => r.turnoutMod * Object.entries(r.mix).reduce((a, [f, m]) => a + m * FACTIONS[f].turnout, 0);
-const regionWeight = r => r.voters * regionTurnout(r);
-const TOTAL_WEIGHT = REGIONS.reduce((a, r) => a + regionWeight(r), 0);
-function stateShares(s, cands = active(s), noiseByRegion) {
+const regionShares = (s, rid, cands = active(s), noise) => toShares(regionVotes(s, rid, cands, noise));
+function stateVotes(s, cands = active(s), noiseByRegion) {
+  const out = Object.fromEntries(cands.map(c => [c, 0]));
+  for (const r of REGIONS) { const v = regionVotes(s, r.id, cands, noiseByRegion?.[r.id]); for (const c of cands) out[c] += v[c]; }
+  return out;
+}
+const stateShares = (s, cands = active(s), noiseByRegion) => toShares(stateVotes(s, cands, noiseByRegion));
+// Support within one faction, statewide: the faction's votes in every region, added together.
+function factionShares(s, f, cands = active(s)) {
   const out = Object.fromEntries(cands.map(c => [c, 0]));
   for (const r of REGIONS) {
-    const sh = regionShares(s, r.id, cands, noiseByRegion?.[r.id]);
-    for (const c of cands) out[c] += sh[c] * regionWeight(r) / TOTAL_WEIGHT;
+    if (!r.mix[f]) continue;
+    const v = factionVotes(r, f), sm = softmax(s, f, r.id, cands);
+    cands.forEach((c, i) => out[c] += v * sm[i] * gotvMult(s, c, r.id));
   }
-  return out;
+  return toShares(out);
 }
-function factionShares(s, f, cands = active(s)) {
-  const sm = softmax(s, f, null, cands);
-  return Object.fromEntries(cands.map((c, i) => [c, sm[i] * 100]));
-}
+// Expected turnout before any campaign activity.
+const regionWeight = r => FKEYS.reduce((a, f) => a + factionVotes(r, f), 0);     // expected votes in a region
+const TOTAL_WEIGHT = () => REGIONS.reduce((a, r) => a + regionWeight(r), 0);       // expected votes statewide
+const regionTurnout = r => regionWeight(r) / (REGISTERED_R * r.voters / 100);      // share of the region's registered Republicans
 const registered = Object.fromEntries(FKEYS.map(f => [f, REGIONS.reduce((a, r) => a + r.voters * (r.mix[f] || 0), 0)]));
-const expectedVote = (() => {
-  const raw = Object.fromEntries(FKEYS.map(f => [f, REGIONS.reduce((a, r) => a + r.voters * r.turnoutMod * (r.mix[f] || 0) * FACTIONS[f].turnout, 0)]));
-  const tot = Object.values(raw).reduce((a, b) => a + b, 0);
-  return Object.fromEntries(FKEYS.map(f => [f, raw[f] / tot * 100]));
-})();
+const expectedVote = () => { const t = TOTAL_WEIGHT(); return Object.fromEntries(FKEYS.map(f => [f, REGIONS.reduce((a, r) => a + factionVotes(r, f), 0) / t * 100])); };
 const sorted = sh => Object.entries(sh).sort((a, b) => b[1] - a[1]);
 
 // ---------- campaign flow ----------
@@ -133,8 +205,20 @@ function pickQuestion(s) {
   return pri[0] || pick(pool.filter(q => !q.priority));
 }
 
+// An outsider can enter the race partway through the campaign (see SCENARIOS.enter).
+function lateEntries(s) {
+  const out = [];
+  for (const [id, step] of Object.entries(scenarioOf(s).enter || {})) if (step === s.step && !s.field.includes(id)) {
+    s.field.push(id);
+    const line = `${CAND[id].name} enters the race for governor. ${CAND[id].blurb.split('. ')[0]}.`;
+    s.wire.unshift({ who: id, text: line });
+    out.push(line);
+  }
+  return out;
+}
 function startStep() {
   const s = S, type = SCHEDULE[s.step];
+  s.entryNews = lateEntries(s);
   s.lastPoll = stateShares(s);
   if (type === 'event') {
     const e = pickEvent(s);
@@ -147,15 +231,14 @@ function startStep() {
     s.cur = { type: 'stop', region: null, action: 'rally', done: false, breaking: [] };
   } else if (type === 'debate1' || type === 'debate2') {
     // Three random questions, then closing statements.
-    const pool = shuffle(DEBATE_QUESTIONS.filter(q => !s.dAsked.includes(q.id) && q.id !== 'd_closing'));
+    const pool = shuffle(DEBATE_QUESTIONS.filter(q => !s.dAsked.includes(q.id) && q.id !== 'd_closing' && q.needs.every(id => active(s).includes(id))));
     const qs = pool.slice(0, 3).map(q => q.id).concat('d_closing');
     s.dAsked.push(...qs.filter(id => id !== 'd_closing'));
     s.cur = { type: 'debate', which: type === 'debate1' ? 1 : 2, qs, idx: -1, sel: null, answered: null,
       scores: Object.fromEntries(active(s).map(id => [id, 0])), grades: Object.fromEntries(active(s).map(id => [id, []])), best: null, breaking: [] };
   } else if (type === 'endorse') {
     const pool = active(s).filter(id => id !== 'whitlock');
-    const presOf = id => id === 'you' ? s.pres : CAND[id].pres + (Math.random() - .5) * 10;
-    const who = pool.map(id => [id, presOf(id)]).sort((a, b) => b[1] - a[1])[0][0];
+    const who = pool.map(id => [id, presOf(s, id) + (id === 'you' ? 0 : (rand() - .5) * 10)]).sort((a, b) => b[1] - a[1])[0][0];
     s.endorsed = who;
     s.cur = { type: 'endorse', who, breaking: [] };
     // Organizations that have not decided yet announce now.
@@ -169,13 +252,15 @@ function startStep() {
   } else if (type === 'election') {
     return runElection();
   }
+  if (s.entryNews?.length) { s.cur.breaking = [...s.entryNews, ...(s.cur.breaking || [])]; s.entryNews = []; }
   save(); render();
 }
 function startQuestion(s) {
   const q = pickQuestion(s);
   if (!q) { s.step++; return startStep(); }
   s.asked.push(q.id);
-  s.cur = { type: 'q', qid: q.id, sel: null, answered: null, breaking: [] };
+  s.cur = { type: 'q', qid: q.id, sel: null, answered: null, breaking: s.entryNews || [] };
+  s.entryNews = [];
   save(); render();
 }
 
@@ -183,7 +268,7 @@ function advance() { S.step++; S.cur = null; startStep(); }
 
 function opponentNews(s) {
   const opps = active(s).filter(id => id !== 'you' && NEWS[id]);
-  const who = pick(opps.filter(id => id !== 'whitlock').concat(Math.random() < .2 && opps.includes('whitlock') ? ['whitlock'] : []));
+  const who = pick(opps.filter(id => id !== 'whitlock').concat(rand() < .2 && opps.includes('whitlock') ? ['whitlock'] : []));
   if (who) {
     const fresh = NEWS[who].filter((_, i) => !s.usedNews.includes(`${who}${i}`));
     if (fresh.length) {
@@ -193,16 +278,28 @@ function opponentNews(s) {
       s.wire.unshift({ who, text: item[0] });
     }
   }
-  for (const id of active(s)) if (id !== 'you') for (const f of FKEYS) s.delta[id][f] = (s.delta[id][f] || 0) + (Math.random() - .5) * .8;
-  // Rivals keep working their own base.
-  for (const id of active(s)) if (id !== 'you' && id !== 'whitlock')
-    for (const f of FKEYS.slice().sort((a, b) => CAND[id].base[b] - CAND[id].base[a]).slice(0, 2)) s.delta[id][f] = (s.delta[id][f] || 0) + TUNE.oppMomentum;
+  for (const id of active(s)) if (id !== 'you') for (const f of FKEYS) s.delta[id][f] = (s.delta[id][f] || 0) + (rand() - .5) * .8;
+  // Rivals grow where they can win the most new votes: appeal × the faction's share of the vote × voters they do not have yet.
+  const grows = id => id !== 'you' && (id !== 'whitlock' || scenarioOf(s).favors === 'whitlock');
+  for (const id of active(s)) if (grows(id))
+    for (const f of growthFactions(s, id)) s.delta[id][f] = (s.delta[id][f] || 0) + TUNE.oppMomentum;
   // Everybody attacks the frontrunner: in factions you lead, rivals claw back.
   for (const f of FKEYS) {
     const sh = factionShares(s, f);
     if (sorted(sh)[0][0] !== 'you') continue;
     for (const id of active(s)) if (id !== 'you' && id !== 'whitlock') s.delta[id][f] = (s.delta[id][f] || 0) + TUNE.clawback + sh.you / 200;
   }
+}
+
+function growthFactions(s, id) {
+  const ev = expectedVote();
+  return FKEYS.map(f => [f, CAND[id].base[f] * ev[f] * (1 - factionShares(s, f)[id] / 100)]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
+}
+const riskP = (s, risk) => typeof risk.p === 'function' ? risk.p(s) : risk.p;
+function startWar(s) {
+  s.war = { start: s.step };
+  s.flags.war = s.step + 1;
+  for (const line of WAR_NEWS.slice().reverse()) s.wire.unshift({ who: null, text: line });
 }
 
 function recordPromise(s, key) { const p = PROMISES[key]; if (p && !s.promises.includes(p)) s.promises.push(p); }
@@ -226,21 +323,24 @@ function answer() {
     s.log.push({ q: q.setting, a: a.text });
     opponentNews(s);
     if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
-  } else if (c.type === 'event') {
-    const e = EVENTS.find(e => e.id === c.eid), ch = e.choices[c.sel];
+  } else if (c.type === 'event' || c.type === 'revent') {
+    const e = (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid), ch = e.choices[c.sel];
     applyFx(s, ch.fx);
     c.fb = ch.fb; c.fx = { ...ch.fx };
     if (ch.risk) {
-      const won = Math.random() < ch.risk.p, o = won ? ch.risk.win : ch.risk.lose;
+      const won = rand() < riskP(s, ch.risk), o = won ? ch.risk.win : ch.risk.lose;
       c.outcome = won ? 'win' : 'lose';
       applyFx(s, o.fx);
       c.fb = o.fb; c.fx = { ...ch.fx, ...o.fx };
     }
     if (e.special === 'strawpoll') runStrawPoll(s, c);
+    if (e.special === 'war') startWar(s);
     recordPromise(s, `${e.id}:${c.sel}`);
-    s.log.push({ q: `${e.kind}: ${e.title}`, a: ch.text + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
-    opponentNews(s);
-    if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
+    s.log.push({ q: `${c.type === 'revent' ? 'Runoff' : e.kind}: ${e.title}`, a: ch.text + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
+    if (c.type === 'event') {
+      opponentNews(s);
+      if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
+    }
   } else if (c.type === 'debate') {
     const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), a = q.answers[c.sel];
     applyFx(s, a.fx);
@@ -282,7 +382,7 @@ function runStrawPoll(s, c) {
     for (const id of cands) out[id] += w * fs[id];
     tot += w;
   }
-  for (const id of cands) out[id] = Math.max(out[id] / tot + (Math.random() - .5) * 4, 0);
+  for (const id of cands) out[id] = Math.max(out[id] / tot + (rand() - .5) * 4, 0);
   const sum = Object.values(out).reduce((a, b) => a + b, 0);
   for (const id of cands) out[id] = out[id] / sum * 100;
   c.straw = sorted(out);
@@ -316,7 +416,7 @@ function doStop() {
   c.oppMoves = [];
   for (const id of active(s)) {
     if (id === 'you') continue;
-    const best = REGIONS.map(r => [r.id, regionShares(s, r.id)[id] + Math.random() * 15]).sort((a, b) => b[1] - a[1])[0][0];
+    const best = REGIONS.map(r => [r.id, regionShares(s, r.id)[id] + rand() * 15]).sort((a, b) => b[1] - a[1])[0][0];
     const amt = id === 'vaskel' ? 6 : id === 'whitlock' ? 2 : 4;
     s.bonus[id][best] = (s.bonus[id][best] || 0) + amt;
     c.oppMoves.push(`${CAND[id].short} ${id === 'vaskel' ? 'runs television ads in' : 'holds events in'} ${REG[best].name}.`);
@@ -348,24 +448,82 @@ function checkDropouts(s) {
 }
 
 // ---------- election night ----------
-function runElection() {
-  const s = S, noise = {};
-  for (const r of REGIONS) noise[r.id] = Object.fromEntries(active(s).map(c => [c, (Math.random() - .5) * 4]));
+const RUNOFF_TURNOUT = .8;   // runoffs draw fewer voters than the primary
+const RUNOFF_DAY = new Date(2030, 7, 25);
+
+// Count an election: real vote counts per region, with a little polling error per region.
+function countVotes(s, cands, turnoutMult = 1) {
+  const noise = {};
+  for (const r of REGIONS) noise[r.id] = Object.fromEntries(cands.map(c => [c, (rand() - .5) * 4]));
   const order = shuffle(REGIONS.map(r => r.id));
-  const results = Object.fromEntries(REGIONS.map(r => [r.id, regionShares(s, r.id, active(s), noise[r.id])]));
-  const total = stateShares(s, active(s), noise);
-  const ranked = sorted(total);
-  let runoff = null, winner = ranked[0][0];
-  if (ranked[0][1] < RUNOFF_LINE) {
+  const votes = Object.fromEntries(REGIONS.map(r => [r.id, Object.fromEntries(Object.entries(regionVotes(s, r.id, cands, noise[r.id])).map(([c, v]) => [c, Math.round(v * turnoutMult)]))]));
+  const results = Object.fromEntries(REGIONS.map(r => [r.id, toShares(votes[r.id])]));
+  const totalVotes = Object.fromEntries(cands.map(c => [c, REGIONS.reduce((a, r) => a + votes[r.id][c], 0)]));
+  const total = toShares(totalVotes);
+  return { order, votes, results, totalVotes, total, cast: sumVals(totalVotes), winner: sorted(total)[0][0], revealed: 0 };
+}
+
+function runElection() {
+  const s = S;
+  s.election = countVotes(s, active(s));
+  const ranked = sorted(s.election.total);
+  if (ranked[0][1] >= RUNOFF_LINE) s.finalWinner = ranked[0][0];
+  else {
     const two = [ranked[0][0], ranked[1][0]];
-    const rival = two.find(c => c !== 'you');
-    if (two.includes('you')) addAll(s, rival, TUNE.runoffGangup);
-    runoff = stateShares(s, two, noise);
-    winner = sorted(runoff)[0][0];
+    s.election.needsRunoff = two;
+    if (!two.includes('you')) {
+      // You are eliminated. The other two finish the race without you.
+      s.runoff = { two, rival: null, live: false, endorse: {} };
+      s.runoffResult = countVotes(s, two, RUNOFF_TURNOUT);
+      s.finalWinner = s.runoffResult.winner;
+    }
   }
-  const votes = Math.round(385000 + Math.random() * 20000);
-  s.election = { order, results, total, runoff, winner, revealed: 0, votes };
+  s.electionPhase = 'primary';
   s.screen = 'election';
+  save(); render();
+}
+
+// ---------- the runoff campaign ----------
+function startRunoff() {
+  const s = S, two = s.election.needsRunoff, rival = two.find(c => c !== 'you');
+  const eliminated = sorted(s.election.total).map(e => e[0]).filter(id => !two.includes(id)).slice(0, 3);
+  s.runoff = { two, rival, live: true, endorse: {}, eliminated, seen: [], idx: 0,
+    queue: ['intro', ...eliminated.map(id => `court:${id}`), 'revent', 'revent', 'vote'] };
+  addAll(s, rival, TUNE.runoffGangup);
+  s.screen = 'runoff';
+  startRunoffStep();
+}
+function startRunoffStep() {
+  const s = S, R = s.runoff, item = R.queue[R.idx];
+  s.lastPoll = stateShares(s);
+  if (item === 'intro') s.cur = { type: 'rintro', breaking: [] };
+  else if (item.startsWith('court:')) s.cur = { type: 'court', who: item.slice(6), sel: null, answered: null, breaking: [] };
+  else if (item === 'revent') {
+    const e = pick(RUNOFF_EVENTS.filter(e => !R.seen.includes(e.id) && (!e.cond || e.cond(s))));
+    if (!e) { R.idx++; return startRunoffStep(); }
+    R.seen.push(e.id);
+    s.cur = { type: 'revent', eid: e.id, sel: null, answered: null, breaking: [] };
+  } else if (item === 'vote') {
+    s.runoffResult = countVotes(s, R.two, RUNOFF_TURNOUT);
+    s.finalWinner = s.runoffResult.winner;
+    s.electionPhase = 'runoff';
+    s.screen = 'election';
+  }
+  save(); render();
+}
+function runoffAdvance() { S.runoff.idx++; S.cur = null; addAll(S, S.runoff.rival, TUNE.runoffMomentum); startRunoffStep(); }
+const runoffDate = s => new Date(PRIMARY_DAY.getTime() + Math.round((s.runoff.idx + 1) * (RUNOFF_DAY - PRIMARY_DAY) / DAY / s.runoff.queue.length) * DAY);
+
+function courtAnswer() {
+  const s = S, c = s.cur, ch = COURT[c.who].choices[c.sel];
+  applyFx(s, ch.fx);
+  const p = typeof ch.p === 'function' ? ch.p(s) : ch.p;
+  c.result = rand() < p ? 'you' : rand() < .6 ? 'rival' : 'none';
+  s.runoff.endorse[c.who] = c.result === 'you' ? 'you' : c.result === 'rival' ? s.runoff.rival : 'none';
+  const line = c.result === 'none' ? `${CAND[c.who].name} declines to endorse in the runoff.` : `${CAND[c.who].name} endorses ${displayName(s, s.runoff.endorse[c.who])} in the runoff.`;
+  s.wire.unshift({ who: c.who, text: line });
+  s.log.push({ q: `Runoff: ${COURT[c.who].title}`, a: `${ch.text} (${RUNOFF_TEXT.endorsed[c.result]})` });
+  c.answered = c.sel;
   save(); render();
 }
 
@@ -388,10 +546,11 @@ function staffBadge(id) {
   const m = STAFF[id];
   return `<span class="portrait" style="--c:${m.color};width:30px;height:30px;font-size:11px">${m.initials}</span>`;
 }
-function dateOf(step) {
-  const d = new Date(2030, 1, 3 + step * 6);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
+const CAMPAIGN_START = new Date(2030, 1, 3), PRIMARY_DAY = new Date(2030, 7, 4), DAY = 864e5;
+const dateAt = step => new Date(CAMPAIGN_START.getTime() + Math.round(step * (PRIMARY_DAY - CAMPAIGN_START) / DAY / (SCHEDULE.length - 1)) * DAY);
+const daysToPrimary = step => Math.round((PRIMARY_DAY - dateAt(step)) / DAY);
+const fmtDate = d => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const dateOf = step => fmtDate(dateAt(step));
 
 function mapSVG(s, opts = {}) {
   const { results, revealed, clickable, selected } = opts;
@@ -439,9 +598,9 @@ function pollPanel(s) {
   const tabs = [['state', 'Statewide'], ['faction', 'By Faction'], ['region', 'By Region']];
   let body = '';
   if (UI.tab === 'state') body = pollRows(s, stateShares(s), s.lastPoll) + (s.dropped.length ? `<div class="dropped">Withdrawn: ${s.dropped.map(id => CAND[id].short).join(', ')}</div>` : '');
-  else if (UI.tab === 'faction') body = crosstab(s, FKEYS, f => factionShares(s, f), f => `<span title="${esc(FACTIONS[f].blurb)}">${FACTIONS[f].name}</span>`, f => `${expectedVote[f].toFixed(0)}% of vote`)
+  else if (UI.tab === 'faction') body = crosstab(s, FKEYS, f => factionShares(s, f), f => `<span title="${esc(FACTIONS[f].blurb)}">${FACTIONS[f].name}</span>`, f => `${expectedVote()[f].toFixed(0)}% of vote`)
     + `<p class="muted small">Support within each faction. "% of vote" is the faction's expected share of primary voters after turnout.</p>`;
-  else body = crosstab(s, REGIONS.map(r => r.id), rid => regionShares(s, rid), rid => `<span class="region-link" data-region="${rid}">${REG[rid].name}</span>`, rid => `${(regionWeight(REG[rid]) / TOTAL_WEIGHT * 100).toFixed(0)}%`)
+  else body = crosstab(s, REGIONS.map(r => r.id), rid => regionShares(s, rid), rid => `<span class="region-link" data-region="${rid}">${REG[rid].name}</span>`, rid => `${(regionWeight(REG[rid]) / TOTAL_WEIGHT() * 100).toFixed(0)}%`)
     + `<p class="muted small">Current support by region. The small number is the region's expected share of the statewide vote.</p>`;
   return `<div class="panel-title">Primary Polling</div>
     <div class="tabs">${tabs.map(([id, n]) => `<button class="tab ${UI.tab === id ? 'on' : ''}" data-tab="${id}">${n}</button>`).join('')}</div>${body}`;
@@ -457,8 +616,11 @@ function endorsementPanel(s) {
 function statusBar(s) {
   const rinoLabel = s.rino < 3 ? 'Trusted' : s.rino < 7 ? 'Questioned' : s.rino < 12 ? 'Attacked as RINO' : 'Branded a RINO';
   return `<div class="status">
-    <div><span class="lbl">Date</span>${dateOf(s.step)}</div>
-    <div><span class="lbl">Days to Primary</span>${Math.max(0, (SCHEDULE.length - 1 - s.step) * 6)}</div>
+    ${s.runoff?.live ? `<div><span class="lbl">Runoff Campaign</span>${fmtDate(runoffDate(s))}</div>
+      <div><span class="lbl">Days to Runoff</span>${Math.max(0, Math.round((RUNOFF_DAY - runoffDate(s)) / DAY))}</div>`
+    : `<div><span class="lbl">Date</span>${dateOf(s.step)}</div>
+    <div><span class="lbl">Days to Primary</span>${daysToPrimary(s.step)}</div>`}
+    ${s.war ? `<div><span class="lbl">Oil Crisis</span><span class="down">Gas $${(6.2 + Math.min(s.step - s.war.start, 4) * .15).toFixed(2)}</span></div>` : ''}
     <div><span class="lbl">War Chest</span>$${s.money.toFixed(1)}M</div>
     <div><span class="lbl">RINO Label</span><span class="${s.rino >= 7 ? 'down' : ''}">${s.rino.toFixed(0)} · ${rinoLabel}</span></div>
     <div><span class="lbl">The President's Opinion</span><span class="mini-bar"><span style="width:${s.pres}%"></span></span></div>
@@ -469,7 +631,7 @@ function statusBar(s) {
 function wirePanel(s) {
   if (!s.wire.length) return '';
   return `<div class="wire"><div class="wire-title">CAMPAIGN WIRE</div>${s.wire.slice(0, 6).map((w, i) =>
-    `<div class="wire-item ${i === 0 ? 'fresh' : ''}"><span class="dot" style="background:${colorOf(w.who)}"></span>${esc(w.text)}</div>`).join('')}</div>`;
+    `<div class="wire-item ${i === 0 ? 'fresh' : ''}"><span class="dot" style="background:${w.who ? colorOf(w.who) : '#c9a13b'}"></span>${esc(w.text)}</div>`).join('')}</div>`;
 }
 
 function chips(s, fx) {
@@ -493,7 +655,7 @@ function answersList(list, c, riskOf = () => false) {
   return `<div class="answers">${list.map((a, i) => `
     <label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
       <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
-      <span>${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(a.risk.p * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
+      <span>${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
 }
 
 function renderQuestion(s) {
@@ -510,9 +672,9 @@ function renderQuestion(s) {
 }
 
 function renderEvent(s) {
-  const c = s.cur, e = EVENTS.find(e => e.id === c.eid);
+  const c = s.cur, e = (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid);
   const text = typeof e.text === 'function' ? e.text(s) : e.text;
-  let h = `<div class="q-meta"><span class="kind" style="background:${EVENT_KINDS[e.kind] || '#333'}">${e.kind}</span><span>${dateOf(s.step)}</span></div>
+  let h = `<div class="q-meta"><span class="kind" style="background:${EVENT_KINDS[e.kind] || '#333'}">${e.kind}</span><span>${c.type === 'revent' ? `Runoff · ${fmtDate(runoffDate(s))}` : dateOf(s.step)}</span></div>
     <div class="event-title">${esc(e.title)}</div>
     <div class="q-text">${esc(text)}</div>`;
   if (e.advice?.length) h += `<div class="advice"><div class="fb-head">Your Advisors</div>${e.advice.map(([id, t]) =>
@@ -524,7 +686,7 @@ function renderEvent(s) {
     if (c.straw) h += `<div class="panel-title">Straw Poll Result · 2,400 delegates</div>` + c.straw.map(([id, v]) => `<div class="poll-row">${portrait(s, id, 24)}
       <div class="poll-main"><div class="poll-name">${nameLink(s, id)}</div><div class="pbar"><div style="width:${v}%;background:${colorOf(id)}"></div></div></div><div class="poll-num">${v.toFixed(1)}%</div></div>`).join('')
       + `<p class="muted small">${displayName(s, c.straw[0][0])} wins the straw poll and gains momentum. Delegates are more online and more religious than primary voters, so the result is not a forecast.</p>`;
-    h += `${breakingBox(c)}<button class="btn" id="next">Continue</button>`;
+    h += `${breakingBox(c)}<button class="btn" id="${c.type === 'revent' ? 'rnext' : 'next'}">Continue</button>`;
   }
   return h;
 }
@@ -581,7 +743,7 @@ function renderStop(s) {
   const r = c.region && REG[c.region];
   return `<div class="q-meta"><span>Campaign Stop</span><span>Choose a region on the map</span></div>
     <div class="q-text">Where will the campaign go this week? <b>Click a region on the map</b>, then choose an action.</div>
-    ${r ? `<div class="sel-region"><b>${r.name}</b> · ${(regionWeight(r) / TOTAL_WEIGHT * 100).toFixed(0)}% of the expected statewide vote · expected turnout ${(regionTurnout(r) * 100).toFixed(0)}%
+    ${r ? `<div class="sel-region"><b>${r.name}</b> · ${(regionWeight(r) / TOTAL_WEIGHT() * 100).toFixed(0)}% of the expected statewide vote · expected turnout ${(regionTurnout(r) * 100).toFixed(0)}%
       <div class="muted small">${esc(r.desc)}</div></div>` : ''}
     <div class="answers">${STOP_ACTIONS.map(a => `<label class="answer ${a.cost > s.money ? 'locked' : ''}"><input type="radio" name="stop" value="${a.id}" ${c.action === a.id ? 'checked' : ''} ${a.cost > s.money ? 'disabled' : ''}>
       <span><b>${a.name}.</b> ${a.desc}</span></label>`).join('')}</div>
@@ -598,9 +760,40 @@ function renderEndorse(s) {
     ${breakingBox(s.cur)}<button class="btn" id="next">Continue</button>`;
 }
 
+function renderRunoffIntro(s) {
+  const R = s.runoff, e = s.election;
+  return `<div class="q-meta"><span class="kind" style="background:var(--red)">Runoff</span><span>August 5, 2030</span></div>
+    <div class="event-title">You vs. ${esc(displayName(s, R.rival))}</div>
+    <div class="endorse-card">${portrait(s, 'you', 56)} <b>vs.</b> ${portrait(s, R.rival, 56)}</div>
+    <div class="q-text">${esc(RUNOFF_TEXT.intro(s))}</div>
+    <div class="panel-title">The Eliminated Candidates</div>
+    ${R.eliminated.map(id => `<div class="poll-row">${portrait(s, id, 26)}<div class="poll-main"><div class="poll-name">${nameLink(s, id)} <span class="muted small">— strongest with ${topFactions(id).map(f => FACTIONS[f].name).join(' and ')}</span></div>
+      <div class="pbar"><div style="width:${e.total[id]}%;background:${colorOf(id)}"></div></div></div><div class="poll-num">${e.total[id].toFixed(1)}%<span class="muted">${e.totalVotes[id].toLocaleString()} votes</span></div></div>`).join('')}
+    <p class="muted small">You will meet each of them. An endorsement moves part of their supporters: the endorser's two strongest factions and, to a smaller degree, every faction. Runoff turnout will be about ${Math.round(RUNOFF_TURNOUT * 100)}% of the primary.</p>
+    <button class="btn" id="rnext">Begin the Runoff Campaign</button>`;
+}
+
+function renderCourt(s) {
+  const c = s.cur, C = COURT[c.who], e = s.election;
+  let h = `<div class="q-meta"><span class="kind" style="background:${colorOf(c.who)}">Endorsement</span><span>Runoff · ${fmtDate(runoffDate(s))}</span></div>
+    <div class="event-title">${esc(C.title)}</div>
+    <div class="endorse-card">${portrait(s, c.who, 56)}<div><b>${nameLink(s, c.who)}</b><div class="muted small">${e.total[c.who].toFixed(1)}% in the primary (${e.totalVotes[c.who].toLocaleString()} votes) · strongest with ${topFactions(c.who).map(f => FACTIONS[f].name).join(' and ')}</div></div></div>
+    <div class="q-text">${esc(C.text)}</div>`;
+  h += `<div class="answers">${C.choices.map((a, i) => `<label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
+      <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
+      <span>${esc(a.text)} <span class="risk-tag" style="background:#1f6b3a">${Math.round((typeof a.p === 'function' ? a.p(s) : a.p) * 100)}% chance of endorsement</span></span></label>`).join('')}</div>`;
+  if (c.answered == null) h += `<button class="btn" id="court-submit" ${c.sel == null ? 'disabled' : ''}>Make the Offer</button>`;
+  else {
+    const ch = C.choices[c.answered];
+    h += `<div class="feedback ${c.result === 'you' ? 'success' : c.result === 'rival' ? 'fail' : ''}"><div class="fb-head">${CAND[c.who].short}: ${RUNOFF_TEXT.endorsed[c.result]}</div><p>${esc(ch.fb)}</p>${chips(s, ch.fx)}</div>
+      <button class="btn" id="rnext">Continue</button>`;
+  }
+  return h;
+}
+
 function renderCampaign(s) {
   const c = s.cur;
-  const body = { q: renderQuestion, event: renderEvent, debate: renderDebate, stop: renderStop, endorse: renderEndorse }[c.type](s);
+  const body = { q: renderQuestion, event: renderEvent, revent: renderEvent, rintro: renderRunoffIntro, court: renderCourt, debate: renderDebate, stop: renderStop, endorse: renderEndorse }[c.type](s);
   return `${statusBar(s)}
     <div class="cols">
       <div class="left-col"><div class="panel q-panel">${body}</div>${wirePanel(s)}</div>
@@ -614,38 +807,45 @@ function renderCampaign(s) {
     </div>`;
 }
 
+const currentResult = s => s.electionPhase === 'runoff' ? s.runoffResult : s.election;
+function resultRows(s, total, votes) {
+  return sorted(total).map(([id, v]) => `<div class="poll-row">${portrait(s, id, 26)}
+    <div class="poll-main"><div class="poll-name">${displayName(s, id)}</div><div class="pbar"><div style="width:${v}%;background:${colorOf(id)}"></div></div></div>
+    <div class="poll-num">${v.toFixed(1)}%<span class="muted">${votes[id].toLocaleString()} votes</span></div></div>`).join('');
+}
 function renderElection(s) {
-  const e = s.election, rev = e.order.slice(0, e.revealed);
-  const counted = rev.reduce((a, r) => a + regionWeight(REG[r]), 0);
-  const run = Object.fromEntries(Object.keys(e.total).map(c => [c, 0]));
-  for (const r of rev) for (const c in run) run[c] += e.results[r][c] * regionWeight(REG[r]) / Math.max(counted, 1e-9);
-  const done = e.revealed >= e.order.length;
-  const repPct = counted / TOTAL_WEIGHT * 100;
-  const table = sorted(done ? e.total : run).map(([id, v]) => `<div class="poll-row">${portrait(s, id, 26)}
-    <div class="poll-main"><div class="poll-name">${displayName(s, id)}</div><div class="pbar"><div style="width:${counted ? v : 0}%;background:${colorOf(id)}"></div></div></div>
-    <div class="poll-num">${counted ? v.toFixed(1) : '0.0'}%<span class="muted">${counted ? Math.round(v / 100 * e.votes * repPct / 100).toLocaleString() : ''}</span></div></div>`).join('');
+  const isRunoff = s.electionPhase === 'runoff', e = currentResult(s), rev = e.order.slice(0, e.revealed);
+  const run = Object.fromEntries(Object.keys(e.totalVotes).map(c => [c, rev.reduce((a, r) => a + e.votes[r][c], 0)]));
+  const counted = sumVals(run), done = e.revealed >= e.order.length;
+  const sh = counted ? toShares(run) : Object.fromEntries(Object.keys(run).map(c => [c, 0]));
+  const expected = isRunoff ? s.election.cast * RUNOFF_TURNOUT : TOTAL_WEIGHT();
   let verdict = '';
   if (done) {
-    const top = sorted(e.total)[0];
-    if (e.runoff) {
-      verdict = `<div class="breaking"><b>NO CANDIDATE REACHES ${RUNOFF_LINE}%.</b> Under state law, the top two candidates go to a runoff three weeks later. The eliminated campaigns and their voters consolidate against the front-runner.</div>
-        <div class="panel-title">Runoff Result · August 25</div>` + sorted(e.runoff).map(([id, v]) => `<div class="poll-row">${portrait(s, id, 26)}
-          <div class="poll-main"><div class="poll-name">${displayName(s, id)}</div><div class="pbar"><div style="width:${v}%;background:${colorOf(id)}"></div></div></div>
-          <div class="poll-num">${v.toFixed(1)}%</div></div>`).join('');
-    } else verdict = `<div class="breaking"><b>DECISION DESK:</b> ${displayName(s, top[0])} wins the Republican nomination outright with ${top[1].toFixed(1)}%.</div>`;
-    verdict += `<button class="btn" id="to-after">${e.winner === 'you' ? 'Continue' : 'Your Response'}</button>`;
+    const top = sorted(e.total)[0], need = !isRunoff && e.needsRunoff;
+    if (isRunoff) verdict = `<div class="breaking"><b>DECISION DESK:</b> ${displayName(s, top[0])} wins the runoff and the Republican nomination with ${top[1].toFixed(1)}%.</div>
+        <button class="btn" id="to-after">${s.finalWinner === 'you' ? 'Continue' : 'Your Response'}</button>`;
+    else if (!need) verdict = `<div class="breaking"><b>DECISION DESK:</b> ${displayName(s, top[0])} wins the Republican nomination outright with ${top[1].toFixed(1)}%.</div>
+        <button class="btn" id="to-after">${s.finalWinner === 'you' ? 'Continue' : 'Your Response'}</button>`;
+    else if (need.includes('you')) verdict = `<div class="breaking"><b>RUNOFF:</b> No candidate reaches ${RUNOFF_LINE}%. You and ${displayName(s, need.find(c => c !== 'you'))} advance to a runoff on August 25.</div>
+        <button class="btn" id="begin-runoff">Begin the Runoff</button>`;
+    else verdict = `<div class="breaking"><b>ELIMINATED:</b> You finish outside the top two. ${displayName(s, need[0])} and ${displayName(s, need[1])} advance to the runoff.</div>
+        <div class="panel-title">Runoff Result · August 25</div>${resultRows(s, s.runoffResult.total, s.runoffResult.totalVotes)}
+        <p class="muted small">Runoff turnout: ${s.runoffResult.cast.toLocaleString()} votes.</p>
+        <button class="btn" id="to-after">Your Response</button>`;
   }
-  return `<div class="status"><div><span class="lbl">Primary Night</span>August 4, 2030</div><div><span class="lbl">Reporting</span>${repPct.toFixed(0)}% of expected vote</div></div>
+  return `<div class="status"><div><span class="lbl">${isRunoff ? 'Runoff Night' : 'Primary Night'}</span>${isRunoff ? 'August 25, 2030' : 'August 4, 2030'}</div>
+      <div><span class="lbl">Reporting</span>${(counted / e.cast * 100).toFixed(0)}% of votes counted</div><div><span class="lbl">Votes Counted</span>${counted.toLocaleString()}</div>
+      <div><span class="lbl">${done ? 'Final Turnout' : 'Expected Turnout'}</span>${((done ? e.cast : expected) / REGISTERED_R * 100).toFixed(1)}% of registered Republicans</div></div>
     <div class="cols">
-      <div class="left-col"><div class="panel q-panel"><div class="q-meta"><span>Election Night Coverage</span><span>KCIM-TV Channel 4</span></div>
+      <div class="left-col"><div class="panel q-panel"><div class="q-meta"><span>${isRunoff ? 'Runoff' : 'Election'} Night Coverage</span><span>KCIM-TV Channel 4</span></div>
         <div class="q-text">${done ? 'All regions have reported.' : rev.length ? `${REG[rev[rev.length - 1]].name} has just reported.` : `Polls have closed across ${STATE_NAME}.`}</div>
-        ${table}${verdict}</div></div>
+        ${resultRows(s, done ? e.total : sh, run)}${verdict}</div></div>
       <div class="right-col"><div class="panel">${mapSVG(s, { results: e.results, revealed: rev })}</div></div>
     </div>`;
 }
 
 function renderConcede(s) {
-  const w = s.election.winner;
+  const w = s.finalWinner;
   return `<div class="panel choose-panel"><div class="panel-title big">Primary Night: Your Decision</div>
     <div class="endorse-card">${portrait(s, w, 60)}<div><b>${displayName(s, w)}</b> has won the Republican nomination.</div></div>
     <p class="q-text">Your campaign manager hands you two drafts and a phone. The winner's campaign is waiting for your call. Your supporters are waiting in the ballroom.</p>
@@ -674,8 +874,8 @@ function generalLine(s, w, margin) {
 }
 
 function renderEnding(s) {
-  const e = s.election, w = e.winner, won = w === 'you';
-  const final = e.runoff || e.total;
+  const e = s.election, w = s.finalWinner, won = w === 'you', rr = s.runoffResult;
+  const final = rr ? rr.total : e.total;
   let sections = '';
   if (won) {
     const margin = clamp(27 - s.rino * .6 - (s.flags.tape2 ? 3 : 0) - (s.flags.donor_deal ? 2 : 0), 6, 34);
@@ -708,9 +908,12 @@ function renderEnding(s) {
   return `<div class="panel ending">
     <div class="ending-head" style="background:${colorOf(w)}">${won ? 'YOU WIN THE NOMINATION' : 'DEFEATED IN THE PRIMARY'}</div>
     <div class="ending-body">
-      <div class="endorse-card">${portrait(s, w, 72)}<div><b>${displayName(s, w)}</b>${e.runoff ? ' (after a runoff)' : ''}
+      <div class="endorse-card">${portrait(s, w, 72)}<div><b>${displayName(s, w)}</b>${rr ? ' (after a runoff)' : ''}
         <div class="muted">${sorted(final).map(([id, v]) => `${esc(shortName(s, id))} ${v.toFixed(1)}%`).join(' · ')}</div></div></div>
+      <div class="muted small">Seed ${s.seed} · Scenario: ${esc(scenarioOf(s).name)}${s.war ? ' · The war with Iran' : ''}</div>
       ${sections}
+      ${rr ? `<div class="panel-title">The Runoff</div>${resultRows(s, rr.total, rr.totalVotes)}
+        ${s.runoff.live ? `<ul class="epilogue">${Object.entries(s.runoff.endorse).map(([id, t]) => `<li>${esc(CAND[id].name)}: ${t === 'none' ? 'stayed neutral' : `endorsed ${esc(displayName(s, t))}`}.</li>`).join('')}</ul>` : ''}` : ''}
       <div class="cols end-cols">
         <div><div class="panel-title">Primary Results by Region</div>${mapSVG(s, { results: e.results, revealed: e.order })}
           ${crosstab(s, REGIONS.map(r => r.id), rid => e.results[rid], rid => REG[rid].name, () => '')}</div>
@@ -761,43 +964,56 @@ function candidateModal(s, id) {
 }
 
 function regionModal(s, rid) {
-  const r = REG[rid], d = r.demo, live = s && ['campaign', 'election', 'ending', 'concede'].includes(s.screen);
-  const sh = live ? (s.election && s.screen !== 'campaign' ? s.election.results[rid] : regionShares(s, rid)) : null;
+  const r = REG[rid], d = r.demo, live = s && ['campaign', 'runoff', 'election', 'ending', 'concede'].includes(s.screen);
+  const sh = live ? (['election', 'ending', 'concede'].includes(s.screen) ? currentResult(s).results[rid] : regionShares(s, rid)) : null;
   const facRows = Object.entries(r.mix).sort((a, b) => b[1] - a[1]).map(([f, m]) =>
-    `<tr><td>${FACTIONS[f].name}</td><td>${(m * 100).toFixed(0)}%</td><td>${(FACTIONS[f].turnout * r.turnoutMod * 100).toFixed(0)}%</td><td style="width:40%"><div class="pbar"><div style="width:${m * 100 * 2}%;background:var(--navy2)"></div></div></td></tr>`).join('');
+    `<tr><td>${FACTIONS[f].name}</td><td>${(m * 100).toFixed(0)}%</td><td>${(turnoutOf(f) * r.turnoutMod * 100).toFixed(0)}%</td><td>${Math.round(factionVotes(r, f)).toLocaleString()}</td></tr>`).join('');
   return `<div class="modal-title">${r.name}</div><p class="muted">County seat: ${r.seat} · ${esc(r.economy)}</p><p>${esc(r.desc)}</p>
     <div class="modal-stats">
       <div><span class="lbl">Population</span>${d.pop}</div><div><span class="lbl">Median age</span>${d.age}</div>
       <div><span class="lbl">Rural</span>${d.rural}%</div><div><span class="lbl">Evangelical</span>${d.evangelical}%</div>
       <div><span class="lbl">Hispanic</span>${d.hispanic}%</div><div><span class="lbl">College degree</span>${d.college}%</div>
       <div><span class="lbl">Median household income</span>${d.income}</div>
-      <div><span class="lbl">Share of registered Republicans</span>${r.voters}%</div>
-      <div><span class="lbl">Expected primary turnout</span>${(regionTurnout(r) * 100).toFixed(0)}%</div>
-      <div><span class="lbl">Share of expected statewide vote</span>${(regionWeight(r) / TOTAL_WEIGHT * 100).toFixed(1)}%</div>
+      <div><span class="lbl">Registered Republicans</span>${Math.round(REGISTERED_R * r.voters / 100).toLocaleString()} (${r.voters}% of the state's)</div>
+      <div><span class="lbl">Expected primary turnout</span>${(regionTurnout(r) * 100).toFixed(0)}% · ${Math.round(regionWeight(r)).toLocaleString()} votes</div>
+      <div><span class="lbl">Share of expected statewide vote</span>${(regionWeight(r) / TOTAL_WEIGHT() * 100).toFixed(1)}%</div>
     </div>
     <div class="panel-title">Republican Primary Electorate</div>
-    <table class="xtab"><thead><tr><th>Faction</th><th>Share</th><th>Turnout</th><th></th></tr></thead><tbody>${facRows}</tbody></table>
-    ${sh ? `<div class="panel-title">${s.screen === 'campaign' ? 'Current Polling' : 'Primary Result'} in ${r.name}</div>${pollRows(s, sh)}
+    <table class="xtab"><thead><tr><th>Faction</th><th>Share of registered</th><th>Turnout here</th><th>Expected votes</th></tr></thead><tbody>${facRows}</tbody></table>
+    ${sh ? `<div class="panel-title">${['campaign', 'runoff'].includes(s.screen) ? 'Current Polling' : 'Result'} in ${r.name}</div>${pollRows(s, sh)}
       <p class="muted small">Your campaign here: ${(s.bonus.you[rid] || 0).toFixed(0)} points from visits and ads${s.gotv[rid] ? `, +${Math.round(s.gotv[rid] * 100)}% turnout operation` : ''}.</p>` : ''}`;
 }
 
+const fmtK = n => n >= 1e6 ? `${(n / 1e6).toFixed(2)} million` : `${Math.round(n / 1000).toLocaleString()},000`;
 function stateModal() {
-  const P = STATE_PROFILE;
+  const P = STATE_PROFILE, regTotal = P.registeredR + P.registeredD + P.unaffiliated;
+  const oldFaith = registered.seniors + registered.faith, oldFaithVote = expectedVote().seniors + expectedVote().faith;
+  const bigTwo = (regionWeight(REG.fort) + regionWeight(REG.osgood)) / TOTAL_WEIGHT() * 100;
+  const notes = [
+    `Older conservatives and evangelicals are ${oldFaith.toFixed(0)}% of registered Republicans, but ${oldFaithVote.toFixed(0)}% of expected primary voters, because they turn out at ${Math.round(turnoutOf('seniors') * 100)}% and ${Math.round(turnoutOf('faith') * 100)}%.`,
+    `The New Right is ${registered.online.toFixed(0)}% of registered Republicans, but only ${Math.round(turnoutOf('online') * 100)}% of them usually vote in a primary, so they are ${expectedVote().online.toFixed(0)}% of the expected vote.`,
+    `Fort Eisenhower and the Osgood Exurbs together cast ${bigTwo.toFixed(0)}% of the expected primary vote.`,
+    `Rural regions vote at higher rates. Expected turnout ranges from ${Math.round(Math.min(...REGIONS.map(regionTurnout)) * 100)}% (${REGIONS.slice().sort((x, y) => regionTurnout(x) - regionTurnout(y))[0].name}) to ${Math.round(Math.max(...REGIONS.map(regionTurnout)) * 100)}% (${REGIONS.slice().sort((x, y) => regionTurnout(y) - regionTurnout(x))[0].name}).`,
+  ];
   return `<div class="modal-title">State of ${STATE_NAME}</div>
     <div class="modal-stats">
-      <div><span class="lbl">Population</span>${P.pop}</div><div><span class="lbl">Registered Republicans</span>${P.registeredR}</div>
-      <div><span class="lbl">Registered Democrats</span>${P.registeredD}</div><div><span class="lbl">Unaffiliated</span>${P.unaffiliated}</div>
-      <div><span class="lbl">Expected primary turnout</span>${P.expectedTurnout}</div>
+      <div><span class="lbl">Population</span>${fmtK(P.pop)} (${fmtK(P.adults)} adults)</div>
+      <div><span class="lbl">Registered voters</span>${fmtK(regTotal)} (${Math.round(regTotal / P.adults * 100)}% of adults)</div>
+      <div><span class="lbl">Registered Republicans</span>${P.registeredR.toLocaleString()} (${Math.round(P.registeredR / regTotal * 100)}%)</div>
+      <div><span class="lbl">Registered Democrats</span>${P.registeredD.toLocaleString()} (${Math.round(P.registeredD / regTotal * 100)}%)</div>
+      <div><span class="lbl">Unaffiliated</span>${P.unaffiliated.toLocaleString()} (${Math.round(P.unaffiliated / regTotal * 100)}%)</div>
+      <div><span class="lbl">Expected primary turnout</span>${Math.round(TOTAL_WEIGHT()).toLocaleString()} votes (${(TOTAL_WEIGHT() / REGISTERED_R * 100).toFixed(1)}% of registered Republicans)</div>
     </div>
     <p><b>Rules:</b> ${P.primary}</p><p><b>Recent results:</b> ${P.lastResults}</p>
-    <div class="panel-title">Why Turnout Matters</div><ul class="small-list">${P.notes.map(n => `<li>${n}</li>`).join('')}</ul>
+    <div class="panel-title">Why Turnout Matters</div><ul class="small-list">${notes.map(n => `<li>${n}</li>`).join('')}</ul>
     <div class="panel-title">The Factions</div>
-    <table class="xtab"><thead><tr><th>Faction</th><th>Registered</th><th>Turnout</th><th>Share of votes</th></tr></thead><tbody>
-      ${FKEYS.map(f => `<tr><td>${FACTIONS[f].name}<div class="muted small">${esc(FACTIONS[f].blurb)}</div></td><td>${registered[f].toFixed(0)}%</td><td>${(FACTIONS[f].turnout * 100).toFixed(0)}%</td><td><b>${expectedVote[f].toFixed(0)}%</b></td></tr>`).join('')}
+    <table class="xtab"><thead><tr><th>Faction</th><th>Registered</th><th>Turnout</th><th>Expected votes</th><th>Share of votes</th></tr></thead><tbody>
+      ${FKEYS.map(f => `<tr><td>${FACTIONS[f].name}<div class="muted small">${esc(FACTIONS[f].blurb)}</div></td><td>${registered[f].toFixed(0)}%</td><td>${(turnoutOf(f) * 100).toFixed(0)}%*</td><td>${Math.round(expectedVote()[f] / 100 * TOTAL_WEIGHT()).toLocaleString()}</td><td><b>${expectedVote()[f].toFixed(1)}%</b></td></tr>`).join('')}
     </tbody></table>
+    <p class="muted small">* Statewide base rate. Each region adjusts it up or down.</p>
     <div class="panel-title">The Regions</div>
-    <table class="xtab"><thead><tr><th>Region</th><th>Population</th><th>Registered R</th><th>Turnout</th><th>Share of votes</th></tr></thead><tbody>
-      ${REGIONS.map(r => `<tr><td><span class="region-link" data-region="${r.id}">${r.name}</span></td><td>${r.demo.pop}</td><td>${r.voters}%</td><td>${(regionTurnout(r) * 100).toFixed(0)}%</td><td><b>${(regionWeight(r) / TOTAL_WEIGHT * 100).toFixed(1)}%</b></td></tr>`).join('')}
+    <table class="xtab"><thead><tr><th>Region</th><th>Population</th><th>Registered R</th><th>Turnout</th><th>Expected votes</th><th>Share of votes</th></tr></thead><tbody>
+      ${REGIONS.map(r => `<tr><td><span class="region-link" data-region="${r.id}">${r.name}</span></td><td>${r.demo.pop}</td><td>${Math.round(REGISTERED_R * r.voters / 100).toLocaleString()}</td><td>${(regionTurnout(r) * 100).toFixed(0)}%</td><td>${Math.round(regionWeight(r)).toLocaleString()}</td><td><b>${(regionWeight(r) / TOTAL_WEIGHT() * 100).toFixed(1)}%</b></td></tr>`).join('')}
     </tbody></table>
     <p class="muted small">Get-Out-the-Vote operations at campaign stops raise turnout among your supporters in a region.</p>`;
 }
@@ -806,9 +1022,10 @@ function stateModal() {
 function renderTitle() {
   const hasSave = !!load();
   return `<div class="panel title-panel">
-    <div class="field-row">${CANDIDATES.filter(c => c.id !== 'you').map(c => `<div class="field-mini">${portrait(null, c.id, 54)}<div>${c.short}</div></div>`).join('')}</div>
+    <div class="field-row">${CANDIDATES.filter(c => c.id !== 'you' && !c.outsider).map(c => `<div class="field-mini">${portrait(null, c.id, 54)}<div>${c.short}</div></div>`).join('')}</div>
     ${TEXT.title.map(p => `<p class="q-text">${p}</p>`).join('')}
     <label class="name-row">Your name: <input id="name" maxlength="28" placeholder="Dale Whitcomb"></label>
+    <label class="name-row">Seed (optional): <input id="seed" inputmode="numeric" maxlength="9" placeholder="random"> <span class="muted small">The same seed gives the same scenario and the same random events.</span></label>
     <div class="btn-row"><button class="btn" id="start">Begin Campaign</button>${hasSave ? '<button class="btn alt" id="resume">Continue Campaign</button>' : ''}<button class="btn alt" id="open-profile">State Profile</button></div>
   </div>`;
 }
@@ -821,8 +1038,9 @@ function renderChoice(title, intro, list, key) {
 }
 function renderField(s) {
   return `<div class="panel choose-panel"><div class="panel-title big">The Field</div>
-    <p class="q-text">${TEXT.fieldIntro}</p>
-    ${CANDIDATES.filter(c => c.id !== 'you').map(c => `<div class="opp-card">${portrait(s, c.id, 60)}<div><b class="cand-link" data-cand="${c.id}">${c.name}</b> <span class="faction-tag" style="background:${c.color}">${c.title}</span><p>${esc(c.blurb)}</p>
+    <div class="scenario-card"><span class="lbl">Scenario · Seed ${s.seed}</span><b>${esc(scenarioOf(s).name)}</b><div>${esc(scenarioOf(s).desc)}</div></div>
+    <p class="q-text">${TEXT.fieldIntro} ${s.field.length - 1} challengers are on the ballot.</p>
+    ${s.field.filter(id => id !== 'you').map(id => CAND[id]).map(c => `<div class="opp-card">${portrait(s, c.id, 60)}<div><b class="cand-link" data-cand="${c.id}">${c.name}</b> <span class="faction-tag" style="background:${c.color}">${c.title}</span><p>${esc(c.blurb)}</p>
       <p class="muted small">Endorsements: ${Object.entries(s.endorsements).filter(([, h]) => h === c.id).map(([o]) => ENDORSERS[o].name).join(', ') || 'none yet'}</p></div></div>`).join('')}
     <button class="btn" id="launch">Launch the Campaign</button></div>`;
 }
@@ -834,11 +1052,11 @@ function render() {
   const screens = {
     record: () => renderChoice('Your First Term', TEXT.recordIntro, RECORDS, 'record'),
     mate: () => renderChoice('Choose a Running Mate', TEXT.mateIntro, RUNNING_MATES, 'mate'),
-    field: () => renderField(s), campaign: () => renderCampaign(s), election: () => renderElection(s),
+    field: () => renderField(s), campaign: () => renderCampaign(s), runoff: () => renderCampaign(s), election: () => renderElection(s),
     concede: () => renderConcede(s), ending: () => renderEnding(s),
   };
   app.innerHTML = screens[s.screen]();
-  $('#ticket').innerHTML = s.screen === 'campaign' || s.screen === 'election'
+  $('#ticket').innerHTML = ['campaign', 'runoff', 'election'].includes(s.screen)
     ? `${portrait(s, 'you', 30)} <span>Gov. ${esc(s.name)}${s.mate ? ` / ${RUNNING_MATES.find(m => m.id === s.mate).name}` : ''}</span>` : '';
 }
 
@@ -846,8 +1064,9 @@ function tickElection() {
   clearInterval(electionTimer);
   electionTimer = setInterval(() => {
     if (!S || S.screen !== 'election') return clearInterval(electionTimer);
-    if (S.election.revealed >= S.election.order.length) { clearInterval(electionTimer); return; }
-    S.election.revealed++; save(); render();
+    const e = currentResult(S);
+    if (e.revealed >= e.order.length) { clearInterval(electionTimer); return; }
+    e.revealed++; save(); render();
   }, 900);
 }
 
@@ -876,7 +1095,7 @@ document.addEventListener('click', e => {
   if (!b) return;
   switch (b.id) {
     case 'open-profile': openModal(stateModal()); break;
-    case 'start': S = newState($('#name').value.trim() || 'Dale Whitcomb'); save(); render(); break;
+    case 'start': newState($('#name').value.trim() || 'Dale Whitcomb', parseInt($('#seed').value, 10)); save(); render(); break;
     case 'resume': S = load(); render(); if (S.screen === 'election') tickElection(); break;
     case 'confirm-record': applyFx(S, RECORDS.find(r => r.id === S.record).fx); S.screen = 'mate'; save(); render(); break;
     case 'confirm-mate': applyFx(S, RUNNING_MATES.find(m => m.id === S.mate).fx); S.screen = 'field'; save(); render(); break;
@@ -885,12 +1104,15 @@ document.addEventListener('click', e => {
     case 'next': advance(); break;
     case 'dnext': debateNext(); break;
     case 'go': doStop(); break;
-    case 'to-after': S.screen = S.election.winner === 'you' ? 'ending' : 'concede'; save(); render(); break;
+    case 'to-after': S.screen = S.finalWinner === 'you' ? 'ending' : 'concede'; save(); render(); break;
+    case 'begin-runoff': startRunoff(); break;
+    case 'rnext': runoffAdvance(); break;
+    case 'court-submit': courtAnswer(); break;
     case 'confirm-concede': S.screen = 'ending'; save(); render(); break;
     case 'restart': wipe(); S = null; clearInterval(electionTimer); render(); break;
   }
-  if (S?.screen === 'election' && S.election.revealed === 0) tickElection();
-  if (['next', 'dnext', 'go', 'to-after', 'confirm-concede', 'launch'].includes(b.id)) window.scrollTo({ top: 0 });
+  if (S?.screen === 'election' && currentResult(S).revealed === 0) tickElection();
+  if (['next', 'dnext', 'go', 'to-after', 'confirm-concede', 'launch', 'begin-runoff', 'rnext'].includes(b.id)) window.scrollTo({ top: 0 });
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 

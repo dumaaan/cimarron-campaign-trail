@@ -212,6 +212,52 @@ const RIVAL_OUTCOMES = {
   },
 };
 
+// Outsider winners
+Object.assign(RIVAL_OUTCOMES, {
+  coburn: {
+    general: 21,
+    speech: 'Tonight Cimarron picked a winner. I have never run for anything but the end zone, and I have never lost the big game. We are going to cut your gas bill, secure our roads, and make this the proudest state in America.',
+    days: [
+      ['Jan 12', 'Signs an executive order cutting the state gas tax to zero. The budget office warns of a $600 million shortfall.'],
+      ['Jan 20', 'Names his former sports agent as Chief of Staff.'],
+      ['Feb 5', 'Launches "Operation Open Road," placing state troopers at interstate entrances to check immigration status.'],
+      ['Feb 26', 'A federal court blocks the checkpoints.'],
+      ['Mar 12', 'Announces a state bid to bring a professional football team to Fort Eisenhower.'],
+      ['Apr 1', 'Proposes a 15% cut to the state university to pay for the gas tax cut.'],
+      ['Apr 18', 'Signs a ban on transgender athletes in adult recreational leagues.'],
+    ],
+    later: 'One year later, Governor Coburn is the most popular politician in the state and the least experienced one. The gas tax cut has left a $700 million hole in the budget, which the legislature fills by cutting schools and roads. He is often mentioned as a future Senate candidate.',
+  },
+  albright: {
+    general: 16,
+    speech: 'They took away my right to practice at the hospital because I told the truth. Tonight you gave me a bigger practice: a whole state. We will end the mandates, get the poison out of our food and water, and hold accountable the people who lied to you.',
+    days: [
+      ['Jan 12', 'Signs an order ending all vaccine requirements, including for hospital workers and schoolchildren.'],
+      ['Jan 19', 'Bans fluoride in all public water systems.'],
+      ['Feb 2', 'Creates a "COVID Truth Commission" with subpoena power.'],
+      ['Feb 20', 'Legalizes retail sales of raw milk statewide.'],
+      ['Mar 8', 'Bans seed oils in school meals.'],
+      ['Mar 30', 'The state health director and 40 senior staff resign.'],
+      ['Apr 22', 'A measles outbreak in Lawrenceville and Osgood reaches 300 cases.'],
+    ],
+    later: 'One year later, Governor Albright is a national leader of the health-freedom movement. Childhood vaccination rates in Cimarron have fallen to 71%. Two hospital systems report staff shortages after health workers leave the state. Her supporters see a revolution in public health. Most doctors see a crisis.',
+  },
+  pike: {
+    general: 9,
+    speech: 'They called us extremists. They called us children. Tonight the youngest movement in American politics took a state. No more foreign wars. No more mass immigration. No more politicians who answer to donors. Cimarron belongs to Cimarronians.',
+    days: [
+      ['Jan 12', 'Ends all state cooperation with federal refugee resettlement.'],
+      ['Jan 25', 'Fires 300 state employees after what he calls "a loyalty review."'],
+      ['Feb 9', 'Proposes a ban on new residents from outside the United States, legal or not. Legal experts call it unconstitutional.'],
+      ['Feb 28', 'Gives paid positions in the governor\'s office to three fellow streamers.'],
+      ['Mar 17', 'Several major employers pause new investment in the state.'],
+      ['Apr 4', 'The state\'s largest churches and Jewish community organizations condemn remarks he made on his stream.'],
+      ['Apr 21', 'Signs a ban on foreign lobbying of the legislature.'],
+    ],
+    later: 'One year later, Governor Pike has the most engaged online following of any governor in the country and the lowest approval among older voters. Businesses and churches that once supported the party now openly oppose him. The legislature, controlled by his own party, has overridden four of his vetoes.',
+  },
+});
+
 // ---------- Your concession (if you lose) ----------
 const CONCESSION = [
   { id: 'endorse', text: 'Concede tonight and endorse the winner.',
@@ -239,6 +285,10 @@ const EPILOGUE = [
   { flag: 'no_prop_tax', text: 'The promise to abolish property taxes leads to a constitutional amendment fight. Rural school districts warn that dozens of schools could close.' },
   { flag: 'defy', text: 'Your defiance of the federal court becomes a model for other Republican governors, and a central case in a growing conflict between the states and the federal judiciary.' },
   { flag: 'donor_deal', text: 'Harold Voigt\'s companies leave 1,200 abandoned wells unplugged. Panhandle farmers file a class-action lawsuit.' },
+  { flag: 'war', text: 'The war with Iran lasts eleven weeks. Gas prices stay above $5 until the following spring. In Cimarron, the war and the oil shock become the main issue of the fall, and several Republican legislators close to the President lose their primaries two years later.' },
+  { flag: 'war_hawk', text: 'You stood with the President on the war. His strongest supporters remember it. So do the farmers who paid $7 for diesel.' },
+  { flag: 'war_dove', text: 'You opposed the war from the first day. The New Right now counts you as one of its own, and the President\'s team does not.' },
+  { flag: 'indicted', text: 'Your former Chief of Staff is convicted the following year. The trial keeps your name in the news for months.' },
   { flag: 'oppo_war', text: 'The negative campaign between you and Dunmore leaves lasting damage. The two factions of the state party do not cooperate for years.' },
 ];
 const EPILOGUE_RINO_HIGH = 'The RINO label stays with you. Dunmore\'s movement continues to treat you as an enemy of the base, and you will likely face a primary challenge in any future race.';

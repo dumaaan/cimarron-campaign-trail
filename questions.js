@@ -217,7 +217,7 @@ const QUESTIONS = [
         fx: { maga: 3, farm: -2, chamber: 1 },
         fb: 'The energy industry is pleased. Farmers in Sumner Valley feel dismissed.' },
     ] },
-  { id: 'rick_jet', setting: 'Press Conference · Fort Eisenhower Airport', region: 'fort',
+  { id: 'rick_jet', cond: s => inRace(s, 'rick'), setting: 'Press Conference · Fort Eisenhower Airport', region: 'fort',
     text: '"Pastor Rick\'s church owns a $60 million private jet that is exempt from state taxes. Critics say it is used for personal travel. Will you criticize him?"',
     answers: [
       { text: 'Voters deserve to know how a candidate uses tax-exempt money.',
@@ -233,7 +233,7 @@ const QUESTIONS = [
         fx: { faith: -4, liberty: -2, chamber: 1, opp: { rick: -3 } },
         fb: 'Pastor Rick\'s network will say you want to tax churches. That message will reach every congregation in the state by Sunday.' },
     ] },
-  { id: 'freedomopolis', setting: 'Tech Forum · Pratt Junction', region: 'pratt',
+  { id: 'freedomopolis', cond: s => inRace(s, 'vaskel'), setting: 'Tech Forum · Pratt Junction', region: 'pratt',
     text: '"Brent Vaskel wants the legislature to exempt his charter city from state labor, zoning and tax law. What do you think of the project?"',
     answers: [
       { text: 'No billionaire should be allowed to write his own laws.',
@@ -249,7 +249,7 @@ const QUESTIONS = [
         fx: { liberty: 2, chamber: 2 },
         fb: 'A pragmatic answer. It does not help you or hurt Vaskel.' },
     ] },
-  { id: 'krantz_sheriff', setting: 'Interview · KCIM-TV Channel 4',
+  { id: 'krantz_sheriff', cond: s => inRace(s, 'krantz'), setting: 'Interview · KCIM-TV Channel 4',
     text: '"Sheriff Krantz says the county sheriff is the highest law enforcement authority in the county, above the Governor and federal agents. Do you agree?"',
     answers: [
       { text: 'Sheriffs are important, but the Constitution does not place them above state law.',
@@ -265,7 +265,7 @@ const QUESTIONS = [
         fx: { guns: 3, liberty: 3, online: 1 },
         fb: 'This takes Krantz\'s issue without accepting his theory. Gun owners respond well.' },
     ] },
-  { id: 'podcast', setting: 'Campaign Headquarters · Fort Eisenhower', region: 'fort',
+  { id: 'podcast', cond: s => inRace(s, 'dunmore'), setting: 'Campaign Headquarters · Fort Eisenhower', region: 'fort',
     text: 'Your digital director reports that Dunmore\'s podcast episode "Is the Governor Really a Conservative?" has been downloaded 400,000 times. How do you respond?',
     answers: [
       { text: 'Start our own weekly show and go directly to voters.',
@@ -281,7 +281,7 @@ const QUESTIONS = [
         fx: { maga: -2, online: -2 },
         fb: 'His audience will hear only his side. Silence reads as weakness.' },
     ] },
-  { id: 'whitlock_extreme', setting: 'Press Conference · Capitol',
+  { id: 'whitlock_extreme', cond: s => inRace(s, 'whitlock'), setting: 'Press Conference · Capitol',
     text: '"Former Senator Whitlock says you have become \'dangerously extreme.\' How do you respond?"',
     answers: [
       { text: 'Coming from Carol Whitlock, I take that as a compliment.',
@@ -839,5 +839,34 @@ const NEWS = {
     ['Whitlock says the party "has confused anger with principle."', {}],
     ['Whitlock holds a town hall in Lake Cheney. About 50 people attend.', { seniors: 1 }],
   ],
+  coburn: [
+    ['Coburn draws 12,000 people to a rally at the Cimarron State football stadium.', { maga: 2, seniors: 1 }],
+    ['In an interview, Coburn cannot name the size of the state budget deficit. "I will hire people who can," he says.', { chamber: -1, seniors: -1 }],
+    ['Coburn is photographed with the President at the President\'s golf club.', { maga: 2 }],
+    ['Reporters find that Coburn voted in only three of the last ten Republican primaries.', { maga: -1, seniors: -1 }],
+    ['Coburn\'s divorce records are published. Several evangelical leaders express concern.', { faith: -2 }],
+    ['Former teammates appear in a Coburn ad: "He never quit on us."', { seniors: 2 }],
+  ],
+  albright: [
+    ['Dr. Albright\'s documentary about "the COVID cartel" passes 5 million views.', { online: 2, liberty: 1 }],
+    ['Albright tours Sumner Valley dairies to promote raw milk sales.', { farm: 2 }],
+    ['The state medical association says Albright\'s vaccine claims are false. Her supporters call it proof.', { online: 1, seniors: -1 }],
+    ['Albright is endorsed by a national health-freedom group with 800,000 members.', { online: 2 }],
+    ['Albright proposes a ban on seed oils in all school meals.', { online: 1, faith: 1 }],
+  ],
+  pike: [
+    ['Pike\'s livestream about "the uniparty" draws 300,000 live viewers.', { online: 3 }],
+    ['Reporters publish clips in which Pike uses antisemitic tropes. He calls it "a smear" and gains followers.', { online: 1, seniors: -2, faith: -1 }],
+    ['Pike urges young supporters to register as Republicans. 6,000 new registrations are reported in Lawrenceville and Osgood.', { online: 2 }],
+    ['Pike calls Pastor Rick "a pro-war grifter." Several pastors condemn him.', { online: 1, faith: -2 }],
+    ['Pike promises "no American blood for foreign wars."', { online: 2, liberty: 1 }],
+  ],
 };
 
+// Headlines when the war begins (shown on the campaign wire).
+const WAR_NEWS = [
+  'Oil passes $140 a barrel. Gasoline in Cimarron reaches $6.20 a gallon.',
+  'Stations in the Panhandle run out of diesel during planting season.',
+  'Young activists organize "No War for Oil" rallies in Lawrenceville and Osgood. Many carry MAGA flags.',
+  'Evangelical leaders call for prayer "for our troops and for Israel."',
+];

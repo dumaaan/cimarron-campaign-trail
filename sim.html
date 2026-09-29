@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balance Simulator</title>
+<style>
+  body { font: 14px/1.5 ui-monospace, Menlo, monospace; margin: 24px; background: #fff; color: #111; }
+  button { font: inherit; padding: 6px 12px; margin: 0 6px 6px 0; cursor: pointer; }
+  pre { background: #f4f4f4; padding: 12px; white-space: pre-wrap; }
+  #app, #ticket, #modal, #modal-body { display: none; }
+</style>
+</head>
+<body>
+<h1>Balance simulator</h1>
+<p>Each button plays many automatic games. This can take a few seconds.</p>
+<button data-run="simBalance">Win rate by strategy</button>
+<button data-run="simScenarios">Scenarios and outsiders</button>
+<button data-run="simRunoffs">Runoffs</button>
+<button data-run="simWar">The war</button>
+<button data-run="simWinners">Who wins (natural mix)</button>
+<button data-run="simEveryScenario">Who wins (each scenario)</button>
+<pre id="out">Choose a simulation.</pre>
+<div id="app"></div><div id="ticket"></div><div id="modal" hidden><div id="modal-body"></div></div>
+<script src="data.js"></script>
+<script src="questions.js"></script>
+<script src="debates.js"></script>
+<script src="events.js"></script>
+<script src="epilogue.js"></script>
+<script src="runoff.js"></script>
+<script src="game.js"></script>
+<script src="sim.js"></script>
+<script>
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-run]');
+  if (!b) return;
+  const out = document.getElementById('out');
+  out.textContent = 'Running...';
+  setTimeout(() => {
+    const t = performance.now();
+    const res = window[b.dataset.run]();
+    out.textContent = JSON.stringify(res, null, 2) + `\n\n(${((performance.now() - t) / 1000).toFixed(1)} s)`;
+  }, 20);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model Checks</title>
+<style>
+  body { font: 14px/1.5 ui-monospace, Menlo, monospace; margin: 24px; background: #fff; color: #111; }
+  .pass { color: #1f7a36; } .fail { color: #b3202a; font-weight: bold; }
+  #app, #ticket, #modal, #modal-body { display: none; }
+</style>
+</head>
+<body>
+<h1>Vote model checks</h1>
+<p id="summary"></p>
+<div id="out"></div>
+<div id="app"></div><div id="ticket"></div><div id="modal" hidden><div id="modal-body"></div></div>
+<script src="data.js"></script>
+<script src="questions.js"></script>
+<script src="debates.js"></script>
+<script src="events.js"></script>
+<script src="epilogue.js"></script>
+<script src="runoff.js"></script>
+<script src="game.js"></script>
+<script>
+// Keep the game from writing to storage or the page while the checks run.
+save = () => {}; render = () => {};
+const results = [];
+const ok = (name, cond, detail = '') => results.push({ name, pass: !!cond, detail });
+const near = (a, b, t = 1e-6) => Math.abs(a - b) < t;
+
+// --- Input data ---
+ok('Region registration shares add to 100%', REGIONS.reduce((a, r) => a + r.voters, 0) === 100);
+ok('Every faction mix adds to 100%', REGIONS.every(r => near(sumVals(r.mix), 1)));
+ok('Faction registered shares add to 100%', near(sumVals(registered), 100));
+ok('Faction expected vote shares add to 100%', near(sumVals(expectedVote()), 100));
+const turnout = TOTAL_WEIGHT() / REGISTERED_R;
+ok('Statewide primary turnout is realistic (30–50%)', turnout > .3 && turnout < .5, `${(turnout * 100).toFixed(1)}% = ${Math.round(TOTAL_WEIGHT()).toLocaleString()} votes`);
+ok('No region turnout above 100%', REGIONS.every(r => regionTurnout(r) < 1), REGIONS.map(r => `${r.name} ${(regionTurnout(r) * 100).toFixed(0)}%`).join(', '));
+const regTotal = STATE_PROFILE.registeredR + STATE_PROFILE.registeredD + STATE_PROFILE.unaffiliated;
+ok('Registration rate is realistic (65–80% of adults)', regTotal / STATE_PROFILE.adults > .65 && regTotal / STATE_PROFILE.adults < .8, `${(regTotal / STATE_PROFILE.adults * 100).toFixed(0)}%`);
+
+const standardGame = seed => { newState('Test', seed); for (const id in S.delta) S.delta[id] = {}; S.flags = {}; S.endorsements = Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder])); applyScenario(S, SCENARIOS[0]); S.warPlanned = null; return S; };
+// --- A campaign in progress, with regional bonuses, GOTV and endorsements ---
+standardGame(11);
+S.bonus.you.fort = 10; S.bonus.dunmore.osgood = 8; S.gotv.bible = .1; S.gotv.fort = .2; S.delta.rick.faith = 6; S.endorsements.rifle = 'you';
+const sv = stateVotes(S), st = stateShares(S), C = active(S);
+ok('Statewide shares add to 100%', near(sumVals(st), 100));
+ok('Statewide votes = sum of region votes', C.every(c => near(sv[c], REGIONS.reduce((a, r) => a + regionVotes(S, r.id)[c], 0))));
+ok('Every region share adds to 100%', REGIONS.every(r => near(sumVals(regionShares(S, r.id)), 100)));
+const fVotes = Object.fromEntries(FKEYS.map(f => [f, REGIONS.reduce((a, r) => {
+  if (!r.mix[f]) return a;
+  const sm = softmax(S, f, r.id, C);
+  return a + factionVotes(r, f) * C.reduce((b, c, i) => b + sm[i] * gotvMult(S, c, r.id), 0);
+}, 0)]));
+const viaF = Object.fromEntries(C.map(c => [c, FKEYS.reduce((a, f) => a + fVotes[f] * factionShares(S, f)[c] / 100, 0) / sumVals(sv) * 100]));
+ok('By-Faction crosstab adds up to the statewide poll', C.every(c => near(viaF[c], st[c])), C.map(c => `${c} ${st[c].toFixed(2)} = ${viaF[c].toFixed(2)}`).join(', '));
+const viaR = Object.fromEntries(C.map(c => [c, REGIONS.reduce((a, r) => a + regionShares(S, r.id)[c] / 100 * sumVals(regionVotes(S, r.id)), 0) / sumVals(sv) * 100]));
+ok('By-Region crosstab adds up to the statewide poll', C.every(c => near(viaR[c], st[c])));
+const noG = JSON.parse(JSON.stringify(S)); noG.gotv = {};
+const extra = sumVals(sv) - sumVals(stateVotes(noG));
+ok('GOTV adds real votes', extra > 0, `+${Math.round(extra).toLocaleString()} votes`);
+
+// --- Election night ---
+S.screen = 'campaign'; S.step = SCHEDULE.length - 1;
+runElection();
+const e = S.election;
+ok('Election total = sum of region counts', Object.keys(e.totalVotes).every(c => e.totalVotes[c] === REGIONS.reduce((a, r) => a + e.votes[r.id][c], 0)));
+ok('Election shares add to 100%', near(sumVals(e.total), 100));
+ok('Election turnout matches the model (within 3%)', Math.abs(e.cast / TOTAL_WEIGHT() - 1) < .03, `${e.cast.toLocaleString()} cast, ${Math.round(TOTAL_WEIGHT()).toLocaleString()} expected`);
+ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorted(e.total)[0][1] < RUNOFF_LINE));
+
+// --- Runoff campaign ---
+{
+  standardGame(777); S.screen = 'campaign'; S.step = SCHEDULE.length - 1;
+  S.election = countVotes(S, active(S));
+  const two = ['you', sorted(S.election.total).map(x => x[0]).find(id => id !== 'you')];
+  S.election.needsRunoff = two;
+  startRunoff();
+  const R = S.runoff;
+  ok('Runoff: only the two finalists are in the race', active(S).length === 2 && active(S).includes('you') && active(S).includes(R.rival));
+  ok('Runoff: the campaign courts each eliminated candidate', R.queue.filter(q => q.startsWith('court:')).length === Math.min(3, S.field.length - 2), R.queue.join(', '));
+  const before = stateShares(S).you;
+  R.endorse[R.eliminated[0]] = 'you';
+  const withYou = stateShares(S).you;
+  R.endorse[R.eliminated[0]] = R.rival;
+  const withRival = stateShares(S).you;
+  ok('Runoff: an endorsement moves votes to the endorsee', withYou > before && withRival < before, `neutral ${before.toFixed(1)}%, endorses you ${withYou.toFixed(1)}%, endorses rival ${withRival.toFixed(1)}%`);
+  R.endorse = {};
+  const model = sumVals(stateVotes(S, R.two));
+  const rr = countVotes(S, R.two, RUNOFF_TURNOUT);
+  ok('Runoff turnout is 80% of the two-candidate vote (within 3%)', Math.abs(rr.cast / model / RUNOFF_TURNOUT - 1) < .03, `${rr.cast.toLocaleString()} votes`);
+  ok('Runoff shares add to 100%', near(sumVals(rr.total), 100));
+}
+
+// --- Seeds and scenarios ---
+{
+  const a = newState('A', 424242), b = { scenario: a.scenario, war: a.warPlanned };
+  const c = newState('B', 424242);
+  ok('The same seed gives the same scenario and war roll', c.scenario === b.scenario && c.warPlanned === b.war, `seed 424242 → ${b.scenario}, war ${b.war}`);
+  const counts = {}; let wars = 0, randomWars = 0, randomGames = 0; const N = 4000;
+  for (let i = 1; i <= N; i++) {
+    const x = newState('X', i * 7919); counts[x.scenario] = (counts[x.scenario] || 0) + 1;
+    if (x.warPlanned != null) wars++;
+    if (scenarioOf(x).warAt == null) { randomGames++; if (x.warPlanned != null) randomWars++; }
+  }
+  const total = SCENARIOS.reduce((t, x) => t + x.weight, 0);
+  ok('Scenario frequencies match their weights (within 2.5 points)', SCENARIOS.every(x => Math.abs((counts[x.id] || 0) / N * 100 - x.weight / total * 100) < 2.5),
+    SCENARIOS.map(x => `${x.id} ${((counts[x.id] || 0) / N * 100).toFixed(1)}% (target ${(x.weight / total * 100).toFixed(0)}%)`).join(', '));
+  ok('Random war frequency matches WAR.chance (within 1.5 points)', Math.abs(randomWars / randomGames - WAR.chance) < .015, `${(randomWars / randomGames * 100).toFixed(1)}% (target ${WAR.chance * 100}%)`);
+  const certain = SCENARIOS.filter(x => x.warAt != null).reduce((t, x) => t + x.weight, 0) / total;
+  const expectWar = WAR.chance + certain * (1 - WAR.chance);
+  ok('Total war frequency matches random wars plus the Reckoning (within 1.5 points)', Math.abs(wars / N - expectWar) < .015, `${(wars / N * 100).toFixed(1)}% (expected ${(expectWar * 100).toFixed(1)}%)`);
+  ok('Every scenario starts with you and 5 challengers', SCENARIOS.every(x => x.field.length === 6 && x.field.includes('you')));
+  const cel = SCENARIOS.find(x => x.id === 'celebrity'); newState('C', 1); for (const id in S.delta) S.delta[id] = {}; applyScenario(S, cel); S.step = cel.enter.coburn;
+  lateEntries(S);
+  ok('Late entry: the outsider joins at the right step', active(S).includes('coburn') && active(S).length === 7);
+  const allRivals = [...new Set(SCENARIOS.flatMap(x => [...x.field, ...Object.keys(x.enter || {})]))].filter(id => id !== 'you');
+  ok('Every possible rival has news, debate answers, an ending and a runoff meeting (the President never endorses Whitlock)', allRivals.every(id => NEWS[id] && RIVAL_OUTCOMES[id] && COURT[id] && (ENDORSE_TEXT[id] || id === 'whitlock') && DEBATE_QUESTIONS.every(q => q.rivals[id])), allRivals.join(', '));
+  newState('D', 5); S.field = ['you', 'dunmore', 'rick', 'krantz', 'albright', 'pike'];
+  ok('Debate questions about an absent rival are never asked', DEBATE_QUESTIONS.filter(q => q.needs.every(id => active(S).includes(id))).every(q => !q.needs.includes('vaskel') && !q.needs.includes('whitlock')));
+}
+
+// --- Scenario turnout ---
+{
+  standardGame(3); const base = expectedVote().online;
+  for (const id in S.delta) S.delta[id] = {}; applyScenario(S, SCENARIOS.find(x => x.id === 'streamer'));
+  const surge = expectedVote().online;
+  ok('Scenario turnout: the streamer brings out young voters', surge > base + 1, `New Right share of the vote ${base.toFixed(1)}% → ${surge.toFixed(1)}%`);
+  ok('Scenario turnout: expected vote shares still add to 100%', near(sumVals(expectedVote()), 100));
+  S = null;
+}
+
+// --- The war ---
+{
+  standardGame(99); S.step = 12; S.endorsed = 'dunmore';
+  const pre = stateShares(S);
+  S.war = { start: 8 };
+  const post = stateShares(S);
+  ok('War: the President\'s endorsed candidate loses support', post.dunmore < pre.dunmore, `Dunmore ${pre.dunmore.toFixed(1)}% → ${post.dunmore.toFixed(1)}%`);
+  ok('War: the traditional conservative, far from the President, gains', post.whitlock > pre.whitlock, `Whitlock ${pre.whitlock.toFixed(1)}% → ${post.whitlock.toFixed(1)}%`);
+  ok('War: the President\'s endorsement makes the damage worse', warLoyalty(S, 'dunmore') > warLoyalty(S, 'krantz') + .4);
+  S.flags.war_dove = 1; const dove = warLoyalty(S, 'you'); delete S.flags.war_dove; S.flags.war_hawk = 1; const hawk = warLoyalty(S, 'you');
+  ok('War: opposing the war protects you, supporting it exposes you', dove < WAR.pivot && hawk > dove);
+  S.war = { start: 12 }; const ramp1 = warPenalty(S, 'dunmore', 'online'); S.war = { start: 8 }; const ramp4 = warPenalty(S, 'dunmore', 'online');
+  ok('War: the oil shock grows over the first weeks', ramp4 > ramp1 && ramp1 > 0);
+  ok('War: evangelicals move the other way', warPenalty(S, 'dunmore', 'faith') < 0);
+}
+
+// --- General election bar ---
+{ const margin = 20, r = 50 + margin / 2 - .7, d = 100 - r - 1.4; ok('General election: margin shown = margin used', near(r - d, margin)); }
+
+// --- Calendar ---
+ok('Last step is primary day', dateOf(SCHEDULE.length - 1) === 'August 4, 2030', dateOf(SCHEDULE.length - 1));
+ok('Days to primary at the start', daysToPrimary(0) === 182, `${daysToPrimary(0)} days`);
+ok('Days to primary always decrease and end at 0', SCHEDULE.every((_, i) => i === 0 || daysToPrimary(i) < daysToPrimary(i - 1)) && daysToPrimary(SCHEDULE.length - 1) === 0);
+
+// --- Text claims ---
+const byTurnout = REGIONS.slice().sort((a, b) => regionTurnout(b) - regionTurnout(a));
+ok('Claim: Caney Ridge has the highest turnout except Lake Cheney', byTurnout[0].id === 'cheney' && byTurnout[1].id === 'bible', byTurnout.slice(0, 2).map(r => `${r.name} ${(regionTurnout(r) * 100).toFixed(1)}%`).join(', '));
+ok('Claim: farmers are about 9% of registered Republicans', Math.round(registered.farm) === 9, `${registered.farm.toFixed(1)}%`);
+ok('Claim: farmers vote above the statewide rate', FACTIONS.farm.turnout > turnout);
+standardGame(12);
+const w = stateShares(S).whitlock;
+ok('Claim: Whitlock starts at about 5 or 6%', w >= 4.5 && w <= 7, `${w.toFixed(1)}%`);
+
+// --- Content links ---
+const bad = Object.keys(PROMISES).filter(k => {
+  const [id, i] = k.split(':');
+  const q = QUESTIONS.find(q => q.id === id) || EVENTS.find(e => e.id === id);
+  return !q || !(q.answers || q.choices)[+i];
+});
+ok('Every promise points at a real answer', bad.length === 0, bad.join(', '));
+
+// --- Output ---
+const failed = results.filter(r => !r.pass).length;
+document.getElementById('summary').innerHTML = failed ? `<span class="fail">${failed} of ${results.length} checks failed.</span>` : `<span class="pass">All ${results.length} checks passed.</span>`;
+document.getElementById('out').innerHTML = results.map(r => `<div class="${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'} ${r.name}${r.detail ? ` <span style="color:#666">— ${r.detail}</span>` : ''}</div>`).join('');
+</script>
+</body>
+</html>

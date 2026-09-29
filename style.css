@@ -202,3 +202,6 @@ blockquote p { margin: 4px 0; }
 .small-list li { margin-bottom: 3px; }
 
 [hidden] { display: none !important; }
+.scenario-card { background: var(--navy); color: #fff; padding: 10px 14px; margin: 6px 0 12px; border-left: 5px solid var(--gold); font-size: 14px; }
+.scenario-card .lbl { display: block; font-family: var(--display); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); }
+.scenario-card b { font-family: var(--display); font-size: 18px; letter-spacing: .5px; }

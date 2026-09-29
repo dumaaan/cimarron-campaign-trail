@@ -174,3 +174,72 @@ const DEBATE_QUESTIONS = [
       whitlock: { text: '"I will not win tonight. But one day this party will want to be serious again, and I will have been here."', fx: { chamber: 2, seniors: 1 } },
     } },
 ];
+
+// ---------- Outsider answers (merged into the questions above) ----------
+const DEBATE_OUTSIDERS = {
+  d_prove: {
+    coburn: { text: '"I won a state title, a Heisman and two division titles. I know how to win. The Governor knows how to hold press conferences."', fx: { maga: 3, seniors: 2 }, attack: 'you' },
+    albright: { text: '"I refused to follow the COVID mandates, and it cost me my hospital privileges. I have paid a real price for my convictions."', fx: { online: 3, liberty: 2, farm: 1 } },
+    pike: { text: '"I built an audience of two million young Americans without one dollar from the donor class. Nobody else on this stage can say that."', fx: { online: 4, maga: 1 } },
+  },
+  d_bible: {
+    coburn: { text: '"I prayed before every game I ever played. But I will not tell your family how to pray."', fx: { seniors: 1, maga: 1, faith: -1 } },
+    albright: { text: '"God made the human body. He did not make it to need forty injections. Faith and health go together."', fx: { faith: 2, online: 2 } },
+    pike: { text: '"Christianity built the West. A state that forgets that will not survive. I will not apologize for saying so."', fx: { online: 3, faith: 2, liberty: -2 } },
+  },
+  d_carpet: {
+    coburn: { text: '"Brent, I grew up in Harlan. You grew up in a gated community. Voters can see the difference."', fx: { farm: 2, seniors: 1 }, attack: 'vaskel' },
+    albright: { text: '"Moving here is not the problem. Brent\'s fund owns shares in the drug companies that pushed the mandates."', fx: { liberty: 1, online: 1 }, attack: 'vaskel' },
+    pike: { text: '"Brent Vaskel is the donor class in a fleece vest."', fx: { online: 3, maga: 1 }, attack: 'vaskel' },
+  },
+  d_arrest: {
+    coburn: { text: '"I respect sheriffs. I also respect the rules. You cannot pick which ones you follow, Bo."', fx: { seniors: 2 }, attack: 'krantz' },
+    albright: { text: '"When the state forced mandates on us, the sheriffs who refused to enforce them were heroes. So yes."', fx: { liberty: 2, guns: 2, online: 1 } },
+    pike: { text: '"The problem is not sheriffs who defy the law. The problem is the people who write laws against us."', fx: { online: 2, guns: 1 } },
+  },
+  d_chamber: {
+    coburn: { text: '"Businesses sponsored my whole career. But the Chamber wants cheap labor, and I want Cimarron jobs for Cimarron workers."', fx: { maga: 2, chamber: -1 } },
+    albright: { text: '"The biggest businesses in this state are hospital systems and drug companies. They are not our friends."', fx: { online: 2, liberty: 1, chamber: -2 } },
+    pike: { text: '"Big business funds open borders and everything else we oppose. I will treat it as the opponent it is."', fx: { online: 3, maga: 2, chamber: -3 } },
+  },
+  d_compromise: {
+    coburn: { text: '"I would work with anyone to lower gas prices. That is not compromise. That is common sense."', fx: { seniors: 2, farm: 1 } },
+    albright: { text: '"I worked beside Democrats in medicine for twenty years. They silenced me the day I disagreed with them."', fx: { online: 2, liberty: 1 } },
+    pike: { text: '"No. Never. That is exactly why they are afraid of us."', fx: { online: 3 } },
+  },
+  d_accept: {
+    coburn: { text: '"If I lose, I will be the first one to shake the winner\'s hand. I have lost games before."', fx: { seniors: 2, maga: -1 } },
+    albright: { text: '"I will accept a result that has been audited by hand."', fx: { maga: 2, online: 1 } },
+    pike: { text: '"I will accept it when every ballot has been checked by people we trust."', fx: { online: 3, maga: 1, seniors: -1 } },
+  },
+  d_democrat: {
+    coburn: { text: '"Some of my best teammates were Democrats. They still threw me the ball."', fx: { seniors: 2 } },
+    albright: { text: '"Robert F. Kennedy Jr. was a Democrat for fifty years. People can change."', fx: { online: 2, liberty: 1 } },
+    pike: { text: '"Nothing. They hate this country, and they hate you."', fx: { online: 3, maga: 2, seniors: -1 } },
+  },
+  d_deport_num: {
+    coburn: { text: '"All of them. And we will show it on television, so the next group does not come."', fx: { maga: 4, online: 1, farm: -1 } },
+    albright: { text: '"Every one, and we will stop paying for their health care today."', fx: { maga: 3, liberty: 1 } },
+    pike: { text: '"All of them. And we will pause legal immigration too. This country needs time to recover."', fx: { online: 4, maga: 3, chamber: -3, farm: -2 } },
+  },
+  d_institutions: {
+    coburn: { text: '"I would start with the university athletic department. It is a mess."', fx: { seniors: 1, farm: 1 } },
+    albright: { text: '"Start with the medical board. It works for the drug companies, not for patients."', fx: { online: 2, liberty: 2 } },
+    pike: { text: '"Yes. Fire them, replace them, and never let them back in. That is what the left did to us."', fx: { online: 4, maga: 2, seniors: -2 } },
+  },
+  d_tariffs: {
+    coburn: { text: '"I support the President. And I will cut the state gas tax to zero so farmers get relief now."', fx: { maga: 2, farm: 3, liberty: 1 } },
+    albright: { text: '"Our farmers should grow real food for Americans, not soybeans for China. This is an opportunity."', fx: { farm: 1, online: 2 } },
+    pike: { text: '"Tariffs protect American workers. A farmer who wants China\'s money more than his country\'s strength should think about that."', fx: { online: 2, maga: 2, farm: -3 } },
+  },
+  d_closing: {
+    coburn: { text: '"I am not a politician. I am a winner. Let me win for Cimarron."', fx: { maga: 3, seniors: 2 } },
+    albright: { text: '"They took my career because I told the truth. Give me the chance to tell it from the Governor\'s office."', fx: { online: 3, liberty: 1, faith: 1 } },
+    pike: { text: '"Every one of them wants your vote. I want your country back."', fx: { online: 4, maga: 1 } },
+  },
+};
+for (const q of DEBATE_QUESTIONS) Object.assign(q.rivals, DEBATE_OUTSIDERS[q.id] || {});
+
+// Questions that are about a specific rival are asked only when that rival is in the race.
+const DEBATE_NEEDS = { d_carpet: ['vaskel'], d_arrest: ['krantz'], d_compromise: ['whitlock'] };
+for (const q of DEBATE_QUESTIONS) q.needs = DEBATE_NEEDS[q.id] || [];
