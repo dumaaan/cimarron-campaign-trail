@@ -51,9 +51,11 @@ function simGame(strategy, seed, scenario, war) {
       S.screen = 'ending'; break;
     }
     const choose = list => strategy(list);
+    // Events: choose only from the choices the player can see.
+    const chooseShown = list => { const vis = c.shown || list.map((_, i) => i); return vis[strategy(vis.map(i => list[i]))]; };
     if (c.type === 'q') { if (c.answered == null) { c.sel = choose(QUESTIONS.find(q => q.id === c.qid).answers); answer(); } else advance(); }
-    else if (c.type === 'event') { if (c.answered == null) { c.sel = choose(EVENTS.find(e => e.id === c.eid).choices); answer(); } else advance(); }
-    else if (c.type === 'revent') { if (c.answered == null) { c.sel = choose(RUNOFF_EVENTS.find(e => e.id === c.eid).choices); answer(); } else runoffAdvance(); }
+    else if (c.type === 'event') { if (c.answered == null) { c.sel = chooseShown(EVENTS.find(e => e.id === c.eid).choices); answer(); } else advance(); }
+    else if (c.type === 'revent') { if (c.answered == null) { c.sel = chooseShown(RUNOFF_EVENTS.find(e => e.id === c.eid).choices); answer(); } else runoffAdvance(); }
     else if (c.type === 'court') {
       if (c.answered == null) {
         const ch = COURT[c.who].choices;

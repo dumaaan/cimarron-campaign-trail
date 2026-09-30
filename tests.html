@@ -172,6 +172,45 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S = null;
 }
 
+// --- Events: kinds, weights, choice conditions, running-mate swaps ---
+{
+  const seenKinds = [];
+  let over = 0;
+  for (let g = 0; g < 200; g++) {
+    standardGame(60000 + g); S.record = pick(RECORDS).id; S.mate = pick(RUNNING_MATES).id;
+    for (let st = 0; st < SCHEDULE.length; st++) if (SCHEDULE[st] === 'event') {
+      S.step = st; const e = pickEvent(S); if (e) S.seenEvents.push(e.id);
+    }
+    const count = {};
+    for (const id of S.seenEvents) { const e = EVENTS.find(x => x.id === id); if (!e.priority) count[e.kind] = (count[e.kind] || 0) + 1; }
+    if (Object.entries(KIND_LIMITS).some(([k, n]) => (count[k] || 0) > n)) over++;
+    seenKinds.push(S.seenEvents.some(id => EVENTS.find(x => x.id === id).kind === 'Record'), S.seenEvents.some(id => EVENTS.find(x => x.id === id).kind === 'Running Mate'));
+  }
+  ok('Events: no game goes over the limit for a kind of event', over === 0, `${over} of 200 games`);
+  const rec = seenKinds.filter((x, i) => i % 2 === 0 && x).length, mate = seenKinds.filter((x, i) => i % 2 === 1 && x).length;
+  ok('Events: most games have a record event and a running-mate event', rec > 120 && mate > 120, `record ${rec}/200, running mate ${mate}/200`);
+  ok('Events: every record and every running mate has its own event', RECORDS.every(r => EVENTS.some(e => e.kind === 'Record' && (standardGame(1), S.record = r.id, e.cond(S))))
+    && RUNNING_MATES.every(m => EVENTS.some(e => e.kind === 'Running Mate' && (standardGame(1), S.mate = m.id, e.cond(S)))));
+  ok('Events: every event has at least two choices with no condition', [...EVENTS, ...RUNOFF_EVENTS].every(e => e.choices.filter(ch => !ch.cond).length >= 2));
+  ok('Events: every choice with a condition shows why it is available', [...EVENTS, ...RUNOFF_EVENTS].every(e => e.choices.every(ch => !ch.cond || ch.unlock || /^s => (!?inRace|!s\.flags\.oppo_dunmore_used)/.test(ch.cond.toString()))));
+  let badP = [];
+  for (const r of RECORDS) for (const m of RUNNING_MATES) for (const pres of [0, 50, 100]) {
+    standardGame(2); S.record = r.id; S.mate = m.id; S.pres = pres; S.money = pres / 20;
+    for (const e of EVENTS) for (const ch of e.choices) if (ch.risk) { const p = riskP(S, ch.risk); if (!(p >= .05 && p <= .95)) badP.push(e.id); }
+  }
+  ok('Events: every risk chance is between 5% and 95%', badP.length === 0, [...new Set(badP)].join(', '));
+  standardGame(3); S.step = 12;
+  applyFx(S, RUNNING_MATES.find(m => m.id === 'voss').fx); S.mate = 'voss';
+  applyFx(S, { mate: 'ellender' });
+  const want = { faith: 3 * TUNE.posMult, seniors: 1 * TUNE.posMult, online: -.5 };
+  ok('Running-mate swap removes the old mate and adds half of the new one', S.mate === 'ellender' && S.formerMate === 'voss' && S.flags.mate_swap
+    && FKEYS.every(f => near(S.delta.you[f] || 0, want[f] || 0)), JSON.stringify(S.delta.you));
+  standardGame(4); S.step = 8; S.record = 'rifle'; S.mate = 'brannigan'; S.endorsements.rifle = 'you';
+  const roadrage = EVENTS.find(e => e.id === 'rifle_roadrage');
+  ok('Choice conditions: the Rifle Association choice appears only with its endorsement', shownChoices(S, roadrage.choices).includes(4) && (S.endorsements.rifle = 'krantz', !shownChoices(S, roadrage.choices).includes(4)));
+  S = null;
+}
+
 // --- General election bar ---
 { const margin = 20, r = 50 + margin / 2 - .7, d = 100 - r - 1.4; ok('General election: margin shown = margin used', near(r - d, margin)); }
 

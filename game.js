@@ -96,6 +96,7 @@ function applyFx(s, fx) {
   if (fx.pres) s.pres = clamp(s.pres + fx.pres, 0, 100);
   if (fx.money) s.money = Math.max(0, s.money + fx.money);
   if (fx.flag) s.flags[fx.flag] = s.step + 1;
+  if (fx.mate) swapMate(s, fx.mate);
   for (const id in fx.opp || {}) if (active(s).includes(id)) addAll(s, id, fx.opp[id]);
   if (fx.oppLeader) { const r = sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you'); if (r) addAll(s, r, fx.oppLeader); }
   for (const org in fx.endorse || {}) {
@@ -108,6 +109,20 @@ function applyFx(s, fx) {
   if (fx.oppRival && s.runoff) addAll(s, s.runoff.rival, fx.oppRival);
   // The President never endorses the traditional conservative.
   if (fx.presEndorse && s.runoff && !(fx.presEndorse === 'rival' && s.runoff.rival === 'whitlock')) s.endorsed = fx.presEndorse === 'you' ? 'you' : s.runoff.rival;
+}
+
+// Replace the running mate: remove what the old one added, then add half of what the new one brings (it is late).
+function swapMate(s, id) {
+  const old = RUNNING_MATES.find(m => m.id === s.mate), nu = RUNNING_MATES.find(m => m.id === id);
+  if (!old || !nu || old.id === id) return;
+  for (const f of FKEYS) if (old.fx[f]) s.delta.you[f] = (s.delta.you[f] || 0) - (old.fx[f] > 0 ? old.fx[f] * TUNE.posMult : old.fx[f]);
+  if (old.fx.rino) s.rino = Math.max(0, s.rino - old.fx.rino);
+  s.formerMate = old.id;
+  s.mate = id;
+  s.flags.mate_swap = s.step + 1;
+  const half = {};
+  for (const k of [...FKEYS, 'rino']) if (nu.fx[k]) half[k] = nu.fx[k] / 2;
+  applyFx(s, half);
 }
 
 // ---------- vote model ----------
@@ -194,11 +209,21 @@ const expectedVote = () => { const t = TOTAL_WEIGHT(); return Object.fromEntries
 const sorted = sh => Object.entries(sh).sort((a, b) => b[1] - a[1]);
 
 // ---------- campaign flow ----------
+// weight: a number or s => number (default 1). A kind at its limit in KIND_LIMITS is not drawn again, but follow-ups (priority) always run.
+const weightOf = (s, e) => typeof e.weight === 'function' ? e.weight(s) : e.weight ?? 1;
+function pickWeighted(s, list) {
+  let r = rand() * list.reduce((a, e) => a + weightOf(s, e), 0);
+  return list.find(e => (r -= weightOf(s, e)) < 0) || list[list.length - 1];
+}
 function pickEvent(s) {
   const ok = e => !s.seenEvents.includes(e.id) && (!e.cond || e.cond(s)) && (e.minStep || 0) <= s.step && (e.maxStep ?? 99) >= s.step;
   const pool = EVENTS.filter(ok);
-  return pool.find(e => e.priority) || pick(pool.filter(e => !e.priority));
+  const seenOfKind = k => s.seenEvents.filter(id => { const e = EVENTS.find(x => x.id === id); return e && !e.priority && e.kind === k; }).length;
+  const open = pool.filter(e => !e.priority && weightOf(s, e) > 0 && seenOfKind(e.kind) < (KIND_LIMITS[e.kind] ?? 99));
+  return pool.find(e => e.priority) || (open.length ? pickWeighted(s, open) : null);
 }
+// Choices with a cond appear only when it is true. The list is fixed when the event starts, so indices never change.
+const shownChoices = (s, list) => list.map((ch, i) => i).filter(i => !list[i].cond || list[i].cond(s));
 function pickQuestion(s) {
   const pool = QUESTIONS.filter(q => !s.asked.includes(q.id) && (!q.cond || q.cond(s)));
   const pri = s.step >= 2 ? pool.filter(q => q.priority) : [];
@@ -224,7 +249,7 @@ function startStep() {
     const e = pickEvent(s);
     if (!e) return startQuestion(s);
     s.seenEvents.push(e.id);
-    s.cur = { type: 'event', eid: e.id, sel: null, answered: null, breaking: [] };
+    s.cur = { type: 'event', eid: e.id, sel: null, answered: null, breaking: [], shown: shownChoices(s, e.choices) };
   } else if (type === 'q') {
     return startQuestion(s);
   } else if (type === 'stop') {
@@ -295,7 +320,8 @@ function growthFactions(s, id) {
   const ev = expectedVote();
   return FKEYS.map(f => [f, CAND[id].base[f] * ev[f] * (1 - factionShares(s, f)[id] / 100)]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
 }
-const riskP = (s, risk) => typeof risk.p === 'function' ? risk.p(s) : risk.p;
+// risk.p is a number, or s => number when the chance depends on the campaign so far. Always between 5% and 95%.
+const riskP = (s, risk) => clamp(typeof risk.p === 'function' ? risk.p(s) : risk.p, .05, .95);
 function startWar(s) {
   s.war = { start: s.step };
   s.flags.war = s.step + 1;
@@ -377,7 +403,7 @@ const grade = p => p >= 5 ? 'Strong' : p >= 2.5 ? 'Solid' : p >= .5 ? 'Weak' : '
 
 function answer() {
   const s = S, c = s.cur;
-  if (c.sel == null) return;
+  if (c.sel == null || (c.shown && !c.shown.includes(c.sel))) return;
   if (c.type === 'q') {
     const q = QUESTIONS.find(q => q.id === c.qid), a = q.answers[c.sel];
     applyFx(s, a.fx);
@@ -607,7 +633,7 @@ function startRunoffStep() {
     const e = pick(RUNOFF_EVENTS.filter(e => !R.seen.includes(e.id) && (!e.cond || e.cond(s))));
     if (!e) { R.idx++; return startRunoffStep(); }
     R.seen.push(e.id);
-    s.cur = { type: 'revent', eid: e.id, sel: null, answered: null, breaking: [] };
+    s.cur = { type: 'revent', eid: e.id, sel: null, answered: null, breaking: [], shown: shownChoices(s, e.choices) };
   } else if (item === 'vote') {
     s.runoffResult = countVotes(s, R.two, RUNOFF_TURNOUT);
     s.finalWinner = s.runoffResult.winner;
@@ -753,6 +779,7 @@ function chips(s, fx) {
   for (const org in fx.endorse || {}) out.push([`${ENDORSERS[org].name} → ${fx.endorse[org] === 'you' ? 'You' : CAND[fx.endorse[org]].short}`, fx.endorse[org] === 'you' ? 'up' : 'down']);
   if (fx.gotvAll || fx.gotv) out.push(['Turnout operation ▲', 'up']);
   if (fx.drop) out.push([`${CAND[fx.drop.id].short} withdraws`, 'up']);
+  if (fx.mate) out.push([`New running mate: ${RUNNING_MATES.find(m => m.id === fx.mate).name}`, 'down']);
   return `<div class="chips">${out.map(([t, c]) => `<span class="chip ${c}">${t}</span>`).join('')}</div>`;
 }
 
@@ -769,10 +796,11 @@ function reactionsBox(s, r) {
 const breakingBox = c => c?.breaking?.length ? c.breaking.map(b => `<div class="breaking"><b>BREAKING:</b> ${esc(b)}</div>`).join('') : '';
 
 function answersList(list, c, riskOf = () => false) {
-  return `<div class="answers">${list.map((a, i) => `
+  const unlockOf = a => typeof a.unlock === 'function' ? a.unlock(S) : a.unlock;
+  return `<div class="answers">${list.map((a, i) => c.shown && !c.shown.includes(i) ? '' : `
     <label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
       <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
-      <span>${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
+      <span>${a.unlock ? `<span class="risk-tag unlock" title="This choice is available because of an earlier decision.">${esc(unlockOf(a))}</span> ` : ''}${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
 }
 
 function renderQuestion(s) {
@@ -987,7 +1015,7 @@ function hundredDays(items) {
   return `<ol class="timeline">${items.map(([d, t]) => `<li><span class="tl-date">${d}</span><span>${esc(t)}</span></li>`).join('')}</ol>`;
 }
 function consequences(s) {
-  const L = EPILOGUE.filter(e => s.flags[e.flag]).map(e => e.text);
+  const L = EPILOGUE.filter(e => s.flags[e.flag]).map(e => typeof e.text === 'function' ? e.text(s) : e.text);
   L.push(s.rino >= 10 ? EPILOGUE_RINO_HIGH : s.rino < 2 ? EPILOGUE_RINO_LOW : '');
   return L.filter(Boolean);
 }

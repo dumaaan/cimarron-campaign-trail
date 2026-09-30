@@ -10,7 +10,7 @@ A political strategy game in the style of *The Campaign Trail*.
 
 ## How a campaign works
 
-- **Your record and your running mate.** Choose the achievement you will run on, and a running mate who brings one faction closer to you.
+- **Your record and your running mate.** Choose the achievement you will run on, and a running mate who brings one faction closer to you. Both can come back during the campaign: your record can be challenged, and your running mate can become a problem you must solve, or replace.
 - **Six months on the trail.** Answer questions at town halls, on talk radio and in interviews. Handle scandals, crises and tragedies, with advice from staff who do not always agree. Some decisions are gambles.
 - **Campaign stops.** Choose where to go and what to do there: rallies, ads, fundraisers, or a turnout operation.
 - **Two debates.** Every candidate answers every question. When the race is close, you can go after the rival nearest to you.
@@ -27,6 +27,7 @@ After every decision, the cable news chyrons and the posters online react.
 - **Every promise counts.** What you promise on the trail becomes your first 100 days, if you win.
 - **Know your rivals.** Click any candidate for their profile, positions and strongest factions.
 - **Check the crosstabs.** The polling panel shows who leads each faction and each region.
+- **Earlier decisions open new choices.** A green tag on a choice shows that your record, your running mate, an endorsement or an earlier decision made it available.
 - **Runoff deals have a price.** An endorsement can win you one faction and cost you another.
 
 ## Seeds
