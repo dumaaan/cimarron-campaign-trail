@@ -172,6 +172,8 @@ const WAR = {
   earliest: 9, latest: 17,  // the step range in which the war can start
   pivot: .55,               // loyalty above this loses support, below it gains
   rampSteps: 4,             // steps until the oil shock reaches full effect
+  spread: 1.2,              // how much more evenly the vote splits at the war's full effect (thinner margins)
+  general: 12,              // points the war costs the Republican nominee in November
   weights: { online: 16, farm: 13, seniors: 10, liberty: 9, chamber: 8, maga: 7, guns: 3, faith: -4 },
 };
 

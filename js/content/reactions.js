@@ -584,7 +584,7 @@ rx('ellender_women', [
   [`Prosecute the WOMEN?? My daughter, my granddaughter?? No. That is too far. Sorry.`, `If it is murder, it is murder. Logically consistent. Electorally fatal.`, `max:{LAST} BACKS PROSECUTING WOMEN WHO TRAVEL FOR ABORTIONS`],
   [`Never the women. Good. Go after the doctors. That is the pro-life position.`, `"Never women." Undercut the running mate on live TV. Awkward.`, `fax:{LAST}: TICKET WILL "NEVER" PROSECUTE WOMEN`],
   [`Let the lawmakers decide. OK. The press moved on. Good.`, `Punted to the legislature. It worked. For now.`, `fax:{LAST} DEFERS TO LEGISLATURE ON ELLENDER REMARKS`,
-   `Pastor Rick asked yes or no and {last} could not answer. Not a good look.`, `"Yes or no." {last} could not say either. A million views.`, `max:RICK CHALLENGES {LAST}: "YES OR NO?"`],
+   `Dunmore asked yes or no and {last} could not answer. Not a good look.`, `"Yes or no." {last} could not say either. A million views.`, `max:DUNMORE CHALLENGES {LAST}: "YES OR NO?"`],
 ]);
 rx('ellender_women', [null, null, null,
   [`Maternity homes!! Help the mothers. THAT is pro-life. Beautiful idea Sen. Ellender 🙏👶`, `Changed the subject to maternity homes. Clever pivot. Did not answer the question.`, `fax:{LAST}, ELLENDER ANNOUNCE STATE MATERNITY HOMES`],
@@ -1440,3 +1440,203 @@ REACTIONS['close:record:w_budget'] = [`Twelve balanced budgets and no taxes. THA
 REACTIONS['close:record:w_water'] = [`She kept the wells running in the drought. My cousin remembers.`, `The water close. The Panhandle nods.`, `fax:DEBATE CLOSE: WHITLOCK CITES AQUIFER COMPACT`];
 REACTIONS['close:record:w_roads'] = [`She paved our roads. The road to my farm is smooth because of Carol.`, `The roads close. Unglamorous. True.`, `fax:DEBATE CLOSE: WHITLOCK CITES RURAL ROADS`];
 REACTIONS['close:record:w_heartbeat'] = [`She wrote the first heartbeat law?? I did not know that!! Good for her 🙏`, `Carol was pro-life before it was cool. Unexpected.`, `fax:DEBATE CLOSE: WHITLOCK: "I WROTE THE FIRST HEARTBEAT LAW"`];
+
+// ---------------- Answers in each candidate's own voice (voices.js) ----------------
+const N4 = [null, null, null, null];
+rx('deport', [...N4,
+  [`Deport the criminals and protect church families. That is fair. Pastor Rick has a heart.`, `"Protect the families." Amnesty with a hymnal.`, `fax:PASTOR RICK: DEPORT CRIMINALS, PROTECT CHURCH FAMILIES`],
+  [`Give the sheriffs the power and it gets done in a year. I believe him.`, `The sheriff deportation plan. Decentralized, effective, based.`, `max:KRANTZ: SHERIFFS CAN DEPORT "WITHIN A YEAR"`],
+  [`Computers to find illegals? OK. Anything that works, I guess.`, `Deportation as a software problem. The tech right has entered the chat.`, `fax:VASKEL PITCHES TECH-DRIVEN DEPORTATIONS`],
+  [`"Cannot be done"? Then what is the point of her?? Dunmore will eat her alive.`, `Told the base their main promise is impossible. Carol is speedrunning a loss.`, `max:WHITLOCK: MASS DEPORTATION PROMISE "CANNOT BE DONE"`],
+]);
+rx('sanctuary', [...N4,
+  [`Names on the show and no more state money. Travis does not mess around!!`, `Doxxing the council on stream and cutting their funds. Content and policy.`, `max:DUNMORE TO NAME SANCTUARY COUNCIL MEMBERS ON AIR`],
+  [`Call the pastors in Lawrenceville. The churches can fix what politicians cannot 🙏`, `Outsourcing immigration enforcement to the pastors. Interesting theology.`, `fax:PASTOR RICK TO RALLY LAWRENCEVILLE CHURCHES`],
+  [`The sheriff enforces the law no matter what the city says. RIGHT!!`, `County sheriffs over city councils. The Posse Comitatus doctrine returns.`, `max:KRANTZ: SHERIFFS WILL ENFORCE LAW DESPITE CITY VOTE`],
+  [`No state contracts for them. Hit them in the wallet. Good.`, `Financial pressure on the sanctuary city. Cold and efficient.`, `fax:VASKEL: SANCTUARY CITIES WOULD LOSE STATE CONTRACTS`],
+  [`Sit down with them first?? Carol, they already voted!!`, `A meeting first. The most boomer response to a sanctuary city possible.`, `max:WHITLOCK WOULD MEET COUNCIL BEFORE ACTING`],
+]);
+rx('prayer', [...N4,
+  [`Travis is going to pray on the radio!! I will listen. Amen 🙏`, `Prayer as a segment. Dunmore has monetized the Almighty.`, `fax:DUNMORE BACKS SCHOOL PRAYER, WILL READ FIRST ONE ON AIR`],
+  [`A Governor who prays with our kids himself. Now THAT is who I want 🙏✝️`, `A pastor-governor leading school prayer. The integralists have won.`, `max:PASTOR RICK WOULD LEAD FIRST SCHOOL PRAYER HIMSELF`],
+  [`Prayer in schools and no judge stops it. The Sheriff means business 🙏`, `Prayer plus nullification. A Krantz special.`, `max:KRANTZ: NO JUDGE WILL STOP SCHOOL PRAYER`],
+  [`Let each school pick? Hmm. Some schools will pick nothing.`, `School-choice prayer. The market will decide if God is allowed.`, `fax:VASKEL: LET SCHOOLS CHOOSE ON PRAYER`],
+  [`Let the kids pray but do not force them. Carol is a Methodist, she knows. Fair.`, `The voluntary prayer answer. Mainline Protestant energy.`, `fax:WHITLOCK: LET CHILDREN PRAY, DON'T MAKE THEM`],
+]);
+rx('drag', [...N4,
+  [`Play the video every night until they quit!! Ha. That board will quit.`, `Nightly video until resignation. The show is a pressure campaign now.`, `max:DUNMORE VOWS NIGHTLY SEGMENT UNTIL LIBRARY BOARD QUITS`],
+  [`Filling that library meeting with church folks. That is how you win locally 🙏`, `Church-organized board takeover. Very effective, very Southern Baptist.`, `fax:PASTOR RICK CALLS CHURCHES TO LIBRARY BOARD MEETING`],
+  [`Enforce it or elect a new board. Sensible Sheriff.`, `The procedural answer. Krantz is surprisingly moderate on culture.`, `fax:KRANTZ: ENFORCE THE LAW OR REPLACE THE BOARD`],
+  [`Rate the libraries like restaurants?? Strange idea. But OK maybe.`, `Yelp for libraries. Techno-solutionism has no limits.`, `max:VASKEL PROPOSES PARENT RATINGS FOR LIBRARIES`],
+  [`"Let Lawrenceville vote." That is the liberals' town, Carol. They will vote for MORE of it.`, `Local control in the most liberal town in the state. Carol is lost.`, `max:WHITLOCK: LAWRENCEVILLE SHOULD DECIDE ON DRAG EVENTS`],
+]);
+rx('stolen', [...N4,
+  [`Every week since 2020. He never backed down. That is Travis 🇺🇸`, `Consistency. Ten years of the same answer. Respect.`, `max:DUNMORE: "YES" ON STOLEN ELECTION, AS ALWAYS`],
+  [`He does not trust the machines. Neither do I. Good answer, Pastor.`, `"Only God knows." Then a yes. The pastor's dodge that is not a dodge.`, `fax:PASTOR RICK: "I DO NOT TRUST THOSE MACHINES"`],
+  [`A sheriff saw fraud with his own eyes. That is evidence enough for me.`, `The sheriff's testimony. Hard to argue with a badge.`, `max:KRANTZ: "NO DOUBT" ABOUT 2020 FRAUD`],
+  [`An engineering problem? That is not a yes or a no, Mr. Vaskel.`, `Called 2020 a bug report. The base wanted a yes.`, `fax:VASKEL: 2020 WAS "AN ENGINEERING PROBLEM"`],
+  [`She said NO?? In a Republican primary?? Well, at least she is honest I guess.`, `Carol said no to the one question that matters. It is over.`, `max:WHITLOCK: 2020 ELECTION "WAS NOT STOLEN"`],
+]);
+rx('measles', [...N4,
+  [`End the mandates. Travis was right about COVID, he is right about this.`, `The show was right all along. The mandate era is over.`, `max:DUNMORE: END SCHOOL VACCINE MANDATES`],
+  [`Parents answer to God, not the health department. Amen. But the kids are sick...`, `Religious exemptions for everyone. Faith over the CDC.`, `fax:PASTOR RICK WOULD EXPAND RELIGIOUS VACCINE EXEMPTIONS`],
+  [`No deputy enforcing vaccine orders. Freedom!! But I hope the kids get better.`, `Deputies will never enforce a jab mandate. Based sheriff.`, `max:KRANTZ: DEPUTIES WILL NEVER ENFORCE VACCINE ORDERS`],
+  [`Just show everybody the numbers and let us decide. OK. Fair.`, `Radical transparency on vaccines. Reasonable. Boring.`, `fax:VASKEL: PUBLISH MEASLES DATA, LET PARENTS DECIDE`],
+  [`She remembers polio. So do I. My cousin had it. Keep the shots.`, `Invoking polio in 2030. Boomer card played.`, `max:WHITLOCK: KEEP VACCINE REQUIREMENTS, CITES POLIO`],
+]);
+rx('soybeans', [...N4,
+  [`Stand with the President. Travis never wavers. The farmers will understand.`, `Tariffs forever. The President is pleased. The farmers are not listening anymore.`, `max:DUNMORE BACKS PRESIDENT'S TARIFFS`],
+  [`Pray for the farmers and help them. That is exactly what a Christian leader should say 🙏`, `Prayer plus a bailout. The evangelical farm policy.`, `fax:PASTOR RICK: PRAYER AND STATE HELP FOR FARMERS`],
+  [`The ranchers built this state. Stand behind them. YES.`, `The sheriff sides with the farmers. Ag populism.`, `fax:KRANTZ: STATE WILL "STAND BEHIND" FARMERS`],
+  [`New buyers in Asia? For our soybeans? Can he actually do that?`, `Free trader in a MAGA primary. The President has noticed.`, `max:VASKEL CALLS TARIFFS "A TAX"`],
+  [`She warned about this in 2019? I did not know that. She was right.`, `"I told you so" on tariffs. Correct, and fatal with the President.`, `max:WHITLOCK: "I WARNED ABOUT THIS TRADE WAR"`],
+]);
+rx('teachers_carry', [...N4,
+  [`Let the willing teachers carry. Simple. Good 🇺🇸`, `The simplest gun answer. Solid.`, `fax:DUNMORE: TEACHERS WHO WANT TO CARRY SHOULD CARRY`],
+  [`Pastor Rick's schools have armed guards already. It works there. Good.`, `Armed volunteers from the Christian academies. Proof of concept.`, `fax:PASTOR RICK CITES ARMED VOLUNTEERS IN CHURCH SCHOOLS`],
+  [`He trained 300 teachers himself!! The Sheriff walks the walk 🇺🇸`, `Actually trained the teachers. Nobody else can say that.`, `fax:KRANTZ: I WILL TRAIN TEACHERS MYSELF`],
+  [`Drones and cameras in schools? Guns SECOND?? Hmm.`, `Tech first, guns second. Gun owners heard "second."`, `max:VASKEL: TECHNOLOGY BEFORE GUNS IN SCHOOLS`],
+  [`Teachers should teach. My daughter is a teacher and she agrees with Carol.`, `"Teachers should teach." The NEA would approve.`, `fax:WHITLOCK: FUND ARMED OFFICERS, NOT ARMED TEACHERS`],
+]);
+rx('homeless', [...N4,
+  [`Clear the camps and make the city pay. HA. Good one.`, `Clear the camps, bill the council. Accountability.`, `max:DUNMORE: ENFORCE CAMPING BAN, BILL THE CITY`],
+  [`Let the churches house them. My church does it every winter 🙏`, `The church shelter answer. Charity over bureaucracy. Correct.`, `fax:PASTOR RICK: CHURCHES CAN HOUSE THE HOMELESS`],
+  [`A cot and honest work. That is dignity. Good plan, Sheriff.`, `The work-crew answer. Harlan County statewide.`, `fax:KRANTZ: ARRESTS, BEDS AND WORK CREWS`],
+  [`90 days to build housing? That sounds like a sales pitch.`, `A startup timeline for homelessness. We will see.`, `fax:VASKEL PROMISES MODULAR HOUSING IN 90 DAYS`],
+  [`She admitted she voted to close those beds. Wow. An honest politician.`, `Admitted her own mistake from 1995. Nobody does that.`, `fax:WHITLOCK: "IT WAS MY VOTE TOO"`],
+]);
+rx('covid', [...N4,
+  [`Put the lockdown people on trial on the radio!! Finally some accountability.`, `COVID tribunals, streamed. The content writes itself.`, `max:DUNMORE: LIVE HEARINGS ON COVID OFFICIALS`],
+  [`They closed our churches. NEVER AGAIN. Pastor Rick lived it 🙏`, `The pastor who was locked out of his own church. Personal and powerful.`, `max:PASTOR RICK: CHURCH CLOSURES "WILL NEVER HAPPEN AGAIN"`],
+  [`He refused to enforce the COVID orders in 2020. He has a record. Respect.`, `The sheriff who ignored the lockdowns. Receipts.`, `fax:KRANTZ: OFFICIALS WHO ENFORCED ORDERS "SHOULD ANSWER"`],
+  [`Publish all the data. Fine. Let people see it.`, `Audit and publish. The Excel-spreadsheet approach to justice.`, `fax:VASKEL: AUDIT AND PUBLISH COVID DECISIONS`],
+  [`No witch hunt? They closed my church, Carol!!`, `"Learn from it." Amnesty for the lockdown bureaucrats.`, `max:WHITLOCK: NO "WITCH HUNT" OVER COVID`],
+]);
+rx('crypto', [...N4,
+  [`Freedom money?? I do not understand it, but OK Travis.`, `Dunmore is a Bitcoiner now. His sponsors are pleased.`, `max:DUNMORE BACKS STATE BITCOIN RESERVE`],
+  [`Not with the widows' pensions!! Thank you, Pastor. My pension is safe.`, `Protecting the pensions from Bitcoin. Retiree-coded. Effective.`, `fax:PASTOR RICK: NO "INTERNET MONEY" FOR PENSIONS`],
+  [`Precious metals, not computer coins. The Sheriff gets it 🪙`, `Hard money. Krantz reads the same forums I do.`, `fax:KRANTZ BACKS GOLD AND SILVER, NOT CRYPTO`],
+  [`He already mines Bitcoin here? And wants the state to buy it? Seems like a conflict.`, `The Bitcoin miner wants a Bitcoin state. Number go up for him too.`, `max:VASKEL: CIMARRON WILL BE "THE FIRST BITCOIN STATE"`],
+  [`Never gamble with public money. Carol is right. Old-fashioned common sense.`, `The boomer crypto take. Unmoved.`, `fax:WHITLOCK REJECTS STATE CRYPTO INVESTMENT`],
+]);
+rx('secede', [...N4,
+  [`Independence on the BALLOT?? Travis, I am an American!! This is too far.`, `Secession referendum on the table. The Republic of Cimarron has a host.`, `max:DUNMORE: PUT INDEPENDENCE ON THE BALLOT`],
+  [`A Convention, not breaking up the country. PERFECT answer 🙏🇺🇸`, `Convention of States and a Pledge of Allegiance. Safe.`, `fax:PASTOR RICK: "ONE NATION UNDER GOD"`],
+  [`Sheriffs refusing bad federal laws. That is how the founders wanted it.`, `Nullification through the sheriffs. The Krantz doctrine.`, `max:KRANTZ: SHERIFFS SHOULD REFUSE FEDERAL LAWS`],
+  [`Charter cities first?? What is a charter city?`, `Network state gradualism. Vaskel has read the books.`, `fax:VASKEL: CHARTER CITIES BEFORE SECESSION`],
+  [`Thirty years serving the country. She will not entertain it. Thank you, Carol 🇺🇸`, `A dignified no. The young right calls it cope.`, `fax:WHITLOCK REJECTS SECESSION TALK`],
+]);
+rx('vouchers', [...N4,
+  [`Every family, every dollar. School choice for all!!`, `Universal vouchers, no exceptions. The show-host position.`, `fax:DUNMORE BACKS UNIVERSAL VOUCHERS`],
+  [`He built twelve Christian schools. Nobody knows this issue better 🙏`, `The man who built the schools wants the vouchers. Aligned incentives.`, `fax:PASTOR RICK CITES 12 CHRISTIAN SCHOOLS IN VOUCHER PUSH`],
+  [`Vouchers but keep the rural schools. In small towns the school is everything. Good.`, `Vouchers with a rural shield. Sensible.`, `fax:KRANTZ: VOUCHERS, BUT RURAL SCHOOLS "STAY WHOLE"`],
+  [`A free AI tutor for every kid? My granddaughter uses his tutor already. It is good.`, `The AI tutor pitch again. It actually works, apparently.`, `fax:VASKEL PAIRS VOUCHERS WITH FREE AI TUTORS`],
+  [`She wrote the rural school formula. She knows the numbers. Good.`, `Protected the public schools first. The teacher's union candidate.`, `max:WHITLOCK: VOUCHERS ONLY IF RURAL SCHOOLS PROTECTED`],
+]);
+rx('national_guard_city', [...N4,
+  [`Troops in the city and Travis at the checkpoint. That will be something to watch 🇺🇸`, `Broadcasting from the checkpoint. Martial law as content.`, `max:DUNMORE: SEND GUARD TO FORT EISENHOWER`],
+  [`Soldiers AND preachers downtown. Both!! Amen 🙏`, `Troops and missionaries. A crusade for downtown.`, `fax:PASTOR RICK: SEND THE GUARD, AND THE CHURCHES`],
+  [`Sheriffs know the streets. Give them the money first. Makes sense.`, `Sheriffs before soldiers. Localism wins.`, `fax:KRANTZ: RESOURCES FOR SHERIFFS BEFORE THE GUARD`],
+  [`Cameras everywhere? I do not like cameras everywhere.`, `Surveillance-state policing from the libertarian candidate. Ironic.`, `max:VASKEL: CAMERAS AND DATA BEFORE THE GUARD`],
+  [`Wait for the mayor's permission? The mayor is the problem, Carol!!`, `Federalism purity while downtown burns. Carol, please.`, `max:WHITLOCK: GUARD ONLY IF MAYOR ASKS`],
+]);
+rx('red_flag', [...N4,
+  [`No red flags. They take your guns first and ask questions later. Right, Travis.`, `No red flags. Correct. Next question.`, `fax:DUNMORE REJECTS RED FLAG LAWS`],
+  [`Prayer and fathers at home. That is the real answer. Not new laws 🙏`, `The faith-and-family gun answer. Evangelicals nod.`, `fax:PASTOR RICK: PRAYER, FATHERS, GUARDS — NOT RED FLAGS`],
+  [`No sheriff will enforce them. EVER. That is my Sheriff 🇺🇸`, `A preemptive refusal to enforce. Peak constitutional sheriff.`, `max:KRANTZ: NO SHERIFF WILL ENFORCE RED FLAG ORDERS`],
+  [`Better data on threats. OK. As long as nobody takes my guns.`, `Data-driven red flags. Gun owners are nervous.`, `fax:VASKEL: "BETTER DATA" ON THREATS, DUE PROCESS FOR OWNERS`],
+  [`She would SIGN a red flag law?? That is it. Carol lost my vote.`, `Would sign a red flag law. The Rifle Association is laughing.`, `max:WHITLOCK WOULD SIGN "NARROW" RED FLAG LAW`],
+]);
+rx('medicaid', [...N4,
+  [`Obamacare is Obamacare. No expansion. Right.`, `No Obamacare. The show position.`, `fax:DUNMORE REJECTS MEDICAID EXPANSION`],
+  [`Churches ran hospitals first. True!! St. Mary's in Fort Eisenhower is 100 years old.`, `Faith-based hospitals. Charity over welfare. Traditional.`, `fax:PASTOR RICK: HELP HOSPITALS DIRECTLY`],
+  [`State money for rural hospitals, no federal strings. Good plan.`, `No strings attached. The rural answer.`, `fax:KRANTZ: DIRECT STATE AID TO RURAL HOSPITALS`],
+  [`Telemedicine?? I want a real doctor in a real building, Mr. Vaskel.`, `Replace the hospitals with an app. Very Silicon Valley.`, `max:VASKEL PITCHES TELEMEDICINE FOR RURAL COUNTIES`],
+  [`She wants to expand Medicaid. There it is. Obamacare Carol.`, `Medicaid expansion from the last moderate. Unsurprising.`, `max:WHITLOCK BACKS MEDICAID EXPANSION`],
+]);
+rx('h1b', [...N4,
+  [`End the program. Americans first. Always.`, `End H-1B. The tech donors are panicking. Good.`, `max:DUNMORE: END THE H-1B PROGRAM`],
+  [`Hire Americans and train them at our Christian colleges. Great idea 🙏`, `Train Americans at Bible colleges. Engineering and theology, together.`, `fax:PASTOR RICK: HIRE AMERICANS, TRAIN THEM AT CHRISTIAN COLLEGES`],
+  [`Cimarron jobs for Cimarron people. Simple.`, `Local hiring first. Simple and correct.`, `fax:KRANTZ: CIMARRON JOBS "FOR CIMARRONIANS FIRST"`],
+  [`He is honest about needing the foreign engineers. But I do not like it.`, `Admitted his plants need visas. At least he is honest about the grift.`, `max:VASKEL: PLANTS NEED FOREIGN ENGINEERS`],
+  [`Keep it for the best? Sounds like the Chamber talking.`, `The Chamber of Commerce position, word for word.`, `max:WHITLOCK: KEEP H-1B FOR "THE BEST ENGINEERS"`],
+]);
+rx('ukraine', [...N4,
+  [`Not one dollar. That is America First. Travis gets it.`, `Not one dollar. Consistent. Correct.`, `max:DUNMORE: "NOT ONE DOLLAR" FOR UKRAINE`],
+  [`Israel first. My church prays for Israel every Sunday 🙏🇮🇱`, `Israel over Ukraine. The evangelical foreign policy.`, `fax:PASTOR RICK: "STAND WITH ISRAEL BEFORE UKRAINE"`],
+  [`Our own border first. That is where our money should go.`, `Border first, Ukraine never. Krantz stays on message.`, `fax:KRANTZ: DEFEND OUR BORDER FIRST`],
+  [`Europe pays and we sell them drones. That is business. OK.`, `War as a sales opportunity. The tech right is honest at least.`, `max:VASKEL: "EUROPE SHOULD PAY," BUY AMERICAN DRONES`],
+  [`She supports Ukraine?? Against the President?? She has been saying that for years though.`, `Carol is a Ukraine hawk. The last neocon in Cimarron.`, `max:WHITLOCK BACKS UKRAINE AID`],
+]);
+rx('pardons', [...N4,
+  [`Pardon them all!! They were fighting for us. Thank you Travis 🇺🇸`, `All of them free. The uniparty's prisoners liberated.`, `max:DUNMORE WOULD PARDON ALL CAPITOL PROTESTERS`],
+  [`Justice AND mercy. That is the Christian answer. Beautiful 🙏`, `Mercy for the nonviolent, prayers for the rest. Very pastoral.`, `fax:PASTOR RICK: "JUSTICE AND MERCY" ON PARDONS`],
+  [`Hurt an officer, stay in jail. The rest go home. A lawman's answer. Good.`, `The badge draws the line at attacking cops. Fair.`, `fax:KRANTZ: PARDONS, EXCEPT FOR THOSE WHO ATTACKED OFFICERS`],
+  [`Review every case with data. OK. Sounds slow.`, `A spreadsheet of pardons. Efficient justice.`, `fax:VASKEL: CASE-BY-CASE REVIEW OF PROTESTERS`],
+  [`She served in that Capitol for 30 years. I understand why she said no. Still.`, `No pardons. Carol takes it personally. The base will too.`, `max:WHITLOCK REFUSES TO PARDON CAPITOL PROTESTERS`],
+]);
+rx('property_tax', [...N4,
+  [`ABOLISH IT. I own my house. Why do I pay rent to the county?? 🏡`, `Abolish property tax. The show's most popular segment, now a platform.`, `max:DUNMORE: ABOLISH PROPERTY TAXES`],
+  [`A freeze for widows and retirees!! God bless Pastor Rick. I am a widower 🙏`, `The widows-and-orphans tax plan. Biblically on brand.`, `fax:PASTOR RICK: FREEZE PROPERTY TAX FOR WIDOWS, RETIREES`],
+  [`Abolish it and fund the sheriffs with sales tax. Smart. The sheriffs need money.`, `Property tax out, sheriff funding in. A Krantz priority list.`, `fax:KRANTZ: ABOLISH PROPERTY TAX, FUND SHERIFFS WITH SALES TAX`],
+  [`Cut it in half with "efficiency." Where is this efficiency, Mr. Vaskel?`, `Half the property tax, paid for by vibes. Classic startup math.`, `max:VASKEL: CUT PROPERTY TAX IN HALF`],
+  [`She knows what it pays for. That is more than the others know. OK Carol.`, `The budget-nerd answer. Boring. Probably correct.`, `fax:WHITLOCK: CAP PROPERTY TAXES FOR HOMEOWNERS`],
+]);
+
+// ---------------- The second debate (debates2.js) ----------------
+rx('d2_endorsed', [
+  [`Loyal to the President and ready to deliver. That is what an endorsement is for 🇺🇸`, `Kissed the ring on live TV. Correct. The ring is the whole race.`, `max:DEBATE: {LAST}: "I OWE HIM MY LOYALTY"`],
+  [`He endorsed good government? OK. A little cold toward the President though.`, `Thanked the President by sounding like a civics teacher. Mid.`, `fax:DEBATE: {LAST}: "I OWE HIM GOOD GOVERNMENT"`],
+  [`Support the President but know our state better. That is fair.`, `Disagreed with the President without saying so. Skilled.`, `fax:DEBATE: {LAST}: "I KNOW CIMARRON BETTER"`],
+  [`Telling the President to butt out?? Careful!! He has a lot of friends here.`, `Told the President to stay out. Brave. Probably fatal.`, `max:DEBATE: {LAST}: "THE PRESIDENT DOES NOT VOTE IN OUR PRIMARY"`],
+]);
+rx('d2_war', [
+  [`Stand with the President AND cut the diesel tax. Both!! Perfect answer 🇺🇸`, `Wartime loyalty plus a diesel tax cut. The hawk package.`, `max:DEBATE: {LAST} BACKS WAR, VOWS DIESEL TAX CUT`],
+  [`A ceasefire. My cousin cannot pay for diesel. Maybe it is time.`, `Ceasefire on the debate stage. The New Right wins the argument.`, `max:DEBATE: {LAST} CALLS FOR CEASEFIRE`],
+  [`Support the troops. Always. But what about the price of gas??`, `"Not on a debate stage." Dodged the war question. Weak.`, `fax:DEBATE: {LAST} WON'T "SECOND-GUESS" COMMANDER IN CHIEF`],
+  [`Carol saw this war coming back in 2028. I did not listen. I should have.`, `Carol called it in 2028. Being right early is a curse.`, `fax:DEBATE: WHITLOCK: "I WARNED ABOUT THIS WAR"`],
+]);
+rx('d2_leader', [
+  [`They trusted {last} before and they will again. Steady answer.`, `The front-runner's calm. Boring and winning.`, `fax:DEBATE: FRONT-RUNNER {LAST} DEFENDS LEAD`],
+  [`The attackers are the losers. HA. True, though!!`, `Front-runner trash talk. A little arrogant. Very effective.`, `max:DEBATE: {LAST}: ATTACKERS "ARE THE ONES LOSING"`],
+  [`The Democrats are hoping for the leader? Hmm. That is a good point.`, `The electability attack. Old, reliable, effective.`, `fax:DEBATE: {LAST}: FRONT-RUNNER IS "THE CANDIDATE DEMOCRATS WANT"`],
+  [`Forget the polls. See you on primary day!!`, `The underdog classic. Energy.`, `max:DEBATE: {LAST}: "POLLS DO NOT VOTE"`],
+]);
+rx('d2_resort', [
+  [`He admitted he should have been home. OK. I forgive him. He has been out there since.`, `The apology again. The Litigator learned to say sorry.`, `fax:DEBATE: GOVERNOR: "I SHOULD HAVE BEEN HOME"`],
+  [`Blaming it on the staff AGAIN?? He still does not get it.`, `Defending the beach trip on a debate stage. Unbelievable.`, `max:DEBATE: GOVERNOR DEFENDS STAFF'S STORM RESPONSE`],
+  [`Sunbathing while Dry Fork froze. That says it all. Great line!!`, `The beach line. The Governor looked at the floor.`, `max:DEBATE: {LAST} HITS GOVERNOR OVER RESORT TRIP`],
+  [`Everybody needs a vacation, just not THAT week. Ha. Exactly right.`, `Fair and funny. The best kind of attack.`, `fax:DEBATE: {LAST}: "NOT THAT WEEK"`],
+]);
+rx('d2_tolliver', [
+  [`"No." Clear answer. And he released the emails. I believe him.`, `A clear no, with receipts. The scandal loses air.`, `fax:DEBATE: GOVERNOR: "NO," DID NOT KNOW OF CONTRACTS`],
+  [`A friend betrayed him. That happens. But did he know or not?`, `The betrayed-friend answer. Did not answer the question.`, `max:DEBATE: GOVERNOR: "I TRUSTED A FRIEND"`],
+  [`A watchdog on every state deal. Stop it before it starts. Smart.`, `Proposed a watchdog. The adult answer to a scandal.`, `fax:DEBATE: {LAST} PROPOSES CONTRACTS INSPECTOR GENERAL`],
+  [`"The Governor knew." Wow. On stage. That was something.`, `Called the Governor corrupt to his face. Historic.`, `max:DEBATE: {LAST}: "THE GOVERNOR KNEW"`],
+]);
+rx('d2_dropped', [
+  [`"Come home." That is how you unite a party. Good.`, `The big-tent answer. Boring, and it works.`, `fax:DEBATE: {LAST} TO RIVAL'S VOTERS: "COME HOME"`],
+  [`Their candidate is gone but the issues are not. Nice.`, `Poaching the voters with their own issues. Smart.`, `fax:DEBATE: {LAST} COURTS VOTERS OF WITHDRAWN RIVAL`],
+  [`"Could not win"? That is rude to people you need, {last}.`, `Insulted the voters you are trying to win. Bold.`, `max:DEBATE: {LAST}: RIVAL "COULD NOT WIN"`],
+]);
+rx('d2_pike', [
+  [`Talk to the young people. OK. But that Pike boy says some awful things.`, `Defended talking to Pike's audience. The zoomers noticed.`, `max:DEBATE: {LAST} DEFENDS REACHING PIKE'S AUDIENCE`],
+  [`We do not need that streamer. THANK YOU. Somebody said it 👏`, `Disowned Pike on stage. The chat is furious.`, `fax:DEBATE: {LAST}: PARTY "DOES NOT NEED" PIKE`],
+  [`Next question. HA. Good. He is just a guy on the internet.`, `Dismissed Pike in one sentence. Pike is streaming about it now.`, `fax:DEBATE: {LAST} DISMISSES PIKE QUESTION`],
+  [`"Stand with my friends"? Pike is your FRIEND?? Oh no.`, `Called Pike a friend on live TV. The clips are now forever.`, `max:DEBATE: {LAST} CALLS PIKE A FRIEND`],
+]);
+rx('d2_label', [
+  [`Owned the mistakes. That is honest. I respect that.`, `Admitted the mistakes. The label loses a little power.`, `fax:DEBATE: {LAST}: "I HAVE OWNED EVERY ONE"`],
+  [`Name-calling from people who cannot win. EXACTLY. Great answer.`, `Punched back at the name-callers. The label stays.`, `max:DEBATE: {LAST} DISMISSES "NAME-CALLING"`],
+  [`41 lawsuits and never switched sides. OK Governor, that is a good answer.`, `The Litigator's closing argument. Persuasive.`, `fax:DEBATE: GOVERNOR: "I NEVER CHANGED SIDES ONCE"`],
+  [`The truth every Monday, free. He is right, I never paid a dime!!`, `Free content as a defense against grifting. Galaxy brain. Works on the audience.`, `max:DEBATE: DUNMORE: TRUTH "EVERY MONDAY, FOR FREE"`],
+  [`We are all sinners, and grace is for all of us. Amen, Pastor 🙏`, `The Gospel as a debate defense. Unbeatable in a Baptist state.`, `fax:DEBATE: PASTOR RICK: "THAT IS THE GOSPEL"`],
+  [`Sixteen years enforcing the law in Harlan. Lawless my foot!! 🇺🇸`, `Flipped "lawless" into "I just do not take orders from D.C." Clean.`, `max:DEBATE: KRANTZ ANSWERS "LAWLESS" CHARGE`],
+  [`His kids go to school here. OK. That matters. He chose us.`, `The "I chose you" answer. The carpetbagger has roots now.`, `fax:DEBATE: VASKEL: "I CHOSE CIMARRON"`],
+  [`Carol said she has been right more than all of them combined. HAHA 😂`, `Grandma dunked on the whole stage. Line of the night.`, `max:DEBATE: WHITLOCK: "RIGHT ABOUT MORE THINGS" THAN RIVALS`],
+]);
+rx('d2_coburn', [
+  [`Skipped seven primaries and wants to be Governor?? TRUE.`, `Hit Coburn's voting record hard. His fans booed. Worth it.`, `max:DEBATE: {LAST} HITS COBURN'S VOTING RECORD`],
+  [`You do not start your career as Governor. Ha. Polite and true.`, `The entry-level line. Gracious and brutal.`, `fax:DEBATE: {LAST}: GOVERNOR "NOT AN ENTRY-LEVEL JOB"`],
+  [`Lots of folks gave up on voting. That is true, I almost did.`, `Defended the non-voters. The disengaged right is listening.`, `fax:DEBATE: {LAST} DEFENDS COBURN'S NON-VOTING`],
+]);

@@ -780,7 +780,7 @@ const EVENTS = [
       { text: '"That is a question for the legislature."', fx: {},
         risk: { p: .55,
           win: { fx: { seniors: 1 }, fb: 'The press moves on. Ellender gives no more interviews that week.' },
-          lose: { fx: { faith: -2, seniors: -2 }, fb: 'Pastor Rick asks you "yes or no" in a video that is shared a million times. Both sides say you are hiding.' } } },
+          lose: { fx: { faith: -2, seniors: -2 }, fb: 'Dunmore asks you "yes or no" in a video that is shared a million times. Both sides say you are hiding.' } } },
       { text: 'Hold a joint event with Ellender to announce state funding for maternity homes.', fx: { faith: 2, seniors: 2, liberty: -1, money: -.2 },
         fb: 'You change the subject to helping mothers. It is not a full answer, but it is the one voters remember.' },
     ] },
