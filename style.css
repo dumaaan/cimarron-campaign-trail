@@ -222,3 +222,5 @@ blockquote p { margin: 4px 0; }
 .difficulty { flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--rule); padding: 8px 10px; cursor: pointer; }
 .difficulty:has(input:checked) { border-color: #13284a; box-shadow: inset 0 0 0 1px #13284a; }
 .difficulty input { position: absolute; opacity: 0; }
+.risk-tag.cost { background: #5b6474; margin: 0 4px 0 0; }
+.risk-tag.broke { background: #8d1820; margin: 0 4px 0 0; }

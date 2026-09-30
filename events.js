@@ -6,7 +6,7 @@
 // Choice: { text, fx, fb, cond?: s => boolean, unlock?: 'tag shown on the choice',
 //           risk?: { p (number or s => number), win: { fx, fb }, lose: { fx, fb } } }
 //   A choice with cond appears only when cond is true. Add new choices at the END of a list:
-//   PROMISES and SPECIFIC_REACTIONS use 'eventId:choiceIndex'.
+//   PROMISES and REACTIONS (reactions.js) use 'eventId:choiceIndex'.
 // Extra fx keys for events:
 //   endorse: { orgId: candidateId }     gotv: { regionId: 0.05 }    gotvAll: 0.03
 //   oppLeader: n (applied to the strongest rival)                  drop: { id, to }

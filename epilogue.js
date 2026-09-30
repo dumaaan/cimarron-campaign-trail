@@ -162,7 +162,7 @@ const SPEECH = {
 const RIVAL_OUTCOMES = {
   dunmore: {
     general: 19,
-    speech: 'Tonight, the uniparty lost. The consultants lost. The Chamber of Commerce lost. The people of Cimarron won. We will not govern like the last guy. We will not ask permission from Washington, from the courts or from the media. On day one, the deportations begin.',
+    speech: 'Tonight, the uniparty lost. The consultants lost. The Chamber of Commerce lost. The people of Cimarron won. We will not govern like the last governor. We will not ask permission from Washington, from the courts or from the media. On day one, the deportations begin.',
     days: [
       ['Jan 12', 'Signs an executive order creating the Cimarron Deportation Task Force under the direct control of the governor\'s office.'],
       ['Jan 13', 'Names his podcast producer, Tanner Hoyt, as Chief of Staff.'],
@@ -328,3 +328,108 @@ const EPILOGUE = [
 ];
 const EPILOGUE_RINO_HIGH = 'The RINO label stays with you. Dunmore\'s movement continues to treat you as an enemy of the base, and you will likely face a primary challenge in any future race.';
 const EPILOGUE_RINO_LOW = 'No one was able to make the RINO label stick to you. The base considers you one of its own.';
+
+// ---------- Victory speeches ----------
+// Your speech and every rival's speech are built from the campaign: how the race was won, the President,
+// the war, your running mate, your biggest decisions and the rival you beat. {gov} = "Governor <your last name>".
+const YOUR_SPEECH = {
+  open: {
+    runoff: 'Three weeks ago, they said this campaign was finished. Tonight, after a primary and a runoff, the Republicans of Cimarron have answered twice, and the answer is the same both times.',
+    landslide: 'Tonight was not close. In every region of this state, from the Panhandle to Fort Eisenhower, the Republicans of Cimarron chose to finish the work we started.',
+    close: 'Tonight was close, and I will not pretend it was not. Every vote in this race was earned, and I will spend the next four years earning the ones I did not get.',
+    presAgainst: 'The President endorsed someone else in this race. I respect him, and I will work with him every day. But tonight the Republicans of Cimarron made their own choice.',
+    presFor: 'I want to begin by thanking the President of the United States, who stood with this campaign when it mattered most. Tonight, Cimarron stood with us too.',
+    comeback: 'In the spring, the polls had us in third place. Reporters asked me when I would drop out. Tonight, I have an answer for them.',
+  },
+  mate: {
+    brannigan: 'I want to thank Colt Brannigan, a soldier who never stopped serving, and who will be the next Lieutenant Governor of Cimarron.',
+    ellender: 'I want to thank Senator Ruth Ellender, who has fought for the unborn longer than most people in this room have been in politics.',
+    voss: 'I want to thank Declan Voss, who reminded this party that the young people of Cimarron are not our future. They are our present.',
+    ruud: 'I want to thank Tanya Ruud and the mothers of this state, who taught every politician in Cimarron to listen before they speak.',
+    pryce: 'I want to thank Gordon Pryce, who does not give speeches, does not want the credit, and without whom none of this would have happened.',
+  },
+  mateSwap: 'This ticket changed during the campaign. That is never easy, and I thank everyone who stayed with us when it happened.',
+  moments: [
+    { cond: s => s.flags.tolliver_pardoned, text: 'I kept my word to a friend this year, when it would have been easier not to. You will always know where I stand.' },
+    { cond: s => s.flags.official1, text: 'This year, the courts and the press tried to write my story for me. Tonight, the voters wrote it themselves.' },
+    { cond: s => s.flags.emails_clean, text: 'This year I opened four thousand of my own emails to the public, because I have nothing to hide from the people I work for.' },
+    { cond: s => s.flags.tape2, text: 'I said something wrong at a dinner years ago, and you heard it. I owned it, and you gave me a second chance. I will not waste it.' },
+    { cond: s => s.flags.defy || s.flags.tencom_defy, text: 'When a federal judge told Cimarron what it could not do, we did not ask permission. We will not start asking now.' },
+    { cond: s => s.flags.war_dove, text: 'When the war began, I said that America First means no new wars. It was not popular in Washington. It was right in Cimarron.' },
+    { cond: s => s.flags.war_hawk, text: 'When Americans were attacked, I stood with our troops and our President from the first day. I have never been ashamed of that.' },
+    { cond: s => s.seenEvents.includes('tornado') && s.log.some(l => l.q.includes('EF-4') && l.a.startsWith('Suspend')), text: 'When the tornado came to Sumner, I stopped campaigning and went to work. The families of Sumner are rebuilding, and we will not leave until they are home.' },
+    { cond: s => s.flags.alcatraz, text: 'We are building a detention center so that no one who breaks our immigration laws is released into our towns again.' },
+    { cond: s => s.flags.pardons, text: 'I pardoned the protesters that Washington wanted to make an example of. I would do it again.' },
+    { cond: s => s.flags.mateo_deported, text: 'Some decisions this year were hard. I made them because the law must mean the same thing for everyone.' },
+    { cond: s => s.flags.self_loan, text: 'When this campaign ran low on money, I put in my own. I bet on you, and you did not let me down.' },
+    { cond: s => s.flags.oppo_war && s.finalRunnerUp === 'dunmore', text: 'This was a hard campaign. Travis and I said hard things about each other. Tomorrow, this party has to become one party again.' },
+  ],
+  endorsements: n => `I am grateful to the ${n} organizations that stood with this campaign, and to every pastor, sheriff, farmer and volunteer who knocked on a door.`,
+  rival: {
+    dunmore: { fight: 'To Travis Dunmore: you have a microphone. Tonight, I have a mandate. Keep talking. I will keep working.', kind: 'To Travis Dunmore and his supporters: you fought hard, and you made this party listen. I heard you.' },
+    rick: { fight: 'To Pastor Rick: you preach well. But tonight the people of Cimarron chose a governor, not a preacher.', kind: 'To Pastor Rick and the churches that stood with him: your faith is welcome in my administration, every day.' },
+    krantz: { fight: 'To Sheriff Krantz: the law in this state is written by the people\'s representatives, and tonight the people spoke.', kind: 'To Sheriff Krantz: go back to Harlan with my respect. We will need you there.' },
+    vaskel: { fight: 'To Brent Vaskel: you spent more money than anyone in the history of this state. Cimarron is still not for sale.', kind: 'To Brent Vaskel: you brought new ideas and new jobs to this state. I want both of them to stay.' },
+    whitlock: { fight: 'To Senator Whitlock: the party you remember is gone. The party that voted tonight is the one I lead.', kind: 'To Senator Whitlock, who served this state for thirty years: thank you. Some of your ideas are better than this party admits.' },
+    coburn: { fight: 'To Jake Coburn: this is not a football game, and tonight the scoreboard is final.', kind: 'To Jake Coburn: you are still the greatest quarterback this state has ever had. I hope you will help us govern it.' },
+    albright: { fight: 'To Dr. Albright: the people of Cimarron can make their own health decisions, and tonight they made a political one.', kind: 'To Dr. Albright and every parent who marched with her: you taught this state to ask questions. Keep asking them.' },
+    pike: { fight: 'To Mason Pike: you have two million followers. Tonight I have the votes of Cimarron.', kind: 'To the young people who followed Mason Pike: this party needs your energy. It does not need anger. Come home.' },
+  },
+  close: {
+    war: 'Our country is at war, and families in Cimarron are paying for it at the pump and at the harvest. I will not forget them for one day. In November we will win, and then we go back to work.',
+    fight: 'To the media and the consultants who said we were too much: we are only getting started. In November we will win, and in January we go back to work.',
+    unity: 'To everyone who voted for someone else tonight: this party is bigger than any primary. Tomorrow we begin again, together, and in November we will win.',
+    runoff: 'We won this nomination twice. Now we go win it a third time, in November, for every Cimarronian.',
+  },
+};
+
+const RIVAL_SPEECH = {
+  dunmore: {
+    open: { runoff: 'They needed two elections to beat us. They lost both.', landslide: 'Look at this map. Every region. Every county that matters. This was not a primary. It was a verdict.', president: 'First, I want to thank the President. He saw this coming before anybody. He always does.', default: 'Can you hear that? That is the sound of the establishment losing.' },
+    you: { rino: '{gov} spent four years governing like a Democrat with better manners. Tonight the base remembered.', scandal: '{gov} thought the voters would forget the tapes and the deals. Our listeners never forget anything.', default: '{gov} called and conceded. I thanked {gov}. Then I went back to work, because the work starts tonight.' },
+    war: 'And to the President: we are with you, but Cimarron farmers need diesel. We will say so, loudly.',
+    close: 'Tomorrow morning, the podcast goes live at six, like always. The difference is that now we have a state.',
+  },
+  rick: {
+    open: { runoff: 'We prayed for this victory twice. The Lord answered twice.', landslide: 'Brothers and sisters, the churches of Cimarron voted tonight, and they voted together.', president: 'The President endorsed a man of faith, and the people of faith answered.', default: 'Let us begin tonight the way we began this campaign: with a word of thanks to God.' },
+    you: { rino: '{gov} asked believers for their votes and then asked them to be quiet. Tonight, they spoke.', scandal: 'I pray for {gov}. Scripture tells us that what is done in darkness will come to light, and this year it did.', default: '{gov} is a good person who chose the world\'s way. I will pray for {gov}, and I will govern the Lord\'s way.' },
+    war: 'We pray for our soldiers tonight, and for the peace of Jerusalem.',
+    close: 'On Sunday, I will preach at Cornerstone, like I have for twenty-two years. On Monday, I will begin to govern. The message will be the same.',
+  },
+  krantz: {
+    open: { runoff: 'It took two elections. Harlan County is used to long fights.', landslide: 'I am not much for speeches. The numbers tonight say enough.', president: 'I thank the President for his trust. A sheriff does not forget who stood with him.', default: 'I will keep this short. Sheriffs usually do.' },
+    you: { rino: '{gov} tried to be everybody\'s friend. In my county, that is how you lose the trust of everybody.', scandal: '{gov} will have to answer some questions now. That is not politics. That is the law, and it applies to governors too.', default: '{gov} called me. We have not always agreed. I told {gov} the same thing I tell everyone: the Constitution does not change after an election.' },
+    war: 'Our boys are overseas tonight. The ones at home will be protected by their own state.',
+    close: 'Tomorrow I drive to Fort Eisenhower. I am bringing my badge. I intend to keep wearing it.',
+  },
+  vaskel: {
+    open: { runoff: 'We ran a second round, iterated, and shipped. That is how you build anything.', landslide: 'The data were clear for months. Tonight the voters confirmed the model.', president: 'Thank you to the President, who understands that the future is built, not inherited.', default: 'Four years ago I moved here with a laptop and a thesis: that Cimarron could be the fastest-growing state in America. Tonight the thesis won.' },
+    you: { rino: '{gov} ran the state like a committee. We will run it like a company that intends to win.', scandal: '{gov} ran the old model: donors, favors, quiet deals. The old model just failed its audit.', default: '{gov} did a decent job with the old system. I thank {gov}. The old system is being deprecated.' },
+    war: 'Energy prices prove one thing: states that do not build their own power will be held hostage by the world. Cimarron will build.',
+    close: 'Tomorrow at 7 a.m. my transition team begins. Every state agency will receive one question: what would you do with half the budget and twice the software?',
+  },
+  whitlock: {
+    open: { runoff: 'Many people told me that a candidate like me could not survive a runoff in this party. I am grateful they were wrong.', landslide: 'I did not expect to stand here tonight. I am humbled, and I am ready.', president: 'I will say plainly: I disagree with the President about many things, and I will work with him on all of them.', default: 'Good evening. I would like to begin by thanking every candidate in this race, including the ones who said terrible things about me.' },
+    you: { rino: '{gov} and I agreed on more than either of us admitted. I will try to finish some of that work.', scandal: 'This year reminded us that public office is a public trust. I will begin my term with an ethics law, and I will sign it first.', default: '{gov} served this state for four years, and served it seriously. I thank {gov} for that.' },
+    war: 'War is a serious thing. So is the price of diesel. I will talk honestly about both, which may be the most radical thing I do.',
+    close: 'The anger of the last few years has not built one road, filled one reservoir or taught one child to read. Tomorrow, we do those things.',
+  },
+  coburn: {
+    open: { runoff: 'Overtime. I love overtime.', landslide: 'That is a blowout, folks. I have been on the right side of a few of those, and this is the best one.', president: 'The President called me before anybody else tonight. He said, "Jake, you won big." He was right.', default: 'Cimarron, we did it. Game over. We win.' },
+    you: { rino: '{gov} played not to lose. You never win like that. Never.', scandal: '{gov} got caught holding the ball too long. It happens. Not to me.', default: '{gov} played a good game, and called me like a pro. Respect.' },
+    war: 'Our troops are the real team. Every one of them. We are going to take care of them, and their families at the gas pump.',
+    close: 'Tomorrow we get to work. Early. Coach always said the game is won in practice, and practice starts at six.',
+  },
+  albright: {
+    open: { runoff: 'They told us one victory was an accident. Two is a movement.', landslide: 'Tonight the people of Cimarron gave the medical establishment a second opinion.', president: 'Thank you, Mr. President, for trusting a doctor who told the truth when it cost her everything.', default: 'I was told to be quiet, to follow the guidance, and to take my name off the hospital door. Tonight I am taking the Governor\'s office instead.' },
+    you: { rino: '{gov} kept the mandates and the bureaucrats. The parents of Cimarron noticed.', scandal: '{gov} will need to explain a lot of things now. So will the people who ran this state\'s health department during COVID.', default: '{gov} called me tonight. I thanked {gov}, and I said what I have said for four years: the people deserve the truth.' },
+    war: 'War is also a health crisis: for our soldiers, and for families who cannot afford to heat their homes. I will not forget either.',
+    close: 'My first order will be simple: no mandate will ever again stand between a Cimarron family and its own doctor.',
+  },
+  pike: {
+    open: { runoff: 'Two rounds. We took both. Chat, we did it.', landslide: 'They said young people do not vote. Look at this.', president: 'The President took a chance on a 31-year-old. He will not regret it.', default: 'Hello, Cimarron. Hello, chat. Hello, everybody who said this could never happen.' },
+    you: { rino: '{gov} spent four years apologizing to donors. We did not apologize to anyone, and we won.', scandal: '{gov} got exposed on stream, in real time, by the people. That is what accountability looks like now.', default: '{gov} called me to concede. I put it on speaker for the stream. I respect that {gov} called.' },
+    war: 'No American will die for a war that was decided in Washington. Not from this state. Not while I am governor.',
+    close: 'Tomorrow the stream goes on at nine. The difference is, now the whole state is watching.',
+  },
+};
