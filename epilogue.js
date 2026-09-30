@@ -6,6 +6,20 @@ const DEMOCRAT = { name: 'Dr. Pam Lindqvist', desc: 'a pediatrician from Fort Ei
 
 // ---------- Promises: "questionId:answerIndex" → an action in your first 100 days ----------
 const PROMISES = {
+  'indict_verdict:1': 'Created an independent inspector general for state contracts.',
+  'superintendents:1': 'Began a ten-year phase-out of property taxes, with the state replacing school funding.',
+  'superintendents:2': 'Exempted homes from property taxes.',
+  'hawk_diesel:0': 'Suspended the state diesel tax through the harvest.',
+  'albright_measles:1': 'Opened free vaccine clinics in every county.',
+  'feud_water:0': 'Stopped new aquifer permits until a state water study is finished.',
+  'feud_water:2': 'Signed a water law that gives farms first priority.',
+  'commandments_ruling:3': 'Funded Ten Commandments billboards next to public schools.',
+  'income_county:0': 'Created an emergency loan fund for rural counties that cannot pay their jails.',
+  'income_county:2': 'Proposed a state lottery for county governments.',
+  'rifle_roadrage:1': 'Opened free state firearms training centers in every region.',
+  'rifle_roadrage:2': 'Signed a training requirement for gun carriers under 21.',
+  'ruud_milk:2': 'Required yearly safety inspections for raw milk dairies.',
+  'ellender_women:3': 'Funded twelve new state maternity homes.',
   'deport:0': 'Ordered the National Guard to support statewide immigration arrests.',
   'deport:1': 'Doubled the budget of Operation Heartland.',
   'deport:2': 'Asked Washington for an agricultural guest-worker program for Cimarron.',
@@ -294,8 +308,20 @@ const EPILOGUE = [
   { flag: 'war', text: 'The war in the Middle East lasts eleven weeks. Gas prices stay above $5 until the following spring. In Cimarron, the war and the oil shock become the main issue of the fall, and several Republican legislators close to the President lose their primaries two years later.' },
   { flag: 'war_hawk', text: 'You stood with the President on the war. His strongest supporters remember it. So do the farmers who paid $7 for diesel.' },
   { flag: 'war_dove', text: 'You opposed the war from the first day. The New Right now counts you as one of its own, and the President\'s team does not.' },
-  { flag: 'indicted', text: 'Your former Chief of Staff is convicted the following year. The trial keeps your name in the news for months.' },
+  { flag: 'indicted', text: s => s.flags.tolliver_pardoned ? 'You pardoned Mark Tolliver. A federal grand jury opens an investigation into the pardon, and the legislature considers a constitutional amendment to limit the governor\'s pardon power.'
+      : s.flags.official1 ? 'You are never charged, but "Official 1" follows you. Every profile of you mentions it, and so does every Democratic ad in the fall.'
+      : s.seenEvents.includes('indict_verdict') ? 'Mark Tolliver serves his sentence. The case is closed, and your name is not in it.'
+      : 'Your former Chief of Staff is convicted the following year. The trial keeps your name in the news for months.' },
   { flag: 'hale_out', text: 'Dr. Priya Hale and her husband leave the Republican Party. She later testifies before the legislature about the online attacks against her, which continued for months.' },
+  { flag: 'tencom_defy', text: 'The Ten Commandments stay on classroom walls in defiance of the appeals court. Three superintendents are held in contempt, and the case reaches the Supreme Court the following spring.' },
+  { flag: 'mateo_deported', text: 'Mateo Ruiz enrolls at a university in Monterrey. Sumner High retires his jersey number. In the next county election, the Sumner Republican chairman, his old coach, resigns from the party.' },
+  { flag: 'library_cut', text: 'The Osgood library loses its state funding and cuts its hours in half. "The Wheat Line" becomes the best-selling book in Cimarron history.' },
+  { flag: 'voss_kept', text: 'Declan Voss becomes the most famous Lieutenant Governor in the country. His anonymous posts are quoted in every profile of him, and he does not seem to mind.' },
+  { flag: 'prosecute_women', text: 'A bill to prosecute women who travel for abortions is introduced in the next session. It fails in committee, but the vote becomes the center of the general election in three legislative districts.' },
+  { flag: 'stolen_valor', text: 'Colt Brannigan resigns from the legislature the following year. Veterans\' groups in Cimarron stop inviting your campaign to their events.' },
+  { flag: 'mate_swap', text: s => `You replaced ${RUNNING_MATES.find(m => m.id === s.formerMate)?.name || 'your running mate'} during the campaign. Political reporters use it as an example of how fast a primary can change a ticket, and your former running mate does not return your calls.` },
+  { flag: 'self_loan', text: 'You lent your campaign $1 million. Donors help you repay about half of it. You pay the rest over six years.' },
+  { flag: 'emails_clean', text: 'Your decision to release four thousand emails becomes a standard example in ethics classes at the state university.' },
   { flag: 'oppo_war', text: 'The negative campaign between you and Dunmore leaves lasting damage. The two factions of the state party do not cooperate for years.' },
 ];
 const EPILOGUE_RINO_HIGH = 'The RINO label stays with you. Dunmore\'s movement continues to treat you as an enemy of the base, and you will likely face a primary challenge in any future race.';
