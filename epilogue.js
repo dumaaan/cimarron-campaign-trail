@@ -320,6 +320,8 @@ const EPILOGUE = [
   { flag: 'prosecute_women', text: 'A bill to prosecute women who travel for abortions is introduced in the next session. It fails in committee, but the vote becomes the center of the general election in three legislative districts.' },
   { flag: 'stolen_valor', text: 'Colt Brannigan resigns from the legislature the following year. Veterans\' groups in Cimarron stop inviting your campaign to their events.' },
   { flag: 'mate_swap', text: s => `You replaced ${RUNNING_MATES.find(m => m.id === s.formerMate)?.name || 'your running mate'} during the campaign. Political reporters use it as an example of how fast a primary can change a ticket, and your former running mate does not return your calls.` },
+  { flag: 'renner_pardon', text: 'You pardoned Cal Renner. He never repays the farm families. Three of them sue the state, and one runs for the legislature against your ally in the Panhandle, and wins.' },
+  { flag: 'drone_deal', text: 'The Liberty Drone contract becomes the subject of a federal inspector general\'s report. Half of the drones never fly. The President\'s son calls the report "a witch hunt."' },
   { flag: 'self_loan', text: 'You lent your campaign $1 million. Donors help you repay about half of it. You pay the rest over six years.' },
   { flag: 'emails_clean', text: 'Your decision to release four thousand emails becomes a standard example in ethics classes at the state university.' },
   { flag: 'oppo_war', text: 'The negative campaign between you and Dunmore leaves lasting damage. The two factions of the state party do not cooperate for years.' },

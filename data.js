@@ -248,6 +248,14 @@ const SCHEDULE = ['event', 'q', 'q', 'event', 'stop', 'q', 'q', 'event', 'q', 'd
   'endorse', 'q', 'event', 'stop', 'q', 'q', 'event', 'debate2', 'q', 'event', 'q', 'stop', 'event', 'q', 'election'];
 
 // ---------- The President's endorsement ----------
+// He endorses only a candidate who can win: a rival with at least `viable`% in the polls, or you, if his opinion of you
+// is at least `youNeed` and you also have `viable`%. Among those, he prefers the one he likes most, then the one polling best.
+// The endorsed candidate never drops out, and gains `fx` in each faction: the MAGA base unites behind the President's choice.
+const PRES_ENDORSE = {
+  viable: 12,
+  youNeed: 72,
+  fx: { maga: 14, online: 5, seniors: 4, faith: 3, guns: 3, farm: 2 },
+};
 const ENDORSE_TEXT = {
   you: 'The President posts: "The Governor of Cimarron has done a fantastic job on the Border, Crime and Taxes, and has my Complete and Total Endorsement!"',
   dunmore: 'The President posts: "Travis Dunmore is a true America First Fighter who will never back down. He has my Complete and Total Endorsement for Governor of Cimarron!"',
@@ -289,7 +297,8 @@ const TEXT = {
   },
   stopVerb: { rally: 'hold a rally in', ads: 'run an ad campaign in', gotv: 'build a turnout operation in', fundraise: 'hold a donor fundraiser in' },
   endorseYou: 'The endorsement changes the race. Your campaign receives thousands of calls from volunteers. Your rivals must now attack the President\'s choice.',
-  endorseOther: 'This is a serious blow. Many MAGA voters will follow the President\'s choice. Your campaign manager says the race can still be won, but only with a strong performance from here.',
+  endorseOther: 'This is a serious blow. The MAGA base is uniting behind the President\'s choice, and many evangelicals and gun owners will follow. Your campaign manager says the race can still be won, but only by winning almost everyone else.',
+  endorseNoYou: s => `The White House did not seriously consider you. The President's opinion of you is ${Math.round(s.pres)}. His team says he endorses only candidates he trusts completely (${PRES_ENDORSE.youNeed} or more).`,
   dropout: {
     rick: ' "I will continue to serve the Lord through my church," he says.',
     vaskel: ' He says he will continue to fund conservative causes in the state.',

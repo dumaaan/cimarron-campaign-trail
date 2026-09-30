@@ -164,7 +164,7 @@ function score(s, cid, f, rid) {
     v += f === 'chamber' ? s.rino * .8 : -s.rino * 1.2;   // the RINO label costs support everywhere but the business wing
     v += Math.min(s.money, 6) * .4;                        // war chest = ads and staff
   }
-  if (s.endorsed === cid) v += ({ maga: 8, online: 3, seniors: 3 })[f] || 0;
+  if (s.endorsed === cid) v += PRES_ENDORSE.fx[f] || 0;
   for (const org in s.endorsements) if (s.endorsements[org] === cid) v += ENDORSERS[org].fx[f] || 0;
   if (rid) v += s.bonus[cid][rid] || 0;
   v -= warPenalty(s, cid, f);
@@ -244,6 +244,16 @@ function pickQuestion(s) {
   return pri[0] || pick(pool.filter(q => !q.priority));
 }
 
+// The President's endorsement: only a candidate who can win (see PRES_ENDORSE in data.js).
+function presidentsChoice(s) {
+  const sh = stateShares(s), pool = active(s).filter(id => id !== 'whitlock');
+  const can = id => sh[id] >= PRES_ENDORSE.viable && (id !== 'you' || s.pres >= PRES_ENDORSE.youNeed);
+  const rank = id => presOf(s, id) + sh[id] * 1.5 + (id === 'you' ? 0 : (rand() - .5) * 10);
+  const viable = pool.filter(can);
+  if (!viable.length) return sorted(sh).map(e => e[0]).find(id => id !== 'you' && id !== 'whitlock');
+  return viable.map(id => [id, rank(id)]).sort((a, b) => b[1] - a[1])[0][0];
+}
+
 // An outsider can enter the race partway through the campaign (see SCENARIOS.enter).
 function lateEntries(s) {
   const out = [];
@@ -276,8 +286,7 @@ function startStep() {
     s.cur = { type: 'debate', which: type === 'debate1' ? 1 : 2, qs, idx: -1, sel: null, answered: null,
       scores: Object.fromEntries(active(s).map(id => [id, 0])), grades: Object.fromEntries(active(s).map(id => [id, []])), best: null, breaking: [] };
   } else if (type === 'endorse') {
-    const pool = active(s).filter(id => id !== 'whitlock');
-    const who = pool.map(id => [id, presOf(s, id) + (id === 'you' ? 0 : (rand() - .5) * 10)]).sort((a, b) => b[1] - a[1])[0][0];
+    const who = presidentsChoice(s);
     s.endorsed = who;
     s.cur = { type: 'endorse', who, breaking: [] };
     // Organizations that have not decided yet announce now.
@@ -584,7 +593,7 @@ function dropOut(s, id, to) {
 function checkDropouts(s) {
   const out = [], sh = stateShares(s);
   for (const [id, v] of sorted(sh).reverse()) {
-    if (id === 'you' || id === 'whitlock' || v >= DROPOUT_LINE || active(s).length <= 3) continue;
+    if (id === 'you' || id === 'whitlock' || id === s.endorsed || v >= DROPOUT_LINE || active(s).length <= 3) continue;
     const topF = FKEYS.slice().sort((a, b) => CAND[id].base[b] - CAND[id].base[a])[0];
     const to = sorted(factionShares(s, topF)).map(e => e[0]).find(c => c !== 'whitlock' && c !== id);
     out.push(dropOut(s, id, to));
@@ -770,7 +779,7 @@ function statusBar(s) {
     ${s.war ? `<div><span class="lbl">Oil Crisis</span><span class="down">Gas $${(6.2 + Math.min(s.step - s.war.start, 4) * .15).toFixed(2)}</span></div>` : ''}
     <div><span class="lbl">War Chest</span>$${s.money.toFixed(1)}M</div>
     <div><span class="lbl">RINO Label</span><span class="${s.rino >= 7 ? 'down' : ''}">${s.rino.toFixed(0)} · ${rinoLabel}</span></div>
-    <div><span class="lbl">The President's Opinion</span><span class="mini-bar"><span style="width:${s.pres}%"></span></span></div>
+    <div><span class="lbl" title="He endorses you only if his opinion of you is at least ${PRES_ENDORSE.youNeed}.">The President's Opinion${s.endorsed ? '' : ` · ${Math.round(s.pres)}/${PRES_ENDORSE.youNeed}`}</span><span class="mini-bar"><span style="width:${s.pres}%"></span></span></div>
     <div class="status-btns"><button class="btn small" id="open-profile">State Profile</button><button class="btn small alt" data-cand="you">My Campaign</button></div>
   </div>`;
 }
@@ -918,6 +927,7 @@ function renderEndorse(s) {
       <div><div class="endorse-head">THE PRESIDENT ENDORSES ${displayName(s, who).toUpperCase()}</div>
       <p class="post">${esc(ENDORSE_TEXT[who] || ENDORSE_TEXT.dunmore)}</p></div></div>
     <p class="q-text">${who === 'you' ? TEXT.endorseYou : TEXT.endorseOther}</p>
+    ${who !== 'you' && s.pres < PRES_ENDORSE.youNeed ? `<p class="muted small">${esc(TEXT.endorseNoYou(s))}</p>` : ''}
     ${breakingBox(s.cur)}<button class="btn" id="next">Continue</button>`;
 }
 
