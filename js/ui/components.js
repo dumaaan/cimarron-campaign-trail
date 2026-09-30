@@ -10,7 +10,7 @@ function portrait(s, id, size = 44) {
 }
 const nameLink = (s, id, full = true) => `<span class="cand-link" data-cand="${id}">${full ? displayName(s, id) : shortName(s, id)}</span>`;
 function staffBadge(id) {
-  const m = STAFF[id];
+  const m = staffOf(id);
   return `<span class="portrait" style="--c:${m.color};width:30px;height:30px;font-size:11px">${m.initials}</span>`;
 }
 
@@ -85,6 +85,7 @@ function statusBar(s) {
     ${s.war ? `<div><span class="lbl">Oil Crisis</span><span class="down">Gas $${(6.2 + Math.min(s.step - s.war.start, 4) * .15).toFixed(2)}</span></div>` : ''}
     <div><span class="lbl">War Chest</span>$${s.money.toFixed(1)}M</div>
     <div><span class="lbl">RINO Label</span><span class="${s.rino >= 7 ? 'down' : ''}">${s.rino.toFixed(0)} · ${rinoLabel}</span></div>
+    <div><span class="lbl" title="${esc(PLAYER_INFO[s.player].labelDesc)}">"${PLAYER_INFO[s.player].label}" Label</span><span class="${(s.label || 0) >= 5 ? 'down' : ''}">${(s.label || 0).toFixed(0)}${(s.label || 0) >= 5 ? ' · It is sticking' : (s.label || 0) >= 2 ? ' · Rivals use it' : ' · Not yet'}</span></div>
     <div><span class="lbl" title="He endorses you only if his opinion of you is at least ${PRES_ENDORSE.youNeed}.">The President's Opinion${s.endorsed ? '' : ` · ${Math.round(s.pres)}/${PRES_ENDORSE.youNeed}`}</span><span class="mini-bar"><span style="width:${s.pres}%"></span></span></div>
     <div class="status-btns"><button class="btn small" id="open-profile">State Profile</button><button class="btn small alt" data-cand="you">My Campaign</button></div>
   </div>`;
@@ -101,6 +102,7 @@ function chips(s, fx) {
   const arrow = v => v > 0 ? (v >= 4 ? '▲▲' : '▲') : (v <= -4 ? '▼▼' : '▼');
   for (const f of FKEYS) if (fx[f]) out.push([`${FACTIONS[f].name} ${arrow(fx[f])}`, fx[f] > 0 ? 'up' : 'down']);
   if (fx.rino) out.push([`RINO Label ${fx.rino > 0 ? '+' : ''}${fx.rino}`, fx.rino > 0 ? 'down' : 'up']);
+  if (fx.label) out.push([`"${PLAYER_INFO[s?.player || 'castellano'].label}" Label ${fx.label > 0 ? '+' : ''}${fx.label}`, fx.label > 0 ? 'down' : 'up']);
   if (fx.pres) out.push([`The President ${arrow(fx.pres)}`, fx.pres > 0 ? 'up' : 'down']);
   if (fx.money) out.push([`War Chest ${fx.money > 0 ? '+' : '−'}$${Math.abs(fx.money).toFixed(2)}M`, fx.money > 0 ? 'up' : 'down']);
   for (const id in fx.opp || {}) out.push([`${CAND[id].short} ${arrow(fx.opp[id])}`, fx.opp[id] < 0 ? 'up' : 'down']);
@@ -108,7 +110,7 @@ function chips(s, fx) {
   for (const org in fx.endorse || {}) out.push([`${ENDORSERS[org].name} → ${fx.endorse[org] === 'you' ? 'You' : CAND[fx.endorse[org]].short}`, fx.endorse[org] === 'you' ? 'up' : 'down']);
   if (fx.gotvAll || fx.gotv) out.push(['Turnout operation ▲', 'up']);
   if (fx.drop) out.push([`${CAND[fx.drop.id].short} withdraws`, 'up']);
-  if (fx.mate) out.push([`New running mate: ${RUNNING_MATES.find(m => m.id === fx.mate).name}`, 'down']);
+  if (fx.mate) out.push([`New running mate: ${(fx.mate === 'alt' ? altMate(s) : mateOf(fx.mate)).name}`, 'down']);
   return `<div class="chips">${out.map(([t, c]) => `<span class="chip ${c}">${t}</span>`).join('')}</div>`;
 }
 
@@ -135,5 +137,5 @@ function answersList(list, c, riskOf = () => false) {
   return `<div class="answers">${list.map((a, i) => c.shown && !c.shown.includes(i) ? '' : `
     <label class="answer ${c.answered != null || (c.answered == null && !canAfford(S, a)) ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
       <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null || !canAfford(S, a) ? 'disabled' : ''}>
-      <span>${costTag(S, a, c)}${a.unlock ? `<span class="risk-tag unlock" title="This choice is available because of an earlier decision.">${esc(unlockOf(a))}</span> ` : ''}${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
+      <span>${costTag(S, a, c)}${a.unlock ? `<span class="risk-tag unlock" title="This choice is available because of an earlier decision.">${esc(unlockOf(a))}</span> ` : ''}${esc(textOf(S, a.text))}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
 }

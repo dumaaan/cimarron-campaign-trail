@@ -10,14 +10,14 @@ const fxOf = x => x.fx || {};
 const STRATEGIES = {
   random: a => Math.floor(Math.random() * a.length),
   // Never chooses an answer that adds to the RINO label.
-  noModerate: a => { const ok = a.map((x, i) => i).filter(i => !fxOf(a[i]).rino); return ok[Math.floor(Math.random() * ok.length)] ?? 0; },
+  noModerate: a => { const ok = a.map((x, i) => i).filter(i => !fxOf(a[i]).rino && !(fxOf(a[i]).label > 0)); return ok.length ? ok[Math.floor(Math.random() * ok.length)] : Math.floor(Math.random() * a.length); },
   // Chooses the answer with the best expected effect on primary voters.
   best: a => {
     let best = 0, bv = -1e9;
     a.forEach((x, i) => {
       const fx = fxOf(x); let v = 0;
       for (const f of FKEYS) v += (fx[f] || 0) * expectedVote()[f] / 12;
-      v -= (fx.rino || 0) * 1.2;
+      v -= (fx.rino || 0) * 1.2 + (fx.label || 0) * .9;
       for (const o in fx.opp || {}) v -= fx.opp[o] * .5;
       if (v > bv) { bv = v; best = i; }
     });
@@ -25,22 +25,23 @@ const STRATEGIES = {
   },
 };
 
-// Play one full game. scenario, war (true/false) and difficulty are optional overrides.
-function simGame(strategy, seed, scenario, war, difficulty = 'normal') {
-  newState('Sim', seed, difficulty);
+// Play one full game. scenario, war (true/false), difficulty and player (the candidate you play) are optional.
+function simGame(strategy, seed, scenario, war, difficulty = 'normal', player = 'castellano') {
+  newState(player, seed, difficulty);
   if (scenario) {
     // Start again from a clean state, then apply the chosen scenario exactly as the game does.
     const keep = { seed: S.seed, rng: S.rng, warPlanned: S.warPlanned };
-    newState('Sim', seed, difficulty); Object.assign(S, keep);
+    newState(player, seed, difficulty); Object.assign(S, keep);
     for (const id in S.delta) S.delta[id] = {};
-    S.flags = {};
+    S.flags = {}; S.pres = CAND[player].pres;
     S.endorsements = Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder]));
     applyScenario(S, SCENARIOS.find(x => x.id === scenario));
+    addAll(S, 'you', PLAYER_INFO[player].start || 0);
   }
   if (war === true) S.warPlanned = 10;
   if (war === false) S.warPlanned = null;
-  S.record = pick(RECORDS).id; applyFx(S, RECORDS.find(r => r.id === S.record).fx);
-  S.mate = pick(RUNNING_MATES).id; applyFx(S, RUNNING_MATES.find(m => m.id === S.mate).fx);
+  S.record = pick(OPENINGS[player]).id; applyFx(S, RECORDS.find(r => r.id === S.record).fx);
+  S.mate = pick(MATES[player]).id; applyFx(S, mateOf(S.mate).fx);
   S.screen = 'campaign'; startStep();
   for (let g = 0; g < 600 && S.screen !== 'ending'; g++) {
     const c = S.cur;
@@ -158,12 +159,23 @@ function simEveryScenario(n = 60, strategy = STRATEGIES.noModerate) {
 }
 
 // Your win rate at each difficulty level (same seeds).
-function simDifficulty(n = 300, strategy = STRATEGIES.noModerate) {
+function simDifficulty(n = 300, strategy = STRATEGIES.noModerate, player = 'castellano') {
   const out = {};
   for (const d of Object.keys(DIFFICULTY)) {
     let w = 0;
-    for (let i = 0; i < n; i++) if (simGame(strategy, 40000 + i, null, null, d).finalWinner === 'you') w++;
+    for (let i = 0; i < n; i++) if (simGame(strategy, 40000 + i, null, null, d, player).finalWinner === 'you') w++;
     out[d] = `${Math.round(w / n * 100)}%`;
+  }
+  return out;
+}
+
+// Your win rate with each playable candidate, on one difficulty level.
+function simCandidates(n = 200, strategy = STRATEGIES.noModerate, difficulty = 'normal') {
+  const out = {};
+  for (const p of PLAYABLE) {
+    let w = 0;
+    for (let i = 0; i < n; i++) if (simGame(strategy, 50000 + i, null, null, difficulty, p).finalWinner === 'you') w++;
+    out[p] = `${Math.round(w / n * 100)}%`;
   }
   return out;
 }

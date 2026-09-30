@@ -42,8 +42,10 @@ function reactionFor(key, outcome) {
 }
 function buildReactions(s, key, fx, text, outcome) {
   const tags = reactionTags(fx || {}, outcome), spec = reactionFor(key, outcome) || {};
-  const last = shortName(s, 'you'), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
-  const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, last.toUpperCase()).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy')
+  const src = EVENTS.find(e => e.id === key.replace(/:\d+$/, '')) || QUESTIONS.find(q => q.id === key.replace(/:\d+$/, ''));
+  const rv = t => !src || isShared(src) ? rivalize(s, t) : t;
+  const last = shortName(s, 'you'), LAST = headlineName(s), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
+  const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, LAST).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy')
     .replace(/\{RIVAL\}/g, (rivalId ? CAND[rivalId].short : 'RIVAL').toUpperCase());
   s.mediaTurn = (s.mediaTurn || 0) + 1;
   let outlet = s.mediaTurn % 2 ? 'fax' : 'max', chyron = spec.chyron;
@@ -52,8 +54,8 @@ function buildReactions(s, key, fx, text, outcome) {
   if (!chyron) chyron = pickPost(s, CHYRONS[tags.has('fail') ? 'fail' : tags.has('rino') ? 'rino' : tags.has('attack') ? 'attack' : (fx?.maga || 0) >= 4 ? 'maga' : 'neutral']);
   return {
     chyron: { outlet, text: fill(chyron) },
-    boomer: fill(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})])),
-    groyper: fill(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})])),
+    boomer: rv(fill(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})]))),
+    groyper: rv(fill(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})]))),
   };
 }
 
@@ -78,24 +80,29 @@ function answer() {
     applyFx(s, a.fx);
     if (q.region) s.bonus.you[q.region] = (s.bonus.you[q.region] || 0) + 1;
     recordPromise(s, `${q.id}:${c.sel}`);
-    s.log.push({ q: q.setting, a: a.text });
+    s.log.push({ q: q.setting, a: textOf(s, a.text) });
     c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text, null, q.text);
     opponentNews(s);
     if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
   } else if (c.type === 'event' || c.type === 'revent') {
     const e = (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid), ch = e.choices[c.sel];
-    applyFx(s, ch.fx);
-    c.fb = ch.fb; c.fx = { ...ch.fx };
+    const chText = textOf(s, ch.text), fx = resolveFx(s, ch.fx);
+    const rv = t => isShared(e) ? rivalize(s, t) : t;
+    c.fb = rv(textOf(s, ch.fb));             // written before the decision changes the game
+    applyFx(s, fx);
+    c.fx = { ...fx };
     if (ch.risk) {
       const won = rand() < riskP(s, ch.risk), o = won ? ch.risk.win : ch.risk.lose;
       c.outcome = won ? 'win' : 'lose';
-      applyFx(s, o.fx);
-      c.fb = o.fb; c.fx = { ...ch.fx, ...o.fx };
+      const ofx = resolveFx(s, o.fx);
+      c.fb = rv(textOf(s, o.fb));
+      applyFx(s, ofx);
+      c.fx = { ...fx, ...ofx };
     }
     if (e.special === 'strawpoll') runStrawPoll(s, c);
     if (e.special === 'war') startWar(s);
     recordPromise(s, `${e.id}:${c.sel}`);
-    s.log.push({ q: `${c.type === 'revent' ? 'Runoff' : e.kind}: ${e.title}`, a: ch.text + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
+    s.log.push({ q: `${c.type === 'revent' ? 'Runoff' : e.kind}: ${textOf(s, e.title)}`, a: chText + (c.outcome ? ` (${c.outcome === 'win' ? 'it worked' : 'it failed'})` : '') });
     c.reactions = buildReactions(s, `${e.id}:${c.sel}`, c.fx, ch.text, c.outcome, e.title);
     if (c.type === 'event') {
       opponentNews(s);
@@ -115,7 +122,8 @@ function answer() {
       const r = q.rivals[id];
       addDelta(s, id, r.fx, TUNE.rivalDebate);
       let p = perfOf(r.fx);
-      const target = r.attack && active(s).includes(r.attack) ? r.attack : null;
+      const tgt = r.attack === s.player ? 'you' : r.attack;   // a rival who attacks the candidate you play attacks you
+      const target = tgt && active(s).includes(tgt) ? tgt : null;
       if (target) {
         p += 1.5;
         c.scores[target] -= .75;

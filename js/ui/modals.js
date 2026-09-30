@@ -8,7 +8,7 @@ function closeModal() { $('#modal').hidden = true; }
 const ordinal = n => n + (['st', 'nd', 'rd'][n - 1] || 'th');
 
 function candidateModal(s, id) {
-  const c = CAND[id], live = s && s.screen !== 'record' && s.screen !== 'mate';
+  const c = CAND[id], live = s && !['record', 'mate', 'field'].includes(s.screen);
   const inRaceNow = live && !s.dropped.includes(id);
   const st = inRaceNow ? stateShares(s) : null;
   const rank = st ? sorted(st).findIndex(e => e[0] === id) + 1 : null;
@@ -19,9 +19,10 @@ function candidateModal(s, id) {
   const news = s ? s.wire.filter(w => w.who === id).slice(0, 4) : [];
   let body;
   if (id === 'you') {
-    const rec = s && RECORDS.find(r => r.id === s.record), mate = s && RUNNING_MATES.find(m => m.id === s.mate);
-    body = `<p>Governor of ${STATE_NAME} since 2027. You are running for a second term.</p>
-      ${rec ? `<p><b>Signature record:</b> ${esc(rec.title)}.</p>` : ''}${mate ? `<p><b>Running mate:</b> ${esc(mate.name)} (${esc(mate.title)}).</p>` : ''}
+    const rec = s && RECORDS.find(r => r.id === s.record), mate = s && mateOf(s.mate), info = PLAYER_INFO[s?.player || 'castellano'];
+    body = `<p class="muted">${c.title} · Age ${c.age} · ${esc(c.home)}</p><p>${esc(c.blurb)}</p>
+      ${rec ? `<p><b>${esc(info.openingTitle)}:</b> ${esc(rec.title)}.</p>` : ''}${mate ? `<p><b>Running mate:</b> ${esc(mate.name)} (${esc(mate.title)}).</p>` : ''}
+      <p><b>Your weak spot, "${esc(info.label)}":</b> ${esc(info.labelDesc)}</p>
       ${s?.promises.length ? `<div class="panel-title">Promises You Have Made (${s.promises.length})</div><ul class="small-list">${s.promises.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}`;
   } else {
     body = `<p class="muted">${c.title} · Age ${c.age} · ${esc(c.home)}</p><p>${esc(c.blurb)}</p>

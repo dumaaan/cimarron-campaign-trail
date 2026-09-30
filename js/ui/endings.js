@@ -12,34 +12,41 @@ function raceContext(s) {
     presFor: s.endorsed === w, presAgainst: !!s.endorsed && s.endorsed !== w, war: !!s.war,
     comeback: (s.lowPlace || 1) >= 3 };
 }
+// Your victory speech. The Governor speaks as the incumbent. Every other candidate speaks in their own voice
+// (RIVAL_SPEECH), and both versions add your running mate, your record, your biggest moments and the rival you beat.
 function yourSpeech(s) {
-  const ctx = raceContext(s), Y = YOUR_SPEECH;
-  const open = ctx.runoff ? Y.open.runoff : ctx.comeback ? Y.open.comeback : ctx.presAgainst ? Y.open.presAgainst
-    : ctx.presFor ? Y.open.presFor : ctx.share >= 55 ? Y.open.landslide : ctx.margin < 4 ? Y.open.close : SPEECH.open;
+  const ctx = raceContext(s), Y = YOUR_SPEECH, R = RIVAL_SPEECH[s.player];
+  const gov = isGov(s) || !R;
+  const open = gov ? (ctx.runoff ? Y.open.runoff : ctx.comeback ? Y.open.comeback : ctx.presAgainst ? Y.open.presAgainst
+    : ctx.presFor ? Y.open.presFor : ctx.share >= 55 ? Y.open.landslide : ctx.margin < 4 ? Y.open.close : SPEECH.open)
+    : (ctx.runoff ? R.open.runoff : ctx.comeback ? Y.open.comeback : ctx.presFor ? R.open.president : ctx.share >= 50 ? R.open.landslide : R.open.default);
   const top = FKEYS.map(f => [f, s.delta.you[f] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
-  const moments = Y.moments.filter(m => m.cond(s)).slice(0, 2).map(m => m.text);
+  const moments = Y.moments.filter(m => m.cond(s)).slice(0, 2).map(m => textOf(s, m.text));
   const orgs = Object.values(s.endorsements).filter(h => h === 'you').length;
   const nod = Y.rival[ctx.second] && (s.rino >= 6 || ctx.margin > 15 ? Y.rival[ctx.second].kind : Y.rival[ctx.second].fight);
-  const close = ctx.war ? Y.close.war : ctx.runoff ? Y.close.runoff : s.rino >= 6 ? Y.close.unity : Y.close.fight;
-  return [open, [Y.mate[s.mate], s.flags.mate_swap ? Y.mateSwap : ''].filter(Boolean).join(' '), SPEECH.record[s.record],
-    ...moments, top.map(f => SPEECH.faction[f]).join(' '), orgs >= 3 ? Y.endorsements(orgs) : '', nod, close].filter(Boolean);
+  const close = ctx.war ? (gov ? Y.close.war : R.war) : ctx.runoff ? Y.close.runoff : gov ? (s.rino >= 6 ? Y.close.unity : Y.close.fight) : R.close;
+  return [open, gov ? '' : RIVAL_OUTCOMES[s.player].speech, [Y.mate[s.mate], s.flags.mate_swap ? Y.mateSwap : ''].filter(Boolean).join(' '), SPEECH.record[s.record],
+    ...moments, gov ? top.map(f => SPEECH.faction[f]).join(' ') : '', orgs >= 3 ? Y.endorsements(orgs) : '', nod, close].filter(Boolean);
 }
 // A rival's victory speech: the opening depends on how the race was won, and one line answers your campaign.
 function rivalSpeech(s, w) {
-  const R = RIVAL_SPEECH[w], ctx = raceContext(s), gov = `Governor ${shortName(s, 'you')}`;
+  const R = RIVAL_SPEECH[w], ctx = raceContext(s), loser = displayName(s, 'you');
   if (!R) return [RIVAL_OUTCOMES[w].speech];
   const scandal = ['tape2', 'donor_deal', 'official1', 'tolliver_pardoned', 'renner_pardon', 'drone_deal', 'emails_bad'].some(f => s.flags[f]);
   const open = ctx.runoff ? R.open.runoff : ctx.presFor ? R.open.president : ctx.share >= 50 ? R.open.landslide : R.open.default;
-  const you = (scandal ? R.you.scandal : s.rino >= 6 ? R.you.rino : R.you.default).replace(/\{gov\}/g, gov);
+  // The lines about the defeated Governor fit only when you played the Governor.
+  const line = !isGov(s) && R.beat ? R.beat : scandal ? R.you.scandal : s.rino >= 6 ? R.you.rino : R.you.default;
+  const you = line.replace(/\{loser\}/g, loser);
   return [open, RIVAL_OUTCOMES[w].speech, you, ctx.war ? R.war : '', R.close].filter(Boolean);
 }
 function hundredDays(items) {
   return `<ol class="timeline">${items.map(([d, t]) => `<li><span class="tl-date">${d}</span><span>${esc(t)}</span></li>`).join('')}</ol>`;
 }
 function consequences(s) {
-  const L = EPILOGUE.filter(e => s.flags[e.flag]).map(e => typeof e.text === 'function' ? e.text(s) : e.text);
+  const governed = isGov(s) || s.finalWinner === 'you';
+  const L = EPILOGUE.filter(e => s.flags[e.flag] && (governed || !e.acts)).map(e => typeof e.text === 'function' ? e.text(s) : e.text);
   L.push(s.rino >= 10 ? EPILOGUE_RINO_HIGH : s.rino < 2 ? EPILOGUE_RINO_LOW : '');
-  return L.filter(Boolean);
+  return L.filter(Boolean).map(t => rivalize(s, t));
 }
 function generalLine(s, w, margin) {
   const rPct = 50 + margin / 2 - .7, dPct = 100 - rPct - 1.4;
@@ -56,15 +63,16 @@ function renderEnding(s) {
     const margin = clamp(27 - s.rino * .6 - (s.flags.tape2 ? 3 : 0) - (s.flags.donor_deal ? 2 : 0), 6, 34);
     const start = new Date(2031, 0, 12);
     const days = s.promises.slice(0, 12).map((p, i) => [new Date(start.getTime() + i * 8 * 864e5).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), p]);
-    if (days.length < 3) days.push(['Feb 1', 'Presented a budget that continues the policies of your first term.'], ['Mar 15', 'Signed the legislature\'s tax and public safety package.']);
+    if (days.length < 3) days.push(...(isGov(s) ? [['Feb 1', 'Presented a budget that continues the policies of your first term.'], ['Mar 15', 'Signed the legislature\'s tax and public safety package.']]
+      : RIVAL_OUTCOMES[s.player].days.slice(0, 3)));
     const n = s.promises.length;
     sections = `
       <div class="panel-title">Your Victory Speech</div><blockquote>${yourSpeech(s).map(p => `<p>${esc(p)}</p>`).join('')}</blockquote>
       <div class="panel-title">The General Election</div>${generalLine(s, 'you', margin)}
-      <div class="panel-title">The First 100 Days of Your Second Term</div>
+      <div class="panel-title">${isGov(s) ? 'The First 100 Days of Your Second Term' : 'Your First 100 Days as Governor'}</div>
       <p class="muted small">Built from the promises you made during the campaign.</p>${hundredDays(days)}
       <div class="panel-title">One Year Later</div>
-      <p class="q-text">${n >= 10 ? 'You campaigned on an aggressive agenda, and you kept most of it. Several of your laws are in federal court. Your approval among Republicans is above 80%. Among all voters it is below 50%, the lowest of your career. National conservative media treat Cimarron as a model.'
+      <p class="q-text">${!isGov(s) ? esc(RIVAL_OUTCOMES[s.player].later) : n >= 10 ? 'You campaigned on an aggressive agenda, and you kept most of it. Several of your laws are in federal court. Your approval among Republicans is above 80%. Among all voters it is below 50%, the lowest of your career. National conservative media treat Cimarron as a model.'
         : n >= 5 ? 'Your second term follows the promises of the campaign. Some laws pass easily; others are slowed by the courts and by the cost of the income tax repeal. The base is satisfied. Your rivals are already preparing for 2034.'
         : 'You made few specific promises, and your second term looks much like your first. The base is not excited, but it is not angry. Dunmore\'s movement continues to grow outside the government.'}</p>
       ${consequences(s).length ? `<div class="panel-title">Consequences of Your Campaign</div><ul class="epilogue">${consequences(s).map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
@@ -72,12 +80,12 @@ function renderEnding(s) {
     const o = RIVAL_OUTCOMES[w], con = CONCESSION.find(c => c.id === s.concession) || CONCESSION[1];
     const obj = w === 'whitlock' ? 'her' : 'him';
     sections = `
-      <div class="panel-title">Your Concession</div><blockquote><p>${esc(con.speech(displayName(s, w), obj))}</p></blockquote>
+      <div class="panel-title">Your Concession</div><blockquote><p>${esc(con.speech(displayName(s, w), obj, s))}</p></blockquote>
       <div class="panel-title">${esc(displayName(s, w))}'s Victory Speech</div><blockquote>${rivalSpeech(s, w).map(p => `<p>${esc(p)}</p>`).join('')}</blockquote>
       <div class="panel-title">The General Election</div>${generalLine(s, w, clamp(o.general + con.general, 4, 34))}
       <div class="panel-title">${esc(CAND[w].short)}'s First 100 Days</div>${hundredDays(o.days)}
       <div class="panel-title">One Year Later</div><p class="q-text">${esc(o.later)}</p>
-      <div class="panel-title">Your Future</div><p class="q-text">${esc(con.future)}</p>
+      <div class="panel-title">Your Future</div><p class="q-text">${esc(concessionFuture(s, con))}</p>
       ${consequences(s).length ? `<div class="panel-title">The Legacy of Your Campaign</div><ul class="epilogue">${consequences(s).map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
   }
   return `<div class="panel ending">

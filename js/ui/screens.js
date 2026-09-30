@@ -5,11 +5,11 @@
 function renderQuestion(s) {
   const c = s.cur, q = QUESTIONS.find(q => q.id === c.qid);
   let h = `<div class="q-meta"><span>Campaign Question</span><span>${esc(q.setting)}</span></div>
-    <div class="q-text">${esc(q.text)}</div>${answersList(q.answers, c)}`;
+    <div class="q-text">${esc(rivalize(s, textOf(s, q.text)))}</div>${answersList(q.answers, c)}`;
   if (c.answered == null) h += `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Answer</button>`;
   else {
     const a = q.answers[c.answered];
-    h += `<div class="feedback"><div class="fb-head">Campaign Manager's Assessment</div><p>${esc(a.fb)}</p>${chips(s, a.fx)}</div>
+    h += `<div class="feedback"><div class="fb-head">Campaign Manager's Assessment</div><p>${esc(rivalize(s, textOf(s, a.fb)))}</p>${chips(s, a.fx)}</div>
       ${reactionsBox(s, c.reactions)}
       ${breakingBox(c)}<button class="btn" id="next">Continue</button>`;
   }
@@ -20,10 +20,10 @@ function renderEvent(s) {
   const c = s.cur, e = (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid);
   const text = typeof e.text === 'function' ? e.text(s) : e.text;
   let h = `<div class="q-meta"><span class="kind" style="background:${EVENT_KINDS[e.kind] || '#333'}">${e.kind}</span><span>${c.type === 'revent' ? `Runoff · ${fmtDate(runoffDate(s))}` : dateOf(s.step)}</span></div>
-    <div class="event-title">${esc(e.title)}</div>
-    <div class="q-text">${esc(text)}</div>`;
+    <div class="event-title">${esc(textOf(s, e.title))}</div>
+    <div class="q-text">${esc(isShared(e) ? rivalize(s, text) : text)}</div>`;
   if (e.advice?.length) h += `<div class="advice"><div class="fb-head">Your Advisors</div>${e.advice.map(([id, t]) =>
-    `<div class="adv">${staffBadge(id)}<div><b>${STAFF[id].name}</b> <span class="muted small">${STAFF[id].role}</span><div>${esc(t)}</div></div></div>`).join('')}</div>`;
+    `<div class="adv">${staffBadge(id)}<div><b>${staffOf(id).name}</b> <span class="muted small">${staffOf(id).role}</span><div>${esc(isShared(e) ? rivalize(s, t) : t)}</div></div></div>`).join('')}</div>`;
   h += answersList(e.choices, c, a => !!a.risk);
   if (c.answered == null) h += `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Decide</button>`;
   else {
@@ -101,7 +101,7 @@ function renderEndorse(s) {
   return `<div class="q-meta"><span>Breaking News</span><span>The President's Endorsement</span></div>
     <div class="endorse-card">${portrait(s, who, 72)}
       <div><div class="endorse-head">THE PRESIDENT ENDORSES ${displayName(s, who).toUpperCase()}</div>
-      <p class="post">${esc(ENDORSE_TEXT[who] || ENDORSE_TEXT.dunmore)}</p></div></div>
+      <p class="post">${esc(ENDORSE_TEXT[who === 'you' ? s.player : who] || ENDORSE_TEXT.dunmore)}</p></div></div>
     <p class="q-text">${who === 'you' ? TEXT.endorseYou : TEXT.endorseOther}</p>
     ${who !== 'you' && s.pres < PRES_ENDORSE.youNeed ? `<p class="muted small">${esc(TEXT.endorseNoYou(s))}</p>` : ''}
     ${breakingBox(s.cur)}<button class="btn" id="next">Continue</button>`;

@@ -34,7 +34,7 @@ const EVENT_KINDS = {
 const KIND_LIMITS = { Tragedy: 1, Scandal: 2, Crisis: 3, 'Rival Feud': 2 };
 const mateName = s => RUNNING_MATES.find(m => m.id === s.mate)?.name || 'your running mate';
 // Personal events (your record, your running mate) are drawn more often than the general ones.
-const PERSONAL = 4;
+const PERSONAL = 6;
 
 const EVENTS = [
   // ---------------- SCANDALS ----------------
@@ -279,7 +279,7 @@ const EVENTS = [
     ] },
 
   { id: 'donor_wife', kind: 'Crisis', title: 'Dr. Priya Hale', minStep: 4,
-    text: s => `Richard Hale, a Fort Eisenhower banker and the state party's finance chair, is your largest donor. His wife, Dr. Priya Hale, is a cardiologist who was born in Pune, India, and has been a U.S. citizen for twenty years. She co-chairs your finance committee. After she speaks at one of your rallies, anonymous accounts flood social media with racist attacks on her and on Indian Americans, calling her an "H-1B invader." Some of the accounts have your campaign logo in their profile pictures.${inRace(s, 'pike') ? ' Mason Pike shares several of the posts with his two million followers.' : ''} The Hales ask what you will say.`,
+    text: s => `Richard Hale, a Fort Eisenhower banker and the state party's finance chair, is your largest donor. His wife, Dr. Priya Hale, is a cardiologist who was born in Pune, India, and has been a U.S. citizen for twenty years. She co-chairs your finance committee. After she speaks at one of your rallies, anonymous accounts flood social media with racist attacks on her and on Indian Americans, calling her an "H-1B invader." Some of the accounts have your campaign logo in their profile pictures. Mason Pike, a streamer with two million followers, shares several of the posts. The Hales ask what you will say.`,
     advice: [
       ['tom', 'This is wrong, and our pastors will say so from the pulpit. You should say it first.'],
       ['kyle', 'If you condemn it by name, part of the online base will turn on you. They are loud, and they vote in primaries.'],
@@ -988,22 +988,7 @@ const EVENTS = [
           win: { fx: { seniors: 2, chamber: 1, opp: { coburn: -4 } }, fb: 'He accepts. He does not know what the state budget is. It shows.' },
           lose: { fx: { maga: -1 }, fb: 'He declines: "I\'d rather talk to the people." He holds a rally the same night. Twelve thousand people come.' } } },
     ] },
-  { id: 'albright_measles', kind: 'Opposition', title: 'Measles in Sumner', minStep: 6, weight: 3, cond: s => inRace(s, 'albright'),
-    text: 'Measles returns to Cimarron. Nineteen cases in Sumner County, where vaccination rates fell after Dr. Albright\'s tour of the county last year. Two infants are in the hospital. Albright says measles "is a normal childhood illness that we were taught to fear."',
-    advice: [
-      ['dana', 'Parents of young children are frightened. The online right is with Albright.'],
-      ['tom', 'Pastors are asking us whether to cancel Vacation Bible School.'],
-      ['kyle', 'If you attack her on vaccines, you attack half of her voters.'],
-    ],
-    choices: [
-      { text: 'Blame her directly: "Her tour put children in the hospital."', fx: { seniors: 3, chamber: 1, online: -4, liberty: -1, opp: { albright: -4 } },
-        fb: 'Parents of young children agree. Her supporters say you are "the COVID governor."' },
-      { text: 'Open free, voluntary vaccine clinics. Mandate nothing.', fx: { seniors: 2, faith: 1, online: -2 },
-        fb: 'A careful answer. Vaccination in Sumner rises. Albright calls the clinics "a trap."' },
-      { text: 'Defend parental choice, and ask parents of sick children to stay home.', fx: { online: 3, liberty: 2, seniors: -3, opp: { albright: 1 } },
-        fb: 'Her voters hear you agree with her. The two infants are still in the hospital.' },
-    ] },
-  { id: 'pike_stream', kind: 'Media', title: 'The Stream', minStep: 5, weight: 3, cond: s => inRace(s, 'pike'),
+  { id: 'pike_stream', kind: 'Influencer', title: 'The Remark', minStep: 9, weight: 2,
     text: 'On his stream, Mason Pike says that "a certain group" controls the banks and the media, and lists their names. The clip is everywhere by morning. Every candidate is asked about it. Pike says: "Anyone who condemns me is afraid of them."',
     advice: [
       ['tom', 'Our pastors love Israel and the Jewish people. They will condemn this, and they expect you to be first.'],
@@ -1011,7 +996,7 @@ const EVENTS = [
       ['dana', 'Every group except the youngest online voters wants him condemned.'],
     ],
     choices: [
-      { text: 'Condemn it by name: "This is antisemitism, and it has no place in our party."', fx: { faith: 3, seniors: 3, chamber: 2, online: -5, opp: { pike: -3 } },
+      { text: 'Condemn it by name: "This is antisemitism, and it has no place in our party."', fx: { faith: 3, seniors: 3, chamber: 2, online: -5, flag: 'pike_snub' },
         fb: 'Evangelical leaders thank you publicly. Pike\'s chat calls you names for a week.' },
       { text: 'Condemn "all forms of bigotry" without naming him.', fx: { online: -1, faith: -1 },
         fb: 'Nobody is satisfied. Pike reads your statement aloud and laughs.' },
@@ -1019,7 +1004,7 @@ const EVENTS = [
         fb: 'Pike thanks you on air. The Council of Pastors does not.' },
       { text: 'Go on his stream and argue with him live.', fx: {},
         risk: { p: .35,
-          win: { fx: { online: 4, faith: 2, opp: { pike: -4 } }, fb: 'You are ready, and he is not. Pike ends the stream early. His chat is not sure which of you won.' },
+          win: { fx: { online: 4, faith: 2 }, fb: 'You are ready, and he is not. Pike ends the stream early. His chat is not sure which of you won.' },
           lose: { fx: { online: -2, seniors: -4, faith: -4 }, fb: 'For two hours, you are on his show, on his terms. The only clip anyone shares is you nodding while he talks.' } } },
     ] },
 
@@ -1153,7 +1138,7 @@ const EVENTS = [
       { text: 'Propose a water law that gives farms first priority, and let the courts decide the rest.', fx: { farm: 2, seniors: 1, chamber: 1, rino: 1 },
         fb: 'A lawyer\'s answer. Both sides say you are hiding behind the courts, and both sides accept it.' },
     ] },
-  { id: 'feud_streamers', kind: 'Rival Feud', title: 'Boomer Podcast', minStep: 5, weight: 3, cond: s => inRace(s, 'dunmore') && inRace(s, 'pike'),
+  { id: 'feud_streamers', kind: 'Rival Feud', title: 'Boomer Podcast', minStep: 5, weight: 3, cond: s => inRace(s, 'dunmore'),
     text: 'Mason Pike calls Travis Dunmore "a boomer podcast grifter who sells supplements to your grandfather." Dunmore calls Pike "a child who has never had a job." Their audiences, which were once the same audience, are now at war.',
     advice: [
       ['kyle', 'Whoever wins this fight wins the young online vote. It could be us.'],
@@ -1163,9 +1148,9 @@ const EVENTS = [
     choices: [
       { text: 'Stay above it: "Cimarron needs adults in charge."', fx: { seniors: 2, chamber: 1, online: -1 },
         fb: 'Both of them attack you for the line. Older voters repeat it.' },
-      { text: 'Side with Pike and the young voters.', fx: { online: 3, seniors: -2, opp: { dunmore: -2, pike: 1 } },
+      { text: 'Side with Pike and the young voters.', fx: { online: 3, seniors: -2, opp: { dunmore: -2 } },
         fb: 'Pike\'s audience is surprised, then pleased. Dunmore\'s audience is older and votes more.' },
-      { text: 'Side with Dunmore against "a streamer with no record."', fx: { maga: 2, online: -1, opp: { pike: -2, dunmore: 1 } },
+      { text: 'Side with Dunmore against "a streamer with no record."', fx: { maga: 2, online: -1, opp: { dunmore: 1 } },
         fb: 'Dunmore mentions you kindly for the first time in the campaign. It does not last.' },
     ] },
 

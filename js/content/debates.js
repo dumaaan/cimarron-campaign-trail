@@ -7,13 +7,18 @@
 const DEBATE_QUESTIONS = [
   { id: 'd_prove', text: 'MODERATOR: "Each of you says you are the true conservative in this race. Name your single most conservative achievement."',
     answers: [
-      { text: '"I eliminated the state income tax."', fx: { liberty: 3, chamber: 2 }, fb: 'A strong answer on economic policy, based on a real record.' },
-      { text: '"I led the first state deportation program in the country."', fx: { maga: 4, farm: -1 }, fb: 'This speaks to the most important issue for primary voters.' },
-      { text: '"I signed the strongest abortion ban in America."', fx: { faith: 3, seniors: 1 }, fb: 'This reminds evangelicals that you delivered on their top issue.' },
+      { cond: s => isGov(s), text: '"I eliminated the state income tax."', fx: { liberty: 3, chamber: 2 }, fb: 'A strong answer on economic policy, based on a real record.' },
+      { cond: s => isGov(s), text: '"I led the first state deportation program in the country."', fx: { maga: 4, farm: -1 }, fb: 'This speaks to the most important issue for primary voters.' },
+      { cond: s => isGov(s), text: '"I signed the strongest abortion ban in America."', fx: { faith: 3, seniors: 1 }, fb: 'This reminds evangelicals that you delivered on their top issue.' },
       { text: '"I have fought the left on every issue, every day."', fx: { maga: 2, online: 2 }, fb: 'Energetic but vague. The audience responds to the tone more than the content.' },
+      { cond: s => s.player === 'dunmore', text: '"I built a movement of two million listeners who are done with the uniparty."', fx: { maga: 3, online: 3 }, fb: 'Your audience is your record, and your audience is in the room.' },
+      { cond: s => s.player === 'rick', text: '"Forty pregnancy centers. Thousands of babies who are alive today. Name a politician who can say that."', fx: { faith: 4, seniors: 1 }, fb: 'The strongest answer on the stage for evangelical voters.' },
+      { cond: s => s.player === 'krantz', text: '"I told the ATF they would be arrested if they came into my county without permission. They never came."', fx: { guns: 4, maga: 1 }, fb: 'Gun owners cheer. Older voters wonder what happens next time.' },
+      { cond: s => s.player === 'vaskel', text: '"I created fifteen hundred jobs in Pratt Junction without one dollar of government money."', fx: { liberty: 3, chamber: 2 }, fb: 'A businessman\'s answer. The Liberty Caucus likes it.' },
+      { cond: s => s.player === 'whitlock', text: '"Twelve balanced budgets. Conservatism used to mean paying your bills."', fx: { chamber: 3, seniors: 2 }, fb: 'Older voters remember when that was the whole platform.' },
     ],
     rivals: {
-      dunmore: { text: '"I built a movement of two million listeners who are done with the uniparty. The Governor built a budget surplus for the Chamber of Commerce."', fx: { maga: 3, online: 2 }, attack: 'you' },
+      dunmore: { text: '"I built a movement of two million listeners who are done with the uniparty. The Governor built a budget surplus for the Chamber of Commerce."', fx: { maga: 3, online: 2 }, attack: 'castellano' },
       rick: { text: '"I have baptized more than four thousand Cimarronians. I have preached the truth when it was unpopular. That is my record."', fx: { faith: 3 } },
       krantz: { text: '"I told the ATF they would be arrested if they came into Harlan County without my permission. They have not come."', fx: { guns: 4, maga: 1 } },
       vaskel: { text: '"I have created 1,400 jobs in Pratt Junction. I have never been on a government payroll. None of these people can say that."', fx: { liberty: 3, chamber: 2 } },
@@ -28,7 +33,7 @@ const DEBATE_QUESTIONS = [
     ],
     rivals: {
       dunmore: { text: '"I am a Christian, but I am not running for pastor. I am running to deport criminals and end the uniparty."', fx: { maga: 2, liberty: 1 } },
-      rick: { text: '"Every law is someone\'s morality. The only question is whose. I choose God\'s. My opponents choose the Chamber of Commerce\'s."', fx: { faith: 5, online: 1 }, attack: 'you' },
+      rick: { text: '"Every law is someone\'s morality. The only question is whose. I choose God\'s. My opponents choose the Chamber of Commerce\'s."', fx: { faith: 5, online: 1 }, attack: 'castellano' },
       krantz: { text: '"The Constitution is the law I swore to uphold. It was written by God-fearing men, and that is enough for me."', fx: { guns: 2, seniors: 1 } },
       vaskel: { text: '"Government should be neutral and small. I do not want the state in your church, and I do not want it in your wallet."', fx: { liberty: 3, faith: -2 } },
       whitlock: { text: '"I am a Methodist. I would never want a governor to decide which church is correct."', fx: { chamber: 1, faith: -1 } },
@@ -44,7 +49,7 @@ const DEBATE_QUESTIONS = [
       dunmore: { text: '"Brent, you gave to Kamala Harris\'s Senate campaign. That is not a startup. That is a confession."', fx: { maga: 2 }, attack: 'vaskel' },
       rick: { text: '"Where a man lived matters less than where he worships. Brent, where do you worship?"', fx: { faith: 2 }, attack: 'vaskel' },
       krantz: { text: '"I have lived in Harlan County for 61 years. I do not need to say more."', fx: { farm: 2, guns: 1 } },
-      vaskel: { text: '"I left California because it failed. I came here so Cimarron would not make the same mistakes. The Governor is making them."', fx: { liberty: 3, online: 2 }, attack: 'you' },
+      vaskel: { text: '"I left California because it failed. I came here so Cimarron would not make the same mistakes. The Governor is making them."', fx: { liberty: 3, online: 2 }, attack: 'castellano' },
       whitlock: { text: '"I welcome Mr. Vaskel. I only wish he had brought his checkbook to the schools and not to the super PACs."', fx: { chamber: 1 } },
     } },
   { id: 'd_arrest', text: 'MODERATOR: "Sheriff Krantz has refused to enforce state laws that he considers unconstitutional. Should a sheriff be allowed to do that?"',
@@ -52,21 +57,23 @@ const DEBATE_QUESTIONS = [
       { text: '"A sheriff who picks which laws to follow should not be governor."', fx: { seniors: 3, chamber: 1, opp: { krantz: -3 } }, fb: 'A clear contrast on the rule of law.' },
       { text: '"Bo is a good sheriff. He is not ready to be governor."', fx: { seniors: 2, guns: 1, opp: { krantz: -2 } }, fb: 'Respectful, and effective with gun owners.' },
       { text: '"I respect any sheriff who stands up to federal overreach."', fx: { guns: 3, opp: { krantz: 1 } }, fb: 'Gun owners approve, but you did not answer the question about state law.' },
-      { text: '"Which of my laws does he oppose? The gun law or the tax cut?"', fx: { guns: 2, liberty: 2, opp: { krantz: -2 } }, fb: 'Krantz has no good answer. A strong moment.' },
+      { cond: s => isGov(s), text: '"Which of my laws does he oppose? The gun law or the tax cut?"', fx: { guns: 2, liberty: 2, opp: { krantz: -2 } }, fb: 'Krantz has no good answer. A strong moment.' },
+      { cond: s => !isGov(s), text: '"If a law is wrong, repeal it. A sheriff who ignores laws is doing the same thing the left does with the border."', fx: { seniors: 2, liberty: 1, opp: { krantz: -2 } }, fb: 'A principled answer that turns Krantz\'s argument against him.' },
     ],
     rivals: {
-      dunmore: { text: '"The problem is not sheriffs who defy bad laws. The problem is governors who sign them."', fx: { maga: 2, guns: 1 }, attack: 'you' },
+      dunmore: { text: '"The problem is not sheriffs who defy bad laws. The problem is governors who sign them."', fx: { maga: 2, guns: 1 }, attack: 'castellano' },
       rick: { text: '"There is a higher law than any statute. A man of conscience must follow it."', fx: { faith: 2, guns: 1 } },
-      krantz: { text: '"I took an oath to the Constitution, not to the Governor. When the Governor violates it, I will not help him."', fx: { guns: 5, liberty: 1 }, attack: 'you' },
+      krantz: { text: '"I took an oath to the Constitution, not to the Governor. When the Governor violates it, I will not help him."', fx: { guns: 5, liberty: 1 }, attack: 'castellano' },
       vaskel: { text: '"Rule of law matters to investors. But a sheriff is closer to the people than any bureaucrat in the capital."', fx: { liberty: 1 } },
       whitlock: { text: '"No. Laws are made by the legislature and reviewed by courts. That is how a republic works."', fx: { chamber: 2, seniors: 1 } },
     } },
   { id: 'd_chamber', text: 'MODERATOR: "Lt. Governor Dunmore says the Governor is controlled by the Chamber of Commerce. Is big business an ally or an enemy of conservatives today?"',
     answers: [
-      { text: '"The Chamber fought my deportation program. Ask them who controls me."', fx: { maga: 3, chamber: -3 }, fb: 'Your record defeats the attack.' },
-      { text: '"Travis has spent four years on a podcast. I have spent four years governing."', fx: { seniors: 3, chamber: 1, opp: { dunmore: -3 } }, fb: 'A strong contrast between experience and media.' },
+      { cond: s => isGov(s), text: '"The Chamber fought my deportation program. Ask them who controls me."', fx: { maga: 3, chamber: -3 }, fb: 'Your record defeats the attack.' },
+      { cond: s => isGov(s), text: '"Travis has spent four years on a podcast. I have spent four years governing."', fx: { seniors: 3, chamber: 1, opp: { dunmore: -3 } }, fb: 'A strong contrast between experience and media.' },
       { text: '"Business creates jobs. I am proud to work with employers."', fx: { chamber: 4, rino: 2, maga: -3 }, fb: 'A traditional Republican answer. In this primary it confirms the attack.' },
       { text: '"Travis, your show is sponsored by a company with ties to China."', fx: { maga: 2, opp: { dunmore: -5 } }, fb: 'Dunmore denies it angrily. Reporters will check it tomorrow.' },
+      { cond: s => !isGov(s), text: '"The Governor takes the Chamber\'s money and follows its orders. I do neither."', fx: { maga: 3, chamber: -2, opp: { castellano: -2 } }, fb: 'You aim Dunmore\'s charge at the Governor. It lands.' },
     ],
     rivals: {
       dunmore: { text: '"Big business wants cheap foreign labor and woke HR departments. They are not our allies. They are the other side with better lawyers."', fx: { maga: 4, online: 2, chamber: -2 } },
@@ -120,16 +127,17 @@ const DEBATE_QUESTIONS = [
   { id: 'd_deport_num', text: 'MODERATOR: "Every candidate has promised deportations. How many people would you deport, and what happens to the plants and farms that lose their workers?"',
     answers: [
       { text: '"Every person who is here illegally. Employers will adjust."', fx: { maga: 4, online: 2, farm: -2 }, fb: 'The strongest answer. Farmers wonder who will work their fields.' },
-      { text: '"More than all my opponents combined, because I have already done it."', fx: { maga: 3, opp: { dunmore: -1 } }, fb: 'Your record gives this answer weight.' },
+      { cond: s => isGov(s), text: '"More than all my opponents combined, because I have already done it."', fx: { maga: 3, opp: { dunmore: -1 } }, fb: 'Your record gives this answer weight.' },
       { text: '"Criminals first. Then we fix the legal system."', fx: { seniors: 2, rino: 1, maga: -2 }, fb: 'Dunmore says this is "the answer Democrats give."' },
       { text: '"The number depends on federal cooperation."', fx: { rino: 1, maga: -1 }, fb: 'Honest, but it sounds like an excuse.' },
+      { cond: s => !isGov(s), text: '"More than the Governor, who talks about four thousand like it is a lot."', fx: { maga: 3, opp: { castellano: -1 } }, fb: 'You make the incumbent\'s record look small.' },
     ],
     rivals: {
       dunmore: { text: '"All of them. Every single one. And if a plant cannot survive without illegal labor, it does not deserve to survive."', fx: { maga: 5, online: 2, farm: -2, chamber: -2 } },
       rick: { text: '"We must enforce the law, and our churches will care for families who are affected."', fx: { faith: 2, maga: 1 } },
       krantz: { text: '"My deputies have already turned over 300 people to ICE. I do not make promises. I make arrests."', fx: { guns: 3, maga: 2 } },
       vaskel: { text: '"Deport criminals, and give H-1B visas to the best engineers in the world. We need both."', fx: { liberty: 2, chamber: 2, maga: -3 } },
-      whitlock: { text: '"The Garnett plant lost 40% of its workers this year. Somebody on this stage should talk about that honestly."', fx: { farm: 2, chamber: 2, maga: -3 }, attack: 'you' },
+      whitlock: { text: '"The Garnett plant lost 40% of its workers this year. Somebody on this stage should talk about that honestly."', fx: { farm: 2, chamber: 2, maga: -3 }, attack: 'castellano' },
     } },
   { id: 'd_institutions', text: 'MODERATOR: "The New Right says conservatives must take control of universities, the media and the civil service. Do you agree?"',
     answers: [
@@ -167,7 +175,7 @@ const DEBATE_QUESTIONS = [
       { text: '"I will be governor for every Cimarronian, not only the loudest ones."', fx: { rino: 3, chamber: 2, maga: -3 }, fb: 'A general-election message in a primary.' },
     ],
     rivals: {
-      dunmore: { text: '"The establishment has had four years. Give the movement four."', fx: { maga: 3, online: 2 }, attack: 'you' },
+      dunmore: { text: '"The establishment has had four years. Give the movement four."', fx: { maga: 3, online: 2 }, attack: 'castellano' },
       rick: { text: '"I do not want your vote for me. I want it for the Lord, and for your children."', fx: { faith: 4 } },
       krantz: { text: '"I have kept Harlan County free for sixteen years. I can do it for the whole state."', fx: { guns: 3, farm: 1 } },
       vaskel: { text: '"Every other candidate on this stage has spent your money. I have made money. Let me make it for you."', fx: { liberty: 3, chamber: 1 } },
@@ -178,76 +186,69 @@ const DEBATE_QUESTIONS = [
 // ---------- Outsider answers (merged into the questions above) ----------
 const DEBATE_OUTSIDERS = {
   d_prove: {
-    coburn: { text: '"I won a state title, a Heisman and two division titles. I know how to win. The Governor knows how to hold press conferences."', fx: { maga: 3, seniors: 2 }, attack: 'you' },
-    albright: { text: '"I refused to follow the COVID mandates, and it cost me my hospital privileges. I have paid a real price for my convictions."', fx: { online: 3, liberty: 2, farm: 1 } },
-    pike: { text: '"I built an audience of two million young Americans without one dollar from the donor class. Nobody else on this stage can say that."', fx: { online: 4, maga: 1 } },
+    castellano: { text: '"As Attorney General I sued Washington forty-one times and won twenty-nine. As Governor I ended the income tax. Results, not podcasts."', fx: { liberty: 3, maga: 2 } },
+    coburn: { text: '"I won a state title, a Heisman and two division titles. I know how to win. The Governor knows how to hold press conferences."', fx: { maga: 3, seniors: 2 }, attack: 'castellano' },
   },
   d_bible: {
+    castellano: { text: '"I argued religious liberty before the Supreme Court, and I won. Faith needs defenders who can win in court, not only in church."', fx: { faith: 2, seniors: 2 } },
     coburn: { text: '"I prayed before every game I ever played. But I will not tell your family how to pray."', fx: { seniors: 1, maga: 1, faith: -1 } },
-    albright: { text: '"God made the human body. He did not make it to need forty injections. Faith and health go together."', fx: { faith: 2, online: 2 } },
-    pike: { text: '"Christianity built the West. A state that forgets that will not survive. I will not apologize for saying so."', fx: { online: 3, faith: 2, liberty: -2 } },
   },
   d_carpet: {
+    castellano: { text: '"Brent moved here for the tax cut I passed. He is welcome. He is not ready."', fx: { liberty: 1, seniors: 1 }, attack: 'vaskel' },
     coburn: { text: '"Brent, I grew up in Harlan. You grew up in a gated community. Voters can see the difference."', fx: { farm: 2, seniors: 1 }, attack: 'vaskel' },
-    albright: { text: '"Moving here is not the problem. Brent\'s fund owns shares in the drug companies that pushed the mandates."', fx: { liberty: 1, online: 1 }, attack: 'vaskel' },
-    pike: { text: '"Brent Vaskel is the donor class in a fleece vest."', fx: { online: 3, maga: 1 }, attack: 'vaskel' },
   },
   d_arrest: {
+    castellano: { text: '"Bo swore an oath to the same Constitution I have argued in court for twenty years. It does not say except in Harlan County."', fx: { seniors: 2, chamber: 1 }, attack: 'krantz' },
     coburn: { text: '"I respect sheriffs. I also respect the rules. You cannot pick which ones you follow, Bo."', fx: { seniors: 2 }, attack: 'krantz' },
-    albright: { text: '"When the state forced mandates on us, the sheriffs who refused to enforce them were heroes. So yes."', fx: { liberty: 2, guns: 2, online: 1 } },
-    pike: { text: '"The problem is not sheriffs who defy the law. The problem is the people who write laws against us."', fx: { online: 2, guns: 1 } },
   },
   d_chamber: {
+    castellano: { text: '"The Chamber fought Operation Heartland. I did it anyway. Travis fought nothing. He was busy recording."', fx: { maga: 2, seniors: 1 }, attack: 'dunmore' },
     coburn: { text: '"Businesses sponsored my whole career. But the Chamber wants cheap labor, and I want Cimarron jobs for Cimarron workers."', fx: { maga: 2, chamber: -1 } },
-    albright: { text: '"The biggest businesses in this state are hospital systems and drug companies. They are not our friends."', fx: { online: 2, liberty: 1, chamber: -2 } },
-    pike: { text: '"Big business funds open borders and everything else we oppose. I will treat it as the opponent it is."', fx: { online: 3, maga: 2, chamber: -3 } },
   },
   d_compromise: {
+    castellano: { text: '"I sued the last Democratic administration twenty-nine times. That is my kind of bipartisanship."', fx: { maga: 2, liberty: 1 } },
     coburn: { text: '"I would work with anyone to lower gas prices. That is not compromise. That is common sense."', fx: { seniors: 2, farm: 1 } },
-    albright: { text: '"I worked beside Democrats in medicine for twenty years. They silenced me the day I disagreed with them."', fx: { online: 2, liberty: 1 } },
-    pike: { text: '"No. Never. That is exactly why they are afraid of us."', fx: { online: 3 } },
   },
   d_accept: {
+    castellano: { text: '"Yes. I am the Governor. The law says I certify the result, and I follow the law."', fx: { seniors: 2, chamber: 1, maga: -1 } },
     coburn: { text: '"If I lose, I will be the first one to shake the winner\'s hand. I have lost games before."', fx: { seniors: 2, maga: -1 } },
-    albright: { text: '"I will accept a result that has been audited by hand."', fx: { maga: 2, online: 1 } },
-    pike: { text: '"I will accept it when every ballot has been checked by people we trust."', fx: { online: 3, maga: 1, seniors: -1 } },
   },
   d_democrat: {
+    castellano: { text: '"Their lawyers are very good. I know, because I beat them."', fx: { maga: 2, seniors: 1 } },
     coburn: { text: '"Some of my best teammates were Democrats. They still threw me the ball."', fx: { seniors: 2 } },
-    albright: { text: '"Robert F. Kennedy Jr. was a Democrat for fifty years. People can change."', fx: { online: 2, liberty: 1 } },
-    pike: { text: '"Nothing. They hate this country, and they hate you."', fx: { online: 3, maga: 2, seniors: -1 } },
   },
   d_deport_num: {
+    castellano: { text: '"Four thousand so far, under a law I wrote and defended in federal court. Everyone else on this stage has a slogan. I have a legal strategy."', fx: { maga: 3, seniors: 1 } },
     coburn: { text: '"All of them. And we will show it on television, so the next group does not come."', fx: { maga: 4, online: 1, farm: -1 } },
-    albright: { text: '"Every one, and we will stop paying for their health care today."', fx: { maga: 3, liberty: 1 } },
-    pike: { text: '"All of them. And we will pause legal immigration too. This country needs time to recover."', fx: { online: 4, maga: 3, chamber: -3, farm: -2 } },
   },
   d_institutions: {
+    castellano: { text: '"We do not seize institutions. We win them, in court and in the budget. I have done both."', fx: { liberty: 2, online: 1, seniors: 1 } },
     coburn: { text: '"I would start with the university athletic department. It is a mess."', fx: { seniors: 1, farm: 1 } },
-    albright: { text: '"Start with the medical board. It works for the drug companies, not for patients."', fx: { online: 2, liberty: 2 } },
-    pike: { text: '"Yes. Fire them, replace them, and never let them back in. That is what the left did to us."', fx: { online: 4, maga: 2, seniors: -2 } },
   },
   d_tariffs: {
+    castellano: { text: '"Yes. And the relief fund I signed has already paid two thousand farmers."', fx: { farm: 2, maga: 2 } },
     coburn: { text: '"I support the President. And I will cut the state gas tax to zero so farmers get relief now."', fx: { maga: 2, farm: 3, liberty: 1 } },
-    albright: { text: '"Our farmers should grow real food for Americans, not soybeans for China. This is an opportunity."', fx: { farm: 1, online: 2 } },
-    pike: { text: '"Tariffs protect American workers. A farmer who wants China\'s money more than his country\'s strength should think about that."', fx: { online: 2, maga: 2, farm: -3 } },
   },
   d_closing: {
+    castellano: { text: '"Everyone up here says they will fight. I am the only one who has won. Forty-one lawsuits, one income tax repeal, four thousand deportations. Let me finish the job."', fx: { maga: 2, seniors: 2, chamber: 1 } },
     coburn: { text: '"I am not a politician. I am a winner. Let me win for Cimarron."', fx: { maga: 3, seniors: 2 } },
-    albright: { text: '"They took my career because I told the truth. Give me the chance to tell it from the Governor\'s office."', fx: { online: 3, liberty: 1, faith: 1 } },
-    pike: { text: '"Every one of them wants your vote. I want your country back."', fx: { online: 4, maga: 1 } },
   },
 };
 for (const q of DEBATE_QUESTIONS) Object.assign(q.rivals, DEBATE_OUTSIDERS[q.id] || {});
 
 // Questions that are about a specific rival are asked only when that rival is in the race.
-const DEBATE_NEEDS = { d_carpet: ['vaskel'], d_arrest: ['krantz'], d_compromise: ['whitlock'] };
+const DEBATE_NEEDS = { d_bible: ['rick'], d_carpet: ['vaskel'], d_arrest: ['krantz'], d_compromise: ['whitlock'], d_chamber: ['dunmore'] };
 for (const q of DEBATE_QUESTIONS) q.needs = DEBATE_NEEDS[q.id] || [];
+// Questions addressed to the Governor are asked only when you are the Governor.
+DEBATE_QUESTIONS.find(q => q.id === 'd_carpet').cond = s => isGov(s);
 
 // ---------- Dynamic debate options ----------
 // When the race with your nearest rival is close, every debate question gets an extra option to attack that rival.
 const CLOSE_RACE = 6;   // points
 const ATTACK_LINES = {
+  castellano: ['"Victor, you sued Washington forty-one times. You never once sued the donors who fund you."',
+    '"The Governor has a Harvard degree and a plan for 2032. Cimarron is a stepping stone to him."',
+    '"Victor was a Chamber lawyer who supported guest workers. He did not change his mind. He changed his job."'],
   dunmore: ['"Travis has been Lieutenant Governor for four years and passed nothing. A podcast is not a record."',
     '"Travis sells hats made in Vietnam and calls it America First."',
     '"Travis wants a promotion. He never wanted to do the job he already has."'],
@@ -264,16 +265,12 @@ const ATTACK_LINES = {
     '"Carol voted for every budget increase for twenty years."'],
   coburn: ['"Jake, this is not a football game. You voted in three of the last ten primaries."',
     '"Jake cannot tell you the size of the state budget. You cannot run a state on name recognition."'],
-  albright: ['"Dr. Albright wants to end vaccine requirements for children in the middle of a measles outbreak."',
-    '"Renee lost her hospital privileges. Now she wants the whole state."'],
-  pike: ['"Mason has never held a job outside a livestream."',
-    '"Mason, the things you say on your stream are not conservative. They are ugly, and every pastor in this state knows it."'],
 };
 // Which voters like each attack.
 const ATTACK_FX = {
+  castellano: { maga: 2, online: 1 },
   dunmore: { chamber: 1, seniors: 2 }, rick: { liberty: 2, maga: 1 }, krantz: { seniors: 2, chamber: 1 },
   vaskel: { farm: 2, maga: 1 }, whitlock: { maga: 2, online: 1 }, coburn: { seniors: 1, faith: 1 },
-  albright: { seniors: 2, faith: 1 }, pike: { faith: 2, seniors: 2 },
 };
 
 // Closing statements are built from your record, your position in the race and your strongest faction.
@@ -283,10 +280,30 @@ const RECORD_CLOSE = {
   commandments: '"I put God back in our classrooms, and I will defend that law all the way to the Supreme Court."',
   heartland: '"I did not talk about deportations. I did them. Four thousand so far, and I am not finished."',
   dictionary: '"I gave parents control of what their children read. I will never give it back to the bureaucrats."',
+  d_border: '"For four years I told you the truth about the border every Monday night. Now let me fix it."',
+  d_uniparty: '"I named every lobbyist who runs this Capitol. Send me there, and they will all need new jobs."',
+  d_elections: '"I fought for every ballot to be counted by hand. I will fight just as hard for every one of you."',
+  d_tiebreak: '"When they tried to raise your fees, I cast the deciding vote. I will keep voting for you."',
+  r_life: '"Thousands of children are alive because this church said yes to life. Give me a state that says yes."',
+  r_revival: '"Sixty thousand of you filled a stadium to pray. Now fill the polls on August 4."',
+  r_academies: '"I built schools for your children when the state would not. I will give every family that choice."',
+  r_relief: '"When the floods came, our church was there before the government. I will govern the same way."',
+  k_atf: '"I kept federal agents out of Harlan County. I will keep them out of your county too."',
+  k_blm: '"I stood on that road for eleven days so the ranchers could keep their land. I will stand for you."',
+  k_border: '"My deputies went to the border when Washington would not. I will send the whole state."',
+  k_jail: '"Crime in my county fell five years in a row. Let me do for the state what I did for Harlan."',
+  v_datacenters: '"I did not promise you jobs. I built them. Give me the state and I will build more."',
+  v_charter: '"Freedomopolis proves that freedom works. Let me make the whole state free."',
+  v_bitcoin: '"I turned wasted gas into money. I will do the same with a wasteful government."',
+  v_tutors: '"Two hundred schools use what I built, for free. Imagine what I could do with the whole state."',
+  w_budget: '"Twelve balanced budgets and not one tax increase. That is not the old party. That is the conservative party."',
+  w_water: '"I kept the Panhandle\'s wells running through the drought. I know how to keep this state working."',
+  w_roads: '"I paved four thousand miles of your roads. I never asked you to cheer. I ask for your vote."',
+  w_heartbeat: '"I wrote this state\'s first heartbeat law before most of these men found their convictions."',
 };
 const POSITION_CLOSE = {
   leading: { text: '"You know my record, and that is why I am leading this race. Do not trade a proven fighter for a promise."', fx: { seniors: 2, maga: 1, chamber: 1 } },
-  behind: { text: '"The polls said I was behind four years ago too. The only poll that counts is on August 4."', fx: { maga: 2, online: 1, seniors: 1 } },
+  behind: { text: '"The polls have been wrong about me before. The only poll that counts is on August 4."', fx: { maga: 2, online: 1, seniors: 1 } },
 };
 const FACTION_CLOSE = {
   maga: { text: '"This movement did not start with any of us. I will fight for it every day that I am governor."', fx: { maga: 3, online: 1 } },
