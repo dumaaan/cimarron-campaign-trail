@@ -1,6 +1,6 @@
 // ============================================================
 // Balance simulator. Plays many automatic games and reports the results.
-// Open sim.html with the server running, or call these functions from the console there.
+// Open dev/sim.html with the server running, or call these functions from the console there.
 // ============================================================
 save = () => {};
 render = () => {};

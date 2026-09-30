@@ -1,11 +1,11 @@
 // ============================================================
 // THE CAMPAIGN TRAIL: CIMARRON 2030 — core data.
-// Other content: questions.js, debates.js, events.js, epilogue.js
+// Other content (js/content/): questions, debates, events, runoff, epilogue, media, reactions.
 // ============================================================
 
 const STATE_NAME = 'Cimarron';
 
-// Registration numbers are real counts. Turnout and vote totals are calculated from them in game.js.
+// Registration numbers are real counts. Turnout and vote totals are calculated from them in js/engine/model.js.
 const STATE_PROFILE = {
   pop: 3100000, adults: 2390000,
   registeredR: 980000, registeredD: 380000, unaffiliated: 440000,

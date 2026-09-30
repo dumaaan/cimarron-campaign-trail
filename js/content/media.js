@@ -19,7 +19,7 @@ const PERSONAS = {
 };
 
 // Fallback posts, used only when a decision has no entry in REACTIONS (reactions.js).
-// Each persona takes a stance on a decision, based on its effects (see postStance in game.js).
+// Each persona takes a stance on a decision, based on its effects (see postStance in js/engine/decisions.js).
 // They never quote the decision and never name a topic of their own.
 const BOOMER_POSTS = {
   approve: [

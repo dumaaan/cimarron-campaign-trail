@@ -22,15 +22,30 @@
 <button data-run="simEveryScenario">Who wins (each scenario)</button>
 <pre id="out">Choose a simulation.</pre>
 <div id="app"></div><div id="ticket"></div><div id="modal" hidden><div id="modal-body"></div></div>
-<script src="data.js"></script>
-<script src="questions.js"></script>
-<script src="debates.js"></script>
-<script src="events.js"></script>
-<script src="epilogue.js"></script>
-<script src="runoff.js"></script>
-<script src="media.js"></script>
-<script src="reactions.js"></script>
-<script src="game.js"></script>
+<!-- Content: the game's data and text -->
+<script src="../js/content/data.js"></script>
+<script src="../js/content/questions.js"></script>
+<script src="../js/content/debates.js"></script>
+<script src="../js/content/events.js"></script>
+<script src="../js/content/epilogue.js"></script>
+<script src="../js/content/runoff.js"></script>
+<script src="../js/content/media.js"></script>
+<script src="../js/content/reactions.js"></script>
+<!-- Engine: rules and state -->
+<script src="../js/engine/config.js"></script>
+<script src="../js/engine/state.js"></script>
+<script src="../js/engine/model.js"></script>
+<script src="../js/engine/campaign.js"></script>
+<script src="../js/engine/decisions.js"></script>
+<script src="../js/engine/trail.js"></script>
+<script src="../js/engine/election.js"></script>
+<script src="../js/engine/save.js"></script>
+<!-- Interface: rendering and input (app.js starts the game) -->
+<script src="../js/ui/components.js"></script>
+<script src="../js/ui/screens.js"></script>
+<script src="../js/ui/endings.js"></script>
+<script src="../js/ui/modals.js"></script>
+<script src="../js/ui/app.js"></script>
 <script src="sim.js"></script>
 <script>
 document.addEventListener('click', e => {
