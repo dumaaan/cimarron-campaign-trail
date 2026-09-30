@@ -25,13 +25,13 @@ const STRATEGIES = {
   },
 };
 
-// Play one full game. scenario and war are optional overrides (war: true/false).
-function simGame(strategy, seed, scenario, war) {
-  newState('Sim', seed);
+// Play one full game. scenario, war (true/false) and difficulty are optional overrides.
+function simGame(strategy, seed, scenario, war, difficulty = 'normal') {
+  newState('Sim', seed, difficulty);
   if (scenario) {
     // Start again from a clean state, then apply the chosen scenario exactly as the game does.
     const keep = { seed: S.seed, rng: S.rng, warPlanned: S.warPlanned };
-    newState('Sim', seed); Object.assign(S, keep);
+    newState('Sim', seed, difficulty); Object.assign(S, keep);
     for (const id in S.delta) S.delta[id] = {};
     S.flags = {};
     S.endorsements = Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder]));
@@ -153,6 +153,17 @@ function simEveryScenario(n = 60, strategy = STRATEGIES.noModerate) {
     const w = {};
     for (let i = 0; i < n; i++) { const s = simGame(strategy, 30000 + i, sc.id); w[s.finalWinner] = (w[s.finalWinner] || 0) + 1; }
     out[sc.id] = Object.fromEntries(Object.entries(w).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, `${Math.round(v / n * 100)}%`]));
+  }
+  return out;
+}
+
+// Your win rate at each difficulty level (same seeds).
+function simDifficulty(n = 300, strategy = STRATEGIES.noModerate) {
+  const out = {};
+  for (const d of Object.keys(DIFFICULTY)) {
+    let w = 0;
+    for (let i = 0; i < n; i++) if (simGame(strategy, 40000 + i, null, null, d).finalWinner === 'you') w++;
+    out[d] = `${Math.round(w / n * 100)}%`;
   }
   return out;
 }

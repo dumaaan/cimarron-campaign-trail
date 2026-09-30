@@ -211,6 +211,21 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S = null;
 }
 
+// --- Difficulty ---
+{
+  const e = newState('E', 5150, 'easy'), eSc = e.scenario, eWar = e.warPlanned, eMoney = e.money, ePos = TUNE.posMult;
+  const h = newState('H', 5150, 'hard');
+  ok('Difficulty: the same seed gives the same scenario and war at every level', h.scenario === eSc && h.warPlanned === eWar);
+  ok('Difficulty: Easy starts with more money than Hard', eMoney > h.money, `$${eMoney}M against $${h.money}M`);
+  ok('Difficulty: Hard keeps less of your gains than Easy', TUNE.posMult < ePos);
+  const risk = { p: .5 };
+  ok('Difficulty: gambles work more often on Easy and less often on Hard', riskP({ difficulty: 'easy' }, risk) > riskP({ difficulty: 'normal' }, risk) && riskP({ difficulty: 'normal' }, risk) > riskP(h, risk));
+  newState('N', 5150);
+  ok('Difficulty: a new Normal game resets every tuning value', Object.keys(TUNE_NORMAL).every(k => TUNE[k] === TUNE_NORMAL[k]) && S.difficulty === 'normal');
+  ok('Difficulty: an old save with no difficulty plays as Normal', difficultyOf({}) === DIFFICULTY.normal);
+  S = null;
+}
+
 // --- General election bar ---
 { const margin = 20, r = 50 + margin / 2 - .7, d = 100 - r - 1.4; ok('General election: margin shown = margin used', near(r - d, margin)); }
 

@@ -30,6 +30,16 @@ After every decision, the cable news chyrons and the posters online react.
 - **Earlier decisions open new choices.** A green tag on a choice shows that your record, your running mate, an endorsement or an earlier decision made it available.
 - **Runoff deals have a price.** An endorsement can win you one faction and cost you another.
 
+## Difficulty
+
+Choose a level on the title screen:
+
+- **Easy:** voters forgive more, rivals grow more slowly, gambles work more often, and you start with more money.
+- **Normal:** the primary as designed.
+- **Hard:** voters remember every mistake, rivals gang up on the leader, gambles fail more often, and you start with less money.
+
+The difficulty does not change the scenario or the field. The same seed gives the same situation at every level.
+
 ## Seeds
 
 Every game has a seed number, shown when the campaign starts and at the end. Enter the same seed on the title screen to play the same situation again, or share it with a friend. Not every year looks the same: sometimes the field changes, and sometimes events outside Cimarron change the race.

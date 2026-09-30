@@ -14,6 +14,18 @@ const TUNE = {
   endorseAll: 1,      // runoff endorsement: bonus in every faction
   fringeRunoff: 8,    // in a runoff, older, evangelical, business and farm voters unite against a fringe outsider
 };
+// Difficulty levels. Each one changes some TUNE values, your starting money, and every risk chance.
+const TUNE_NORMAL = { ...TUNE };
+const DIFFICULTY = {
+  easy:   { name: 'Easy', desc: 'Voters forgive more, rivals grow more slowly, and gambles work more often. You start with $3.0M.',
+            money: 3.0, risk: .1, tune: { posMult: .88, oppMomentum: .13, clawback: .13, rivalDebate: .45, runoffMomentum: 1.2 } },
+  normal: { name: 'Normal', desc: 'The primary as designed. You start with $2.0M.', money: 2.0, risk: 0, tune: {} },
+  hard:   { name: 'Hard', desc: 'Voters remember every mistake, rivals gang up on the leader, and gambles fail more often. You start with $1.5M.',
+            money: 1.5, risk: -.1, tune: { posMult: .7, oppMomentum: .2, clawback: .2, rivalDebate: .6, runoffMomentum: 2 } },
+};
+const difficultyOf = s => DIFFICULTY[s?.difficulty] || DIFFICULTY.normal;
+// TUNE is global, so set it again whenever a game starts or loads.
+function applyDifficulty(s) { Object.assign(TUNE, TUNE_NORMAL, difficultyOf(s).tune); }
 const RUNOFF_LINE = 40;      // a candidate needs this % to avoid a runoff
 const DROPOUT_LINE = 9;      // rivals below this % may drop out (after the President's endorsement)
 const SAVE_KEY = 'cimarron_campaign_trail_save_v4';
@@ -47,11 +59,12 @@ function pickScenario() {
   let r = rand() * SCENARIOS.reduce((a, x) => a + x.weight, 0);
   return SCENARIOS.find(x => (r -= x.weight) < 0) || SCENARIOS[0];
 }
-function newState(name, seed) {
+function newState(name, seed, difficulty = 'normal') {
   seed = (seed >>> 0) || Math.floor(Math.random() * 900000) + 100000;
+  if (!DIFFICULTY[difficulty]) difficulty = 'normal';
   S = {
-    name, seed, rng: seed, screen: 'record', record: null, mate: null,
-    step: 0, rino: 0, pres: CAND.you.pres, money: 2.0,
+    name, seed, rng: seed, difficulty, screen: 'record', record: null, mate: null,
+    step: 0, rino: 0, pres: CAND.you.pres, money: DIFFICULTY[difficulty].money,
     delta: Object.fromEntries(CANDIDATES.map(c => [c.id, {}])),
     bonus: Object.fromEntries(CANDIDATES.map(c => [c.id, {}])),
     gotv: {},
@@ -63,6 +76,7 @@ function newState(name, seed) {
   const warRoll = rand(), warStep = WAR.earliest + Math.floor(rand() * (WAR.latest - WAR.earliest + 1));
   S.warPlanned = URLQ.get('war') === '1' || warRoll < WAR.chance ? warStep : null;
   applyScenario(S, pickScenario());
+  applyDifficulty(S);
   return S;
 }
 // Set up the field and starting conditions of a scenario. Used by newState and by the simulator.
@@ -321,7 +335,7 @@ function growthFactions(s, id) {
   return FKEYS.map(f => [f, CAND[id].base[f] * ev[f] * (1 - factionShares(s, f)[id] / 100)]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
 }
 // risk.p is a number, or s => number when the chance depends on the campaign so far. Always between 5% and 95%.
-const riskP = (s, risk) => clamp(typeof risk.p === 'function' ? risk.p(s) : risk.p, .05, .95);
+const riskP = (s, risk) => clamp((typeof risk.p === 'function' ? risk.p(s) : risk.p) + difficultyOf(s).risk, .05, .95);
 function startWar(s) {
   s.war = { start: s.step };
   s.flags.war = s.step + 1;
@@ -1063,7 +1077,7 @@ function renderEnding(s) {
     <div class="ending-body">
       <div class="endorse-card">${portrait(s, w, 72)}<div><b>${displayName(s, w)}</b>${rr ? ' (after a runoff)' : ''}
         <div class="muted">${sorted(final).map(([id, v]) => `${esc(shortName(s, id))} ${v.toFixed(1)}%`).join(' · ')}</div></div></div>
-      <div class="muted small">Seed ${s.seed} · Scenario: ${esc(scenarioOf(s).name)}${s.war ? ' · The war in the Middle East' : ''}</div>
+      <div class="muted small">Seed ${s.seed} · ${difficultyOf(s).name} · Scenario: ${esc(scenarioOf(s).name)}${s.war ? ' · The war in the Middle East' : ''}</div>
       ${sections}
       ${rr ? `<div class="panel-title">The Runoff</div>${resultRows(s, rr.total, rr.totalVotes)}
         ${s.runoff.live ? `<ul class="epilogue">${Object.entries(s.runoff.endorse).map(([id, t]) => `<li>${esc(CAND[id].name)}: ${t === 'none' ? 'stayed neutral' : `endorsed ${esc(displayName(s, t))}`}.</li>`).join('')}</ul>` : ''}` : ''}
@@ -1179,6 +1193,7 @@ function renderTitle() {
     ${TEXT.title.map(p => `<p class="q-text">${p}</p>`).join('')}
     <label class="name-row">Your name: <input id="name" maxlength="28" placeholder="Dale Whitcomb"></label>
     <label class="name-row">Seed (optional): <input id="seed" inputmode="numeric" maxlength="9" placeholder="random"> <span class="muted small">The same seed gives the same scenario and the same random events.</span></label>
+    <div class="name-row">Difficulty:<div class="difficulty-row">${Object.entries(DIFFICULTY).map(([id, d]) => `<label class="difficulty"><input type="radio" name="difficulty" value="${id}" ${id === 'normal' ? 'checked' : ''}> <b>${d.name}</b><span class="muted small">${d.desc}</span></label>`).join('')}</div></div>
     <div class="btn-row"><button class="btn" id="start">Begin Campaign</button>${hasSave ? '<button class="btn alt" id="resume">Continue Campaign</button>' : ''}<button class="btn alt" id="open-profile">State Profile</button></div>
   </div>`;
 }
@@ -1191,7 +1206,7 @@ function renderChoice(title, intro, list, key) {
 }
 function renderField(s) {
   return `<div class="panel choose-panel"><div class="panel-title big">The Field</div>
-    <div class="scenario-card"><span class="lbl">Scenario · Seed ${s.seed}</span><b>${esc(scenarioOf(s).name)}</b><div>${esc(scenarioOf(s).desc)}</div></div>
+    <div class="scenario-card"><span class="lbl">Scenario · Seed ${s.seed} · ${difficultyOf(s).name}</span><b>${esc(scenarioOf(s).name)}</b><div>${esc(scenarioOf(s).desc)}</div></div>
     <p class="q-text">${TEXT.fieldIntro} ${s.field.length - 1} challengers are on the ballot.</p>
     ${s.field.filter(id => id !== 'you').map(id => CAND[id]).map(c => `<div class="opp-card">${portrait(s, c.id, 60)}<div><b class="cand-link" data-cand="${c.id}">${c.name}</b> <span class="faction-tag" style="background:${c.color}">${c.title}</span><p>${esc(c.blurb)}</p>
       <p class="muted small">Endorsements: ${Object.entries(s.endorsements).filter(([, h]) => h === c.id).map(([o]) => ENDORSERS[o].name).join(', ') || 'none yet'}</p></div></div>`).join('')}
@@ -1248,8 +1263,8 @@ document.addEventListener('click', e => {
   if (!b) return;
   switch (b.id) {
     case 'open-profile': openModal(stateModal()); break;
-    case 'start': newState($('#name').value.trim() || 'Dale Whitcomb', parseInt($('#seed').value, 10)); save(); render(); break;
-    case 'resume': S = load(); render(); if (S.screen === 'election') tickElection(); break;
+    case 'start': newState($('#name').value.trim() || 'Dale Whitcomb', parseInt($('#seed').value, 10), $('input[name=difficulty]:checked')?.value); save(); render(); break;
+    case 'resume': S = load(); applyDifficulty(S); render(); if (S.screen === 'election') tickElection(); break;
     case 'confirm-record': applyFx(S, RECORDS.find(r => r.id === S.record).fx); S.screen = 'mate'; save(); render(); break;
     case 'confirm-mate': applyFx(S, RUNNING_MATES.find(m => m.id === S.mate).fx); S.screen = 'field'; save(); render(); break;
     case 'launch': S.screen = 'campaign'; startStep(); break;
