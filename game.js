@@ -109,7 +109,7 @@ function applyFx(s, fx) {
   if (fx.rino) s.rino = Math.max(0, s.rino + fx.rino);
   if (fx.pres) s.pres = clamp(s.pres + fx.pres, 0, 100);
   if (fx.money) s.money = Math.max(0, s.money + fx.money);
-  if (fx.flag) s.flags[fx.flag] = s.step + 1;
+  for (const f of [].concat(fx.flag || [])) s.flags[f] = s.step + 1;   // flag: 'name' or ['name', 'other']
   if (fx.mate) swapMate(s, fx.mate);
   for (const id in fx.opp || {}) if (active(s).includes(id)) addAll(s, id, fx.opp[id]);
   if (fx.oppLeader) { const r = sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you'); if (r) addAll(s, r, fx.oppLeader); }

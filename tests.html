@@ -211,6 +211,35 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S = null;
 }
 
+// --- Story arcs and follow-ups: play every event step with a fixed choice ---
+{
+  const playEvents = (setup, choose = () => 0) => {
+    standardGame(77); S.record = 'income'; S.mate = 'pryce'; setup(S); S.screen = 'campaign';
+    for (let st = 0; st < SCHEDULE.length - 1; st++) {
+      S.step = st;
+      if (SCHEDULE[st] !== 'event') continue;
+      const e = pickEvent(S); if (!e) continue;
+      S.seenEvents.push(e.id);
+      S.cur = { type: 'event', eid: e.id, sel: null, answered: null, breaking: [], shown: shownChoices(S, e.choices) };
+      S.cur.sel = S.cur.shown[Math.min(choose(e), S.cur.shown.length - 1)];
+      answer();
+    }
+    return S;
+  };
+  const w = playEvents(s => { s.flags.indicted = 1; s.scenario = 'wounded'; });
+  ok('Wounded Incumbent: the three steps of the arc happen in order', ['indict_plea', 'indict_testimony', 'indict_verdict'].every((id, i, a) => w.seenEvents.indexOf(id) > (i ? w.seenEvents.indexOf(a[i - 1]) : -1)), w.seenEvents.join(', '));
+  const p = playEvents(s => { s.flags.indicted = 1; }, e => e.id === 'indict_plea' ? 1 : e.id === 'indict_verdict' ? 3 : 0);
+  ok('Wounded Incumbent: a pardon offer unlocks the pardon at the end', !!p.flags.tolliver_pardoned && consequences(p).some(t => t.includes('pardoned Mark Tolliver')));
+  for (const [flag, id] of [['hale_out', 'hale_money'], ['no_prop_tax', 'superintendents'], ['oppo_war', 'oppo_revenge']]) {
+    const g = playEvents(s => { s.flags[flag] = 1; });
+    ok(`Follow-up: the "${flag}" decision comes back as "${id}"`, g.seenEvents.includes(id));
+  }
+  const allIds = [...EVENTS, ...RUNOFF_EVENTS].map(e => e.id);
+  ok('Every event id is unique', new Set(allIds).size === allIds.length);
+  ok('Every event kind has a color', EVENTS.every(e => EVENT_KINDS[e.kind]));
+  S = null;
+}
+
 // --- Difficulty ---
 {
   const e = newState('E', 5150, 'easy'), eSc = e.scenario, eWar = e.warPlanned, eMoney = e.money, ePos = TUNE.posMult;

@@ -10,21 +10,24 @@
 // Extra fx keys for events:
 //   endorse: { orgId: candidateId }     gotv: { regionId: 0.05 }    gotvAll: 0.03
 //   oppLeader: n (applied to the strongest rival)                  drop: { id, to }
-//   mate: runningMateId (replace your running mate)
+//   mate: runningMateId (replace your running mate)       flag: 'name' or ['name', 'other']
 // Flags hold the step when they were set: since(s, flag) = steps passed since then.
 // ============================================================
 
 const since = (s, f) => s.flags[f] ? s.step + 1 - s.flags[f] : -1;
 const inRace = (s, id) => active(s).includes(id);
 const topRival = s => sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you');
+// Your lead over the strongest rival, in points (negative when you trail), and your place in the race (1 = first).
+const leadOver = s => { const sh = stateShares(s); return sh.you - sh[topRival(s)]; };
+const placeOf = s => sorted(stateShares(s)).findIndex(e => e[0] === 'you') + 1;
 
 const EVENT_KINDS = {
   Scandal: '#8d1820', Crisis: '#b35a00', Tragedy: '#333', Endorsement: '#1f6b3a',
   Opposition: '#5b2c83', Party: '#13284a', Media: '#1f5f8a', Strategy: '#555',
-  Record: '#7a5c14', 'Running Mate': '#2d6e6e',
+  Record: '#7a5c14', 'Running Mate': '#2d6e6e', 'Rival Feud': '#7a2e5a',
 };
 // The most events of one kind in a game (follow-ups not counted), so no campaign is all tragedies or all scandals.
-const KIND_LIMITS = { Tragedy: 1, Scandal: 2, Crisis: 3 };
+const KIND_LIMITS = { Tragedy: 1, Scandal: 2, Crisis: 3, 'Rival Feud': 2 };
 const mateName = s => RUNNING_MATES.find(m => m.id === s.mate)?.name || 'your running mate';
 // Personal events (your record, your running mate) are drawn more often than the general ones.
 const PERSONAL = 4;
@@ -777,6 +780,348 @@ const EVENTS = [
         risk: { p: .35,
           win: { fx: { maga: 3, online: 2, opp: { dunmore: -2 } }, fb: 'Pryce is calm, funny and very well prepared. Dunmore\'s listeners hear the establishment defend itself, and some of them like it.' },
           lose: { fx: { maga: -3, online: -3, rino: 1 }, fb: 'Dunmore spends two hours reading Pryce\'s old lobbying reports aloud. The clips are everywhere.' } } },
+    ] },
+
+  // ---------------- FOLLOW-UPS: earlier decisions come back ----------------
+  { id: 'hale_money', kind: 'Scandal', title: 'The Hale Money', priority: true, cond: s => since(s, 'hale_out') >= 3,
+    text: 'Richard Hale gives $2 million to a new super PAC, "Cimarron Deserves Better." Its first ad shows Dr. Priya Hale in her hospital scrubs. A narrator says: "She saved 4,000 hearts. When the mob came for her, the Governor asked her to leave."',
+    advice: [
+      ['pryce', 'Richard knows every donor in Fort Eisenhower. This will not be his last check.'],
+      ['dana', 'The ad works with older women and business Republicans. It does nothing with the online right.'],
+      ['wade', 'Answer it, or the ad becomes the story of your campaign.'],
+    ],
+    choices: [
+      { text: 'Apologize to Dr. Hale in public, by name.', fx: { seniors: 2, chamber: 3, faith: 1, online: -3, rino: 1 },
+        fb: 'The apology is sincere, and late. The Hales accept it in a short statement. The ad stops running two weeks later.' },
+      { text: 'Run ads that call Richard Hale "a bitter donor who wanted a governor he could buy."', fx: { money: -.5, maga: 1, chamber: -3, seniors: -1 },
+        fb: 'The fight is now between two wealthy men. The voters who liked Dr. Hale still like her.' },
+      { text: 'Ask the Hales for a private meeting.', fx: {},
+        risk: { p: s => .4 + (s.mate === 'pryce' ? .2 : 0),
+          win: { fx: { chamber: 2, seniors: 1 }, fb: 'The meeting is long and hard. Afterward, the super PAC pulls its ads "for now."' },
+          lose: { fx: { chamber: -2, seniors: -2 }, fb: 'Richard records the meeting. The PAC\'s second ad uses your own voice.' } } },
+    ] },
+  { id: 'oppo_revenge', kind: 'Opposition', title: 'Dunmore\'s File', priority: true, cond: s => since(s, 'oppo_war') >= 3 && inRace(s, 'dunmore'),
+    text: 'Dunmore answers your opposition research with his own. His campaign releases records showing that in 2019, before you were governor, you bought land near Sumner from a road contractor at half its value. The same contractor has won $90 million in state highway work since you took office.',
+    advice: [
+      ['pryce', 'The land deal was legal and the contracts were competitive. Both things are true, and neither fits in an ad.'],
+      ['wade', 'He started this war because you started it. Finish it.'],
+      ['dana', 'Voters do not follow land records. They follow the word "contractor."'],
+    ],
+    choices: [
+      { text: 'Release every document about the land deal and the contracts.', fx: {},
+        risk: { p: s => .6 - (s.flags.indicted ? .2 : 0),
+          win: { fx: { seniors: 3, chamber: 2, opp: { dunmore: -2 } }, fb: 'The Ledger reads all 900 pages. It finds a good deal for you, but nothing illegal. Dunmore moves on.' },
+          lose: { fx: { seniors: -3, maga: -2 }, fb: 'In the documents, a reporter finds an email from the contractor thanking you "for everything." It means nothing. It sounds like everything.' } } },
+      { text: 'Hit back harder: run ads about Dunmore\'s unpaid taxes.', fx: { money: -.4, maga: -1, seniors: -1, opp: { dunmore: -4 } },
+        fb: 'The race is now two men calling each other crooks. Both of you fall. Whoever is third gains.' },
+      { text: 'Call for a truce: both campaigns stop negative ads for the last month.', fx: { seniors: 2, faith: 2, maga: -1 },
+        fb: 'Dunmore refuses on his show. Voters who are tired of the fight remember who asked to stop it.' },
+    ] },
+  { id: 'superintendents', kind: 'Crisis', title: 'Forty School Boards', priority: true, cond: s => since(s, 'no_prop_tax') >= 2,
+    text: 'Forty rural school boards pass the same resolution against your plan to abolish property taxes. Property taxes pay for 60% of their budgets. The superintendent in Dry Fork says his district would close two of its three schools. Most of the forty board members are Republicans.',
+    advice: [
+      ['dana', 'Abolishing property taxes is still popular. Closing the school in your own town is not.'],
+      ['pryce', 'We never said what would replace the money. Now we have to.'],
+      ['wade', 'If you back down now, Vaskel and the Liberty Caucus will say you never meant it.'],
+    ],
+    choices: [
+      { text: 'Hold firm: "Families should not rent their homes from the government."', fx: { liberty: 3, online: 1, farm: -3, seniors: -2 },
+        fb: 'The Liberty Caucus is delighted. In small towns, the school is the town, and people say so.' },
+      { text: 'Phase it out over ten years, with the state replacing school funding.', fx: { seniors: 2, farm: 2, liberty: -2, rino: 1 },
+        fb: 'The school boards are satisfied. The Club for Growth says you "found a way to never do it."' },
+      { text: 'Exempt homes, but keep the tax on farmland and businesses.', fx: { seniors: 3, farm: -3, chamber: -2 },
+        fb: 'Homeowners are pleased. Farmers ask why their land pays for the schools alone.' },
+    ] },
+  { id: 'dove_rally', kind: 'Party', title: 'Disloyal', priority: true, cond: s => since(s, 'war_dove') >= 3 && s.war && s.endorsed !== 'you',
+    text: s => `The President holds a tele-rally for Cimarron Republicans. "Some people in your state," he says, "turned on our troops the day the war started. Very disloyal. The Governor knows who I mean."${s.endorsed ? ` He asks voters to support ${displayName(s, s.endorsed)}.` : ''}`,
+    advice: [
+      ['wade', 'Do not fight the President. Fight about gas prices.'],
+      ['kyle', 'The New Right loves this. He just made you the anti-war candidate.'],
+      ['dana', 'Farmers and older voters are with you on the war now. The MAGA base is not.'],
+    ],
+    choices: [
+      { text: '"I respect the President. I also serve Cimarron, and Cimarron is paying $7 for diesel."', fx: { farm: 2, seniors: 2, online: 1, maga: -2 },
+        fb: 'A respectful answer that does not step back. Farmers repeat the line at the grain elevator.' },
+      { text: '"America First means no new wars. I have not changed. He has."', fx: { online: 4, liberty: 2, maga: -4, pres: -6 },
+        fb: 'The New Right makes you a hero. The President\'s voters make you an enemy.' },
+      { text: 'Praise the troops and ask the President for a meeting.', fx: { pres: 4, maga: 1, online: -3 },
+        fb: 'The White House does not answer. The New Right thinks you blinked.' },
+    ] },
+  { id: 'hawk_diesel', kind: 'Crisis', title: 'The Tractor Convoy', priority: true, cond: s => since(s, 'war_hawk') >= 3 && s.war,
+    text: 'Three hundred tractors drive down the interstate to the Capitol. Diesel is $7.40, and the harvest is six weeks away. The farmers\' signs quote your words from the first day of the war: "We will finish this." One sign adds: "With whose diesel?"',
+    advice: [
+      ['dana', 'Farmers were with you. Now they are with whoever talks about diesel.'],
+      ['wade', 'If you back away from the war, the President\'s people will never forgive you.'],
+      ['pryce', 'Ask the President to release oil from the Strategic Petroleum Reserve. It is the only real help we can get.'],
+    ],
+    choices: [
+      { text: 'Suspend the state diesel tax until the harvest is over.', fx: { farm: 4, seniors: 1, liberty: -1, money: -.2 },
+        fb: 'Diesel falls 32 cents. The farmers drive home. The tax cut costs the state $40 million.' },
+      { text: '"Victory takes sacrifice. Cimarron farmers have always carried their share."', fx: { pres: 3, maga: 1, farm: -4, seniors: -1 },
+        fb: 'The White House likes it. The farmers do not.' },
+      { text: 'Ask the President to release the Strategic Petroleum Reserve.', fx: {},
+        risk: { p: s => s.pres / 100,
+          win: { fx: { farm: 4, pres: 1, maga: 1 }, fb: 'The President announces the release and thanks you by name. Diesel falls before the harvest.' },
+          lose: { fx: { farm: -2 }, fb: 'The White House says the reserve is "for real emergencies." The farmers ask what they are having.' } } },
+    ] },
+
+  // ---------------- THE WOUNDED INCUMBENT: your former Chief of Staff (three steps) ----------------
+  { id: 'indict_plea', kind: 'Scandal', title: 'The Plea Offer', priority: true, cond: s => !!s.flags.indicted && s.step >= 5,
+    text: 'Prosecutors offer your former Chief of Staff, Mark Tolliver, a plea deal on the contract charges. The Ledger reports that the deal depends on what he can tell them about "people above him." Attorney General Dean Hollis, who brought the case, is a close ally of Travis Dunmore.',
+    advice: [
+      ['pryce', 'Mark was your friend for twenty years. He is also facing twenty years. Do not assume he is still your friend.'],
+      ['wade', 'Hollis is Dunmore\'s man. Say so, loudly.'],
+      ['dana', 'Voters do not know what Mark did. They know he worked for you.'],
+      ['tom', 'Pray for him in public. People respect a man who does not abandon a friend.'],
+    ],
+    choices: [
+      { text: 'Release every email between you and Tolliver about state contracts.', fx: { flag: 'plea' },
+        risk: { p: s => .5 + (s.flags.donor_deal ? -.2 : .1),
+          win: { fx: { seniors: 3, chamber: 2, flag: 'emails_clean' }, fb: 'Four thousand emails, and none of them helps the prosecutors. The Ledger calls you "boring, and apparently honest."' },
+          lose: { fx: { seniors: -3, maga: -2, flag: 'emails_bad' }, fb: 'One email from 2028 says: "Make sure Garrison gets the Route 9 job. You know why." You wrote it about a road. Nobody reads it that way.' } } },
+      { text: 'Say you would consider a pardon if he is convicted.', fx: { maga: 1, seniors: -3, chamber: -2, flag: ['plea', 'pardon_offer'] },
+        fb: 'Some supporters see loyalty. Prosecutors see a governor telling a witness not to cooperate.' },
+      { text: 'Attack the Attorney General as a Dunmore ally who is using his office.', fx: { maga: 2, online: 1, seniors: -1, opp: { dunmore: -2 }, flag: 'plea' },
+        fb: 'The base likes the fight. It does not answer the question of what Tolliver knows.' },
+      { text: 'Say nothing about an active case.', fx: { seniors: 1, maga: -1, flag: 'plea' },
+        fb: 'Correct and careful. The silence lets everyone else tell the story.' },
+    ] },
+  { id: 'indict_testimony', kind: 'Scandal', title: 'Tolliver Talks', priority: true, cond: s => since(s, 'plea') >= 3,
+    text: s => `Mark Tolliver accepts the plea deal. At his hearing, he tells the judge that the Governor "knew the contractor had been promised the job, and never asked how."${s.flags.pardon_offer ? ' The prosecutor adds that your talk of a pardon "may have been an attempt to influence a witness."' : ''}${s.flags.emails_clean ? ' Your released emails do not support him.' : ''}${s.flags.emails_bad ? ' He points to the Route 9 email.' : ''} Reporters are outside the Capitol.`,
+    advice: [
+      ['pryce', 'He is saying what keeps him out of prison. That does not mean it is false. You know better than I do.'],
+      ['wade', 'He is a convicted liar. Treat him like one.'],
+      ['dana', 'A majority of our voters still believe you. It is not a large majority.'],
+    ],
+    choices: [
+      { text: 'Offer to testify under oath, voluntarily.', fx: { flag: 'testified' },
+        risk: { p: s => .5 + (s.flags.emails_clean ? .25 : 0) - (s.flags.emails_bad ? .25 : 0) - (s.flags.pardon_offer ? .1 : 0),
+          win: { fx: { seniors: 4, chamber: 2, faith: 1 }, fb: 'Three hours under oath. You are calm and specific. The judge does not refer you for investigation, and the story turns against Tolliver.' },
+          lose: { fx: { seniors: -4, maga: -3, chamber: -2, flag: 'official1' }, fb: 'Your answers about the contractor are different from your answers in 2029. The court record now calls you "Official 1."' } } },
+      { text: '"He is a man who will say anything to save himself."', fx: { maga: 2, seniors: -2 },
+        fb: 'Your base agrees. Everyone else notices that you worked with him for twenty years.' },
+      { text: 'Withdraw any talk of a pardon.', cond: s => !!s.flags.pardon_offer, unlock: 'You mentioned a pardon',
+        fx: { seniors: 2, maga: -2 }, fb: 'Too late to look principled, but it ends one of the two stories.' },
+      { text: 'Say again that you would pardon him: "He is a good man in a political prosecution."', cond: s => !!s.flags.pardon_offer, unlock: 'You mentioned a pardon',
+        fx: { maga: 3, online: 2, seniors: -4, chamber: -3, flag: 'official1' },
+        fb: 'Tolliver stops looking at you in court. The prosecutors add your statement to the record.' },
+    ] },
+  { id: 'indict_verdict', kind: 'Scandal', title: 'The Sentence', priority: true, cond: s => since(s, 'testified') >= 2 || (since(s, 'plea') >= 6 && s.seenEvents.includes('indict_testimony')),
+    text: s => `The judge sentences Mark Tolliver to four years in federal prison. ${s.flags.official1 ? 'In the sentencing document, the judge describes "Official 1," who "knew enough to ask questions and chose not to." Every reporter in the state knows who Official 1 is.' : 'The sentencing document does not mention you. The judge says Tolliver "acted for his own benefit."'} Early voting starts in two weeks.`,
+    advice: [
+      ['wade', 'Say one thing, say it once, and go back to the campaign.'],
+      ['pryce', 'Announce ethics reform. Voters want to hear that this cannot happen again.'],
+    ],
+    choices: [
+      { text: '"Mark betrayed my trust and the state\'s. The court did its job."', fx: { seniors: 2, chamber: 1, maga: -1 },
+        fb: 'Short and firm. The story fades in a few days.' },
+      { text: 'Announce an ethics package: an independent inspector general for all state contracts.', fx: { seniors: 3, chamber: 2, liberty: 1, maga: -2, rino: 1 },
+        fb: 'Good government, and good politics with older voters. Dunmore says you are "cleaning up your own mess."' },
+      { text: 'Call it a political prosecution and say the Attorney General should resign.', fx: { maga: 3, online: 2, seniors: -3, chamber: -2 },
+        fb: 'The base cheers. Older voters see a governor who cannot admit that anything went wrong.' },
+      { text: 'Pardon Tolliver today.', cond: s => !!s.flags.pardon_offer, unlock: 'You mentioned a pardon',
+        fx: { maga: 3, online: 3, seniors: -6, chamber: -4, faith: -2, flag: 'tolliver_pardoned' },
+        fb: 'He is free by the evening. You kept your word. Most of the state believes it knows why.' },
+    ] },
+
+  // ---------------- OUTSIDERS (only in some scenarios) ----------------
+  { id: 'coburn_dui', kind: 'Opposition', title: 'The Old Arrest', minStep: 9, weight: 3, cond: s => inRace(s, 'coburn'),
+    text: 'A police video from 2014 appears online: Jake Coburn, then a quarterback in the NFL, arrested for drunk driving in Harlan with a teammate in the car. The case was quietly dismissed. The President posts that Coburn is "a great champion, and we all make mistakes!"',
+    advice: [
+      ['wade', 'Do not touch it. The President just defended him. Voters forgive football players.'],
+      ['dana', 'It moves older voters a little. Everyone else shrugs.'],
+      ['kyle', 'The real story is that the case was dismissed. Who dismissed it?'],
+    ],
+    choices: [
+      { text: 'Ask why the case was dismissed: "Is there one law for celebrities?"', fx: { seniors: 1, pres: -4, opp: { coburn: -4 } },
+        fb: 'A fair question. The county attorney who dropped the case was a Coburn family friend. The President does not like the question.' },
+      { text: 'Say nothing about it.', fx: {}, fb: 'The story lasts two days. Coburn\'s poll numbers do not move.' },
+      { text: 'Defend him: "He was young, and he has grown up. Talk about his plans instead."', fx: { seniors: 1, farm: 1, pres: 2, opp: { coburn: 1 } },
+        fb: 'Gracious. And now reporters ask Coburn about his plans, which is where he is weakest.' },
+      { text: 'Challenge him to a debate on policy, one on one.', fx: {},
+        risk: { p: .5,
+          win: { fx: { seniors: 2, chamber: 1, opp: { coburn: -4 } }, fb: 'He accepts. He does not know what the state budget is. It shows.' },
+          lose: { fx: { maga: -1 }, fb: 'He declines: "I\'d rather talk to the people." He holds a rally the same night. Twelve thousand people come.' } } },
+    ] },
+  { id: 'albright_measles', kind: 'Opposition', title: 'Measles in Sumner', minStep: 6, weight: 3, cond: s => inRace(s, 'albright'),
+    text: 'Measles returns to Cimarron. Nineteen cases in Sumner County, where vaccination rates fell after Dr. Albright\'s tour of the county last year. Two infants are in the hospital. Albright says measles "is a normal childhood illness that we were taught to fear."',
+    advice: [
+      ['dana', 'Parents of young children are frightened. The online right is with Albright.'],
+      ['tom', 'Pastors are asking us whether to cancel Vacation Bible School.'],
+      ['kyle', 'If you attack her on vaccines, you attack half of her voters.'],
+    ],
+    choices: [
+      { text: 'Blame her directly: "Her tour put children in the hospital."', fx: { seniors: 3, chamber: 1, online: -4, liberty: -1, opp: { albright: -4 } },
+        fb: 'Parents of young children agree. Her supporters say you are "the COVID governor."' },
+      { text: 'Open free, voluntary vaccine clinics. Mandate nothing.', fx: { seniors: 2, faith: 1, online: -2 },
+        fb: 'A careful answer. Vaccination in Sumner rises. Albright calls the clinics "a trap."' },
+      { text: 'Defend parental choice, and ask parents of sick children to stay home.', fx: { online: 3, liberty: 2, seniors: -3, opp: { albright: 1 } },
+        fb: 'Her voters hear you agree with her. The two infants are still in the hospital.' },
+    ] },
+  { id: 'pike_stream', kind: 'Media', title: 'The Stream', minStep: 5, weight: 3, cond: s => inRace(s, 'pike'),
+    text: 'On his stream, Mason Pike says that "a certain group" controls the banks and the media, and lists their names. The clip is everywhere by morning. Every candidate is asked about it. Pike says: "Anyone who condemns me is afraid of them."',
+    advice: [
+      ['tom', 'Our pastors love Israel and the Jewish people. They will condemn this, and they expect you to be first.'],
+      ['kyle', 'His audience will turn on anyone who condemns him. That audience votes in this primary now.'],
+      ['dana', 'Every group except the youngest online voters wants him condemned.'],
+    ],
+    choices: [
+      { text: 'Condemn it by name: "This is antisemitism, and it has no place in our party."', fx: { faith: 3, seniors: 3, chamber: 2, online: -5, opp: { pike: -3 } },
+        fb: 'Evangelical leaders thank you publicly. Pike\'s chat calls you names for a week.' },
+      { text: 'Condemn "all forms of bigotry" without naming him.', fx: { online: -1, faith: -1 },
+        fb: 'Nobody is satisfied. Pike reads your statement aloud and laughs.' },
+      { text: 'Refuse to comment on "what a streamer says."', fx: { online: 2, faith: -3, seniors: -2 },
+        fb: 'Pike thanks you on air. The Council of Pastors does not.' },
+      { text: 'Go on his stream and argue with him live.', fx: {},
+        risk: { p: .35,
+          win: { fx: { online: 4, faith: 2, opp: { pike: -4 } }, fb: 'You are ready, and he is not. Pike ends the stream early. His chat is not sure which of you won.' },
+          lose: { fx: { online: -2, seniors: -4, faith: -4 }, fb: 'For two hours, you are on his show, on his terms. The only clip anyone shares is you nodding while he talks.' } } },
+    ] },
+
+  // ---------------- THE STATE OF THE RACE ----------------
+  { id: 'frontrunner', kind: 'Strategy', title: 'Everyone Against You', minStep: 10, weight: 2, cond: s => leadOver(s) >= 8,
+    text: 'You lead the race by a wide margin. Three rival super PACs now run the same ad, paid for together, with the same ending: "Anybody but the Governor." Donors are relaxed. Your field director is not.',
+    advice: [
+      ['pryce', 'Frontrunners lose when they relax. Spend the money on turnout.'],
+      ['wade', 'Hit the one in second place. Make it a two-person race you win.'],
+      ['dana', 'Our support is wide, but not deep. Many of our voters like two candidates.'],
+    ],
+    choices: [
+      { text: 'Hit the rival in second place with negative ads.', fx: { money: -.4, oppLeader: -3, seniors: -1 },
+        fb: 'Second place falls. The race looks like yours to lose.' },
+      { text: 'Put the money into turnout everywhere.', fx: { money: -.6, gotvAll: .04 },
+        fb: 'Less visible. Your field staff doubles.' },
+      { text: 'Stay positive and run on the record.', fx: { seniors: 2, chamber: 1, maga: -1 },
+        fb: 'The joint ads keep running. Voters see you above the fight.' },
+    ] },
+  { id: 'cash_crunch', kind: 'Strategy', title: 'Payroll', minStep: 6, weight: 2, cond: s => s.money < .6,
+    text: 'Your finance director says the campaign cannot make payroll in two weeks. Television is already reserved and must be paid in advance. Two consultants have stopped returning calls.',
+    advice: [
+      ['pryce', 'Lend the campaign your own money. Donors give to campaigns that look like they will win.'],
+      ['kyle', 'One email to small donors, with the right subject line, raises $400,000 in a day.'],
+      ['wade', 'A crypto PAC wants to help. Their money spends like anyone\'s.'],
+    ],
+    choices: [
+      { text: 'Lend the campaign $1 million of your own money.', fx: { money: 1, flag: 'self_loan' },
+        fb: 'Payroll is safe. You will be paying this back for years.' },
+      { text: 'Send an urgent email to small donors: "They are trying to steal this primary."', fx: {},
+        risk: { p: .65,
+          win: { fx: { money: 1, online: 1, maga: 1 }, fb: 'The email raises $1 million in 36 hours. The subject line becomes a joke on cable news. You do not care.' },
+          lose: { fx: { money: .3, seniors: -1 }, fb: 'The email raises $300,000 and a story in the Ledger about "fundraising by fear."' } } },
+      { text: 'Accept $1.5 million from a crypto industry PAC.', fx: { money: 1.5, liberty: 2, seniors: -2, chamber: -1 },
+        fb: 'The money arrives the next day, with a list of bills they would like signed.' },
+      { text: 'Cut the field staff by half.', fx: { money: .6, farm: -1, seniors: -1 },
+        fb: 'You make payroll. In small towns, the volunteers notice that nobody is calling them.' },
+    ] },
+  { id: 'rino_censure', kind: 'Party', title: 'The Censure', minStep: 8, weight: 2, cond: s => s.rino >= 7,
+    text: 'The Osgood County Republican Party votes 41 to 6 to censure you "for betraying the platform of the Republican Party." Two more county parties plan votes next week. Dunmore attends the Osgood meeting and signs the resolution as a witness.',
+    advice: [
+      ['wade', 'The base does not trust you anymore. Give them a reason to.'],
+      ['dana', 'Censures excite activists. Most primary voters will never hear about it, unless we make it a story.'],
+      ['pryce', 'Your record is what it is. Defend it, or it defends itself badly.'],
+    ],
+    choices: [
+      { text: 'Move right: sign the county party\'s pledge on immigration and taxes.', fx: { maga: 2, online: 2, chamber: -3, rino: -2 },
+        fb: 'Two of the three county parties cancel their votes. The Chamber asks what else you plan to sign.' },
+      { text: 'Defend your record: "I govern the whole state, not one county committee."', fx: { seniors: 2, chamber: 2, maga: -2 },
+        fb: 'Older voters respect it. The next two counties censure you too.' },
+      { text: 'Ignore it.', fx: { maga: -1 }, fb: 'Nobody outside Osgood talks about it. Inside Osgood, nobody talks about anything else.' },
+    ] },
+  { id: 'white_house_trip', kind: 'Party', title: 'Air Force One', minStep: 8, maxStep: 22, weight: 3, cond: s => s.pres >= 58,
+    text: 'The White House invites you to travel with the President for four days of rallies in other states. You would speak before him every night. You would also miss four days in Cimarron, in the middle of the primary.',
+    advice: [
+      ['wade', 'Four days next to the President on national television. Nobody in this race can match that.'],
+      ['dana', 'Cimarron voters notice when their governor is not in Cimarron.'],
+      ['pryce', 'The President remembers who says yes, and who says no.'],
+    ],
+    choices: [
+      { text: 'Go.', fx: { pres: 6, maga: 3, farm: -1, seniors: -1 },
+        fb: 'Four nights of national television. You come home a national figure, and a little behind in Cimarron.' },
+      { text: 'Decline politely: "The people of Cimarron hired me to be here."', fx: { pres: -4, seniors: 2, farm: 1 },
+        fb: 'The Ledger praises it. The White House scheduler does not call again.' },
+      { text: 'Go for one night only.', fx: { pres: 2, maga: 1 },
+        fb: 'A good compromise. The clip from your speech runs on Fax News for a day.' },
+    ] },
+  { id: 'dropout_talk', kind: 'Strategy', title: 'The Drop-Out Rumors', minStep: 12, weight: 2, cond: s => placeOf(s) >= 3,
+    text: 'You are third in the polls. A national columnist writes that "the incumbent should consider whether his campaign is helping anyone." Two large donors ask to meet. Your staff want a new plan by Monday.',
+    advice: [
+      ['wade', 'Pick one faction and win it completely. You cannot win everyone now.'],
+      ['dana', 'Undecided voters are older and quieter than the ones in the news. They are still there.'],
+      ['pryce', 'Put your own money in. Nothing ends the rumors faster.'],
+    ],
+    choices: [
+      { text: 'Go all in on the base: a new campaign about the border and the "uniparty."', fx: { maga: 4, online: 3, seniors: -2, chamber: -3 },
+        fb: 'The rallies are louder. The donors stop calling.' },
+      { text: 'Go all in on the quiet voters: churches, farms and retirees.', fx: { seniors: 3, faith: 2, farm: 2, online: -2 },
+        fb: 'Less excitement, and more coffee with county chairmen. The polls move slowly, but they move.' },
+      { text: 'Announce that you will lend the campaign $1 million.', fx: { money: 1, maga: 1, seniors: 1, flag: 'self_loan' },
+        fb: 'The rumors end the next day. You are now a large creditor of your own campaign.' },
+    ] },
+
+  // ---------------- RIVAL FEUDS: your rivals fight each other ----------------
+  { id: 'feud_jet', kind: 'Rival Feud', title: 'The Jet and the Microphone', minStep: 8, cond: s => inRace(s, 'dunmore') && inRace(s, 'rick'),
+    text: 'On his podcast, Dunmore mocks Pastor Rick\'s church jet: "Jesus rode a donkey." Rick answers from the pulpit: "Some men worship a microphone." Their supporters fight online all weekend. Reporters ask whose side you are on.',
+    advice: [
+      ['wade', 'Two of your rivals are hurting each other. Let them.'],
+      ['tom', 'Church people are angry at Dunmore. A kind word for Rick costs you nothing with them.'],
+      ['kyle', 'I can make sure the jet invoices reach Dunmore. Nobody would know.'],
+    ],
+    choices: [
+      { text: 'Stay out of it: "I am running for governor, not for moderator."', fx: { seniors: 1 },
+        fb: 'Both of them keep falling. You stay where you are.' },
+      { text: 'Defend Pastor Rick: "Attacking a church is out of bounds."', fx: { faith: 2, maga: -1, opp: { dunmore: -2, rick: 1 } },
+        fb: 'Church voters notice. So does Dunmore, who now attacks you instead.' },
+      { text: 'Agree with Dunmore about the jet.', fx: { maga: 2, online: 1, faith: -2, opp: { rick: -2, dunmore: 1 } },
+        fb: 'The base enjoys it. Pastors add you to their list.' },
+      { text: 'Quietly send the jet\'s invoices to Dunmore\'s team.', fx: {},
+        risk: { p: .55,
+          win: { fx: { opp: { rick: -4, dunmore: -1 } }, fb: 'Dunmore reads the invoices on air. Rick\'s jet cost $4 million, paid by the church. Both men lose.' },
+          lose: { fx: { faith: -3, seniors: -1, opp: { rick: 1 } }, fb: 'The Ledger finds out where the invoices came from. Rick calls you "a coward who uses other men\'s mouths."' } } },
+    ] },
+  { id: 'feud_sunday', kind: 'Rival Feud', title: 'Taliban Economics', minStep: 6, cond: s => inRace(s, 'rick') && inRace(s, 'vaskel'),
+    text: 'Brent Vaskel calls Pastor Rick\'s plan to close most businesses on Sundays "Taliban economics." Rick says Vaskel "worships the market because he has no other god." The owners of three hundred small businesses want to know where you stand.',
+    advice: [
+      ['tom', 'Nobody in the churches supports Vaskel\'s language. But not many support Rick\'s plan either.'],
+      ['pryce', 'Retailers do 20% of their weekly sales on Sunday. That is our donor base.'],
+      ['dana', 'The Liberty Caucus and the evangelicals disagree. Pick one, or neither.'],
+    ],
+    choices: [
+      { text: 'Side with Rick: "Our state can honor the Sabbath."', fx: { faith: 3, liberty: -3, chamber: -2, opp: { vaskel: -2, rick: 1 } },
+        fb: 'Pastors are grateful. Retailers call your office all week.' },
+      { text: 'Side with Vaskel\'s policy, but not his words.', fx: { liberty: 2, chamber: 2, faith: -2, opp: { rick: -2 } },
+        fb: 'Business owners are relieved. Rick says you "stand with the man who mocked believers."' },
+      { text: 'Condemn Vaskel\'s words and reject Rick\'s plan.', fx: { faith: 1, seniors: 2, chamber: 1, opp: { vaskel: -2, rick: -1 } },
+        fb: 'A position that makes both rivals look extreme. It is not exciting, and that is the point.' },
+    ] },
+  { id: 'feud_water', kind: 'Rival Feud', title: 'The Aquifer', minStep: 6, cond: s => inRace(s, 'krantz') && inRace(s, 'vaskel'),
+    text: 'Vaskel\'s data center company asks for permits to pump 3 billion gallons a year from the Ogallala aquifer to cool its servers. Sheriff Krantz leads 400 ranchers to the water board hearing. "The water belongs to the people who work the land," he says. Vaskel calls the ranchers "a museum."',
+    advice: [
+      ['dana', 'Farmers vote at high rates, and this is the only issue they are talking about.'],
+      ['pryce', 'Vaskel\'s data centers are 6,000 jobs. Water is also jobs, just older ones.'],
+      ['wade', 'Krantz is right on this one. Say so before he owns it.'],
+    ],
+    choices: [
+      { text: 'Stand with the ranchers: no new permits until a full water study.', fx: { farm: 4, guns: 1, chamber: -2, liberty: -1, opp: { vaskel: -2, krantz: 1 } },
+        fb: 'The hearing is suspended. Krantz shakes your hand for the cameras, reluctantly.' },
+      { text: 'Stand with the jobs: approve the permits with conditions.', fx: { chamber: 3, liberty: 2, farm: -4, opp: { krantz: 2, vaskel: 1 } },
+        fb: 'Pratt Junction celebrates. In the Panhandle, the sheriff\'s signs go up on every fence.' },
+      { text: 'Propose a water law that gives farms first priority, and let the courts decide the rest.', fx: { farm: 2, seniors: 1, chamber: 1, rino: 1 },
+        fb: 'A lawyer\'s answer. Both sides say you are hiding behind the courts, and both sides accept it.' },
+    ] },
+  { id: 'feud_streamers', kind: 'Rival Feud', title: 'Boomer Podcast', minStep: 5, weight: 3, cond: s => inRace(s, 'dunmore') && inRace(s, 'pike'),
+    text: 'Mason Pike calls Travis Dunmore "a boomer podcast grifter who sells supplements to your grandfather." Dunmore calls Pike "a child who has never had a job." Their audiences, which were once the same audience, are now at war.',
+    advice: [
+      ['kyle', 'Whoever wins this fight wins the young online vote. It could be us.'],
+      ['wade', 'Stay out. Let the two loudest people in the race make each other quieter.'],
+      ['dana', 'Older voters find both of them embarrassing. That is useful.'],
+    ],
+    choices: [
+      { text: 'Stay above it: "Cimarron needs adults in charge."', fx: { seniors: 2, chamber: 1, online: -1 },
+        fb: 'Both of them attack you for the line. Older voters repeat it.' },
+      { text: 'Side with Pike and the young voters.', fx: { online: 3, seniors: -2, opp: { dunmore: -2, pike: 1 } },
+        fb: 'Pike\'s audience is surprised, then pleased. Dunmore\'s audience is older and votes more.' },
+      { text: 'Side with Dunmore against "a streamer with no record."', fx: { maga: 2, online: -1, opp: { pike: -2, dunmore: 1 } },
+        fb: 'Dunmore mentions you kindly for the first time in the campaign. It does not last.' },
     ] },
 
   // ---------------- THE WAR (rare) ----------------

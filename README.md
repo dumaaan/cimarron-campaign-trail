@@ -27,6 +27,8 @@ After every decision, the cable news chyrons and the posters online react.
 - **Every promise counts.** What you promise on the trail becomes your first 100 days, if you win.
 - **Know your rivals.** Click any candidate for their profile, positions and strongest factions.
 - **Check the crosstabs.** The polling panel shows who leads each faction and each region.
+- **Decisions come back.** A scandal you handled badly, a donor you lost or a promise you made can return weeks later. In some scenarios, a story runs across the whole campaign.
+- **Your rivals fight each other too.** When two of them feud, you can take a side, stay out, or quietly make it worse.
 - **Earlier decisions open new choices.** A green tag on a choice shows that your record, your running mate, an endorsement or an earlier decision made it available.
 - **Runoff deals have a price.** An endorsement can win you one faction and cost you another.
 
