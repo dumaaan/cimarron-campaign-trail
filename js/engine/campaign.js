@@ -14,7 +14,8 @@ function pickEvent(s) {
   const pool = EVENTS.filter(ok);
   const seenOfKind = k => s.seenEvents.filter(id => { const e = EVENTS.find(x => x.id === id); return e && !e.priority && e.kind === k; }).length;
   const open = pool.filter(e => !e.priority && weightOf(s, e) > 0 && seenOfKind(e.kind) < (KIND_LIMITS[e.kind] ?? 99));
-  return pool.find(e => e.priority) || (open.length ? pickWeighted(s, open) : null);
+  // due: a personal event that has not come up by this step comes next.
+  return pool.find(e => e.priority) || pool.find(e => e.due && s.step >= e.due) || (open.length ? pickWeighted(s, open) : null);
 }
 // A choice that spends money (fx.money < 0) is locked when the war chest cannot pay for it.
 const costOf = a => Math.max(0, -(a?.fx?.money || 0));
@@ -22,7 +23,7 @@ const canAfford = (s, a) => costOf(a) <= s.money + 1e-9;
 // Choices with a cond appear only when it is true. The list is fixed when the event starts, so indices never change.
 const shownChoices = (s, list) => list.map((ch, i) => i).filter(i => !list[i].cond || list[i].cond(s));
 function pickQuestion(s) {
-  const pool = QUESTIONS.filter(q => !s.asked.includes(q.id) && (!q.cond || q.cond(s)));
+  const pool = QUESTIONS.filter(q => !s.asked.includes(q.id) && (!q.cond || q.cond(s)) && shownChoices(s, q.answers).length >= 2);
   const pri = s.step >= 2 ? pool.filter(q => q.priority) : [];
   return pri[0] || pick(pool.filter(q => !q.priority));
 }
@@ -64,7 +65,7 @@ function startStep() {
     s.cur = { type: 'stop', region: null, action: 'rally', done: false, breaking: [] };
   } else if (type === 'debate1' || type === 'debate2') {
     // Three random questions, then closing statements.
-    const pool = shuffle(DEBATE_QUESTIONS.filter(q => !s.dAsked.includes(q.id) && q.id !== 'd_closing' && q.needs.every(id => active(s).includes(id))));
+    const pool = shuffle(DEBATE_QUESTIONS.filter(q => !s.dAsked.includes(q.id) && q.id !== 'd_closing' && q.needs.every(id => active(s).includes(id)) && (!q.cond || q.cond(s))));
     const qs = pool.slice(0, 3).map(q => q.id).concat('d_closing');
     s.dAsked.push(...qs.filter(id => id !== 'd_closing'));
     s.cur = { type: 'debate', which: type === 'debate1' ? 1 : 2, qs, idx: -1, sel: null, answered: null,
@@ -91,7 +92,7 @@ function startQuestion(s) {
   const q = pickQuestion(s);
   if (!q) { s.step++; return startStep(); }
   s.asked.push(q.id);
-  s.cur = { type: 'q', qid: q.id, sel: null, answered: null, breaking: s.entryNews || [] };
+  s.cur = { type: 'q', qid: q.id, sel: null, answered: null, breaking: s.entryNews || [], shown: shownChoices(s, q.answers) };
   s.entryNews = [];
   save(); render();
 }

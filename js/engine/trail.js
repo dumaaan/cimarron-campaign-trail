@@ -24,14 +24,16 @@ function closingOptions(s, which) {
   const say = t => t.replace(/^"/, `"${intro}`);
   const rec = RECORDS.find(r => r.id === s.record);
   return [
-    { rkey: `close:record:${s.record}`, text: say(RECORD_CLOSE[s.record]), fx: factionFx(rec.fx), fb: 'You closed on your record. Voters who liked your first term hear a reason to stay with you.' },
+    { rkey: `close:record:${s.record}`, text: say(RECORD_CLOSE[s.record]), fx: factionFx(rec.fx), fb: 'You closed on your record. Voters who know what you have done hear a reason to stay with you.' },
     { rkey: `close:${lead ? 'leading' : 'behind'}`, text: say(POSITION_CLOSE[lead ? 'leading' : 'behind'].text), fx: POSITION_CLOSE[lead ? 'leading' : 'behind'].fx,
-      fb: lead ? 'A front-runner\'s close: steady and confident.' : 'A challenger\'s close, from an incumbent. It fires up your supporters.' },
+      fb: lead ? 'A front-runner\'s close: steady and confident.' : 'An underdog\'s close. It fires up your supporters.' },
     { rkey: `close:${topF}`, text: say(FACTION_CLOSE[topF].text), fx: FACTION_CLOSE[topF].fx, fb: `A closing aimed at your strongest group, ${FACTIONS[topF].name}.` },
   ];
 }
 function buildDebateOptions(s, q, which) {
-  const opts = q.id === 'd_closing' ? closingOptions(s, which) : q.answers.slice();
+  // Answers keep their original index as their reaction key, even when some are hidden for this candidate.
+  const opts = q.id === 'd_closing' ? closingOptions(s, which)
+    : q.answers.map((a, i) => ({ ...a, rkey: a.rkey || `${q.id}:${i}` })).filter(a => !a.cond || a.cond(s));
   const atk = attackOption(s);
   if (atk) opts.push(atk);
   if (q.id === 'd_closing') opts.push({ ...MODERATE_CLOSE, rkey: 'close:moderate' });
@@ -91,7 +93,8 @@ function dropOut(s, id, to) {
 function checkDropouts(s) {
   const out = [], sh = stateShares(s);
   for (const [id, v] of sorted(sh).reverse()) {
-    if (id === 'you' || id === 'whitlock' || id === s.endorsed || v >= DROPOUT_LINE || active(s).length <= 3) continue;
+    // The incumbent, Whitlock and the President's candidate never drop out.
+    if (id === 'you' || id === 'whitlock' || id === 'castellano' || id === s.endorsed || v >= DROPOUT_LINE || active(s).length <= 3) continue;
     const topF = FKEYS.slice().sort((a, b) => CAND[id].base[b] - CAND[id].base[a])[0];
     const to = sorted(factionShares(s, topF)).map(e => e[0]).find(c => c !== 'whitlock' && c !== id);
     out.push(dropOut(s, id, to));

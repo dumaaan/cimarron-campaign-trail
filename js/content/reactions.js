@@ -16,7 +16,7 @@ const rx = (id, rows) => rows.forEach((r, i) => { if (r) REACTIONS[`${id}:${i}`]
 
 // ---------------- QUESTIONS ----------------
 rx('deport', [
-  [`NATIONAL GUARD!!! Now THAT is a plan. My father served in the Guard and he would be proud today 🇺🇸🇺🇸`, `Every. Single. One. {last} said the quiet part out loud and the sky did not fall. We are so back.`, `max:GOV. {LAST} VOWS TO USE GUARD FOR MASS DEPORTATIONS`],
+  [`NATIONAL GUARD!!! Now THAT is a plan. My father served in the Guard and he would be proud today 🇺🇸🇺🇸`, `Every. Single. One. {last} said the quiet part out loud and the sky did not fall. We are so back.`, `max:{LAST} VOWS TO USE GUARD FOR MASS DEPORTATIONS`],
   [`4,000 already gone and more coming. That is RESULTS, not talk. Dunmore has a microphone. {last} has a record!!`, `"We will expand it." Expand it to what, 4,500? Dunmore said all of them. Do the math, Governor.`, `fax:{LAST} TOUTS OPERATION HEARTLAND, PROMISES EXPANSION`],
   [`Guest workers?? We have heard this before. It is called AMNESTY with extra steps 😡`, `"Guest-worker path." The Chamber of Commerce wrote this answer and {last} read it off the card. ngmi.`, `max:{LAST} FLOATS GUEST-WORKER PLAN; BASE CALLS IT AMNESTY`],
   [`A place to HOLD them so they do not disappear before court. Why has nobody done this before?? 🙏`, `A state detention camp. In Cimarron. Six months ago this was a meme. Now it is policy. Beautiful.`, `fax:{LAST} PROPOSES STATE-RUN IMMIGRATION DETENTION CENTER`],
@@ -40,7 +40,7 @@ rx('stolen', [
   [`PAPER BALLOTS COUNTED BY HAND. Like when I was young. Nobody hacked a pencil 📝`, `Hand counts everywhere. Slow, expensive and correct. The machines cannot be trusted.`, `fax:{LAST} WANTS VOTING MACHINES BANNED, HAND COUNTS STATEWIDE`],
 ]);
 rx('measles', [
-  [`My kids got their shots and they are fine. But it is the PARENTS' choice. Not the government's. OK.`, `Medical freedom from the Governor's office. The COVID people are finally getting their apology.`, `max:{LAST} MOVES TO END SCHOOL VACCINE MANDATES DURING OUTBREAK`],
+  [`My kids got their shots and they are fine. But it is the PARENTS' choice. Not the government's. OK.`, `Medical freedom from {last}. The COVID people are finally getting their apology.`, `max:{LAST} MOVES TO END SCHOOL VACCINE MANDATES DURING OUTBREAK`],
   [`Forty sick kids. Keep the shots. I had measles in 1962 and my brother almost died. This is not a joke.`, `"Public health emergency." We heard those words in 2020. We remember what came next.`, `fax:{LAST} KEEPS VACCINE RULES AS MEASLES SPREADS`],
   [`Exemptions for religion makes sense. Freedom of religion is the FIRST amendment for a reason 🙏`, `Keep the mandate but make it optional. Galaxy-brained middle path. Mid.`, `fax:{LAST} EXPANDS VACCINE EXEMPTIONS, KEEPS REQUIREMENTS`],
   [`Praying for the children in Cloud County tonight. God is in control 🙏🙏`, `Thoughts and prayers as health policy. Unironically better than the CDC.`, `max:{LAST} CALLS FOR PRAYER AS MEASLES OUTBREAK GROWS`],
@@ -96,7 +96,7 @@ rx('wind', [
 rx('rick_jet', [
   [`Hmm. A $60 million jet IS a lot for a church. I tithe and my church has a van with no AC.`, `A Republican asking a televangelist about his jet. Unprecedented. Keep going.`, `max:{LAST} QUESTIONS PASTOR RICK'S $60M CHURCH JET`],
   [`Good. Do not attack a pastor. We have enough fighting.`, `Too polite to mention the jet. Rick's Gulfstream salutes you from 40,000 feet.`, `fax:{LAST} REFUSES TO CRITICIZE RICK'S MINISTRY`],
-  [`Between him and his church. Fair enough.`, `The "not my business" answer. It is literally a tax question, Governor.`, `fax:{LAST}: JET IS "BETWEEN RICK AND HIS CONGREGATION"`],
+  [`Between him and his church. Fair enough.`, `The "not my business" answer. It is literally a tax question, {last}.`, `fax:{LAST}: JET IS "BETWEEN RICK AND HIS CONGREGATION"`],
   [`Tax the jet if it goes to the beach. My fishing boat is taxed and it has never been to a beach!!`, `Tax the jet. Populism that hits a pastor. Did not see it coming.`, `max:{LAST} CALLS FOR TAXING CHURCH AIRCRAFT`],
 ]);
 rx('freedomopolis', [
@@ -108,14 +108,14 @@ rx('freedomopolis', [
 rx('krantz_sheriff', [
   [`Sheriffs are great. But the Governor is the Governor. Somebody has to be in charge.`, `Defending the chain of command against a constitutional sheriff. Very Federalist Society of you.`, `fax:{LAST}: SHERIFFS NOT ABOVE STATE LAW`],
   [`He refused to enforce YOUR laws?? Then he is not a conservative. Good point!!`, `Calling Krantz lawless. Bold. The gun guys will remember.`, `max:{LAST} CALLS KRANTZ "LAWLESS"`],
-  [`Sheriffs are elected by the people. They know the county. I agree 100%!!`, `Sheriff supremacy endorsed by the sitting Governor. Based. Krantz just got a free ad.`, `max:{LAST} BACKS KRANTZ ON SHERIFF AUTHORITY`],
+  [`Sheriffs are elected by the people. They know the county. I agree 100%!!`, `Sheriff supremacy endorsed by {last}. Based. Krantz just got a free ad.`, `max:{LAST} BACKS KRANTZ ON SHERIFF AUTHORITY`],
   [`Protect the sheriffs who stand up to the feds. Yes!! 🇺🇸`, `A shield law for sheriffs. Institutional power for our side. More of this.`, `fax:{LAST} PROPOSES LAW PROTECTING SHERIFFS WHO DEFY FEDS`],
 ]);
 rx('podcast', [
-  [`A Governor with a podcast. My grandson says I can listen on my phone. Somebody help me find it 😂`, `The Governor starts a podcast. Everyone has a podcast. At least this one has a budget.`, `fax:GOV. {LAST} LAUNCHES WEEKLY SHOW`],
+  [`{last} has a podcast now. My grandson says I can listen on my phone. Somebody help me find it 😂`, `{last} starts a podcast. Everyone has a podcast. At least this one has a budget.`, `fax:{LAST} LAUNCHES WEEKLY SHOW`],
   [`Go right into the lion's den. That takes guts!!`, `Walking into Dunmore's studio. Either very brave or very stupid. Grabbing popcorn.`, `max:{LAST} ACCEPTS DUNMORE'S PODCAST CHALLENGE`],
   [`Four years and no laws passed? That IS a good point. What has he done?`, `Attacking the podcaster for not passing laws. Fair hit, boomer delivery.`, `fax:{LAST} HITS DUNMORE'S EMPTY LEGISLATIVE RECORD`],
-  [`Do not give him attention. That is what my wife says about the neighbor's dog.`, `No response. 400,000 downloads and the Governor is "above it." LMAO.`, `max:{LAST} IGNORES DUNMORE PODCAST ATTACKS`],
+  [`Do not give him attention. That is what my wife says about the neighbor's dog.`, `No response. 400,000 downloads and {last} is "above it." LMAO.`, `max:{LAST} IGNORES DUNMORE PODCAST ATTACKS`],
 ]);
 rx('whitlock_extreme', [
   [`Carol Whitlock says you are extreme? Then you are doing something RIGHT 😂`, `Taking "dangerously extreme" as a compliment. Put it on a shirt.`, `max:{LAST}: WHITLOCK'S ATTACK IS "A COMPLIMENT"`],
@@ -178,7 +178,7 @@ rx('aquifer', [
   [`Environmentalists exaggerate EVERYTHING. They said we would be underwater by now!!`, `Climate skepticism applied to groundwater. Maybe wrong, definitely on brand.`, `max:{LAST}: AQUIFER CRISIS "EXAGGERATED"`],
 ]);
 rx('crypto', [
-  [`Cimarron the Bitcoin capital?? I do not understand crypto and neither does anybody I know.`, `Cimarron as the Bitcoin state. Number go up. Governor based.`, `max:{LAST} WANTS STATE BITCOIN RESERVE`],
+  [`Cimarron the Bitcoin capital?? I do not understand crypto and neither does anybody I know.`, `Cimarron as the Bitcoin state. Number go up. {last} based.`, `max:{LAST} WANTS STATE BITCOIN RESERVE`],
   [`Pay your fishing license in Bitcoin? Sure, whatever. Just do not gamble with the money.`, `Crypto payments but no reserve. Half-pilled. Better than nothing.`, `fax:{LAST}: ACCEPT CRYPTO, NO PUBLIC INVESTMENT`],
   [`GOLD AND SILVER!!! Real money. My grandfather never trusted paper and neither do I 🪙`, `Gold and silver as legal tender. Ron Paul is smiling somewhere.`, `max:{LAST} PUSHES GOLD AND SILVER AS LEGAL TENDER`],
   [`Good. No gambling with our money. That is common sense.`, `No Bitcoin reserve because it is "risky." Spoken like someone who bought Pets.com in 1999.`, `fax:{LAST} REJECTS STATE BITCOIN RESERVE`],
@@ -250,9 +250,9 @@ rx('porn', [
   [`Filters. My grandson set one up on my computer and now I cannot open half my emails 😂`, `Internet filters as crime policy. The 2006 answer.`, `fax:{LAST}: PARENTS SHOULD USE INTERNET FILTERS`],
 ]);
 rx('podcast_guest', [
-  [`I did not understand what the guest was talking about but it sounded strange. Hmm.`, `The Governor let him cook. Free speech on the show. The algorithm will reward this.`, `max:{LAST} LETS GUEST'S "GLOBALIST BANKERS" REMARKS STAND`],
+  [`I did not understand what the guest was talking about but it sounded strange. Hmm.`, `{last} let him cook. Free speech on the show. The algorithm will reward this.`, `max:{LAST} LETS GUEST'S "GLOBALIST BANKERS" REMARKS STAND`],
   [`Good. Talk about something else. That guy was weird.`, `Changed the subject. Neither brave nor useful.`, `fax:{LAST} CHANGES SUBJECT AFTER GUEST'S REMARKS`],
-  [`Good for {last}. We do not talk like that about anybody. My church supports Israel 🇺🇸🇮🇱`, `Pushing back on a guest, live, on the Governor's own show. The ADL just gained a subscriber.`, `fax:{LAST} REBUKES GUEST'S ANTISEMITIC LANGUAGE ON AIR`],
+  [`Good for {last}. We do not talk like that about anybody. My church supports Israel 🇺🇸🇮🇱`, `Pushing back on a guest, live, on {last}'s own show. The ADL just gained a subscriber.`, `fax:{LAST} REBUKES GUEST'S ANTISEMITIC LANGUAGE ON AIR`],
 ]);
 rx('pardon_repeat', [
   [`Due process. He is innocent until proven guilty. But threatening a clerk is not OK.`, `No comment. Correct. Never apologize for a pardon.`, `max:{LAST} DECLINES COMMENT ON RE-ARRESTED PARDON RECIPIENT`],
@@ -273,7 +273,7 @@ rx('red_flag', [
 rx('medicaid', [
   [`Medicaid expansion is Obamacare. We know that. Good answer.`, `No expansion. The rural hospitals can figure it out. Tough but consistent.`, `fax:{LAST} REJECTS MEDICAID EXPANSION`],
   [`Keep the hospitals open without Obamacare. Smart. My hospital in Sumner needs help.`, `Emergency grants. Pay for hospitals without saying the M-word. Clever.`, `fax:{LAST} OFFERS EMERGENCY GRANTS TO RURAL HOSPITALS`],
-  [`EXPAND Medicaid?? With work requirements or not, that is Obamacare. Come on {last}.`, `Medicaid expansion from a Republican governor. Uniparty confirmed.`, `max:{LAST} BACKS MEDICAID EXPANSION WITH WORK RULES`],
+  [`EXPAND Medicaid?? With work requirements or not, that is Obamacare. Come on {last}.`, `Medicaid expansion from a Republican. Uniparty confirmed.`, `max:{LAST} BACKS MEDICAID EXPANSION WITH WORK RULES`],
   [`Health savings accounts. Sounds good. But how does a poor family fill one?`, `HSAs instead of Medicaid. Libertarian theory. Hospitals still close.`, `fax:{LAST} PROPOSES HEALTH SAVINGS ACCOUNTS INSTEAD OF MEDICAID`],
 ]);
 rx('raw_milk_fda', [
@@ -303,7 +303,7 @@ rx('fluoride', [
   [`Hmm. My dentist says fluoride is good. But I do not like them putting things in my water either.`, `No fluoride statewide. Clean water, sharp minds. MAHA wins.`, `max:{LAST} WOULD BAN FLUORIDE STATEWIDE`],
   [`Let the counties decide. That is how it should be.`, `County option. Federalism for tap water. Fine.`, `fax:{LAST}: COUNTIES SHOULD DECIDE ON FLUORIDE`],
   [`Ban fluoride AND review the shots?? My grandkids had all their shots. That is going too far.`, `Fluoride and vaccines in one breath. Full health-freedom speedrun.`, `max:{LAST}: BAN FLUORIDE, REVIEW ALL VACCINE RULES`],
-  [`"The science supports fluoride." OK. My dentist agrees. But the young people will not like it.`, `"Trust the science." We have heard that one before, Governor.`, `fax:{LAST} REFUSES TO BAN FLUORIDE, CITES SCIENCE`],
+  [`"The science supports fluoride." OK. My dentist agrees. But the young people will not like it.`, `"Trust the science." We have heard that one before, {last}.`, `fax:{LAST} REFUSES TO BAN FLUORIDE, CITES SCIENCE`],
 ]);
 rx('sanctuary', [
   [`Send in the Guard!! Lawrenceville does not get to make its own immigration law!!`, `The Guard into a sanctuary city. They always said we would not. We did.`, `max:{LAST} THREATENS GUARD DEPLOYMENT IN LAWRENCEVILLE`],
@@ -405,7 +405,7 @@ rx('hospital', [
   [`Went to the funeral. That was the right thing. Politics can wait 🙏`, `No policy, just a funeral. Respectful. The question is not going away.`, `fax:{LAST} ATTENDS FUNERAL IN DRY FORK`],
 ]);
 rx('donor_wife', [
-  [`Good for {last}. Dr. Hale is a heart doctor and a citizen. That IS the American Dream. The people attacking her should be ashamed of themselves.`, REMOVED_POST('212,000'), `fax:GOV. {LAST} STANDS WITH DONOR'S WIFE AFTER RACIST ATTACKS`],
+  [`Good for {last}. Dr. Hale is a heart doctor and a citizen. That IS the American Dream. The people attacking her should be ashamed of themselves.`, REMOVED_POST('212,000'), `fax:{LAST} STANDS WITH DONOR'S WIFE AFTER RACIST ATTACKS`],
   [`Hate is hate. Glad {last} said something. Now can we get back to the issues please.`, `"All hate." LOL. {last} could not even say who they were defending. Weak.`, `fax:{LAST} CONDEMNS "ALL FORMS OF HATE"`],
   [`Not sure why this is even a story. Politicians should stay out of Twitter fights.`, `Silence is agreement. {last} knows exactly who the voters are.`, `max:{LAST} STAYS SILENT AS ONLINE ATTACKS ON DONOR'S WIFE GROW`],
   [`Probably the safe thing for her. Too many crazies online these days.`, `They are learning. First one gone. 🏛️`, `fax:DONOR'S WIFE STEPS BACK FROM {LAST} CAMPAIGN AFTER ATTACKS`],
@@ -426,7 +426,7 @@ rx('lawrenceville_murder', [
   [`The detention center {last} promised. If that was open, Emily would be alive. Build it NOW!!`, `The camp that critics mocked is now the answer. Called it.`, `max:{LAST}: DETENTION CENTER WOULD HOLD "MEN LIKE HIM"`],
 ]);
 rx('rifle_q', [
-  [`All three!! A+ from the Rifle Association. That is my Governor 🇺🇸🔫`, `Endorsed. Full gun-rights package. Krantz is seething.`, `fax:RIFLE ASSOCIATION ENDORSES {LAST}`],
+  [`All three!! A+ from the Rifle Association. That is my candidate 🇺🇸🔫`, `Endorsed. Full gun-rights package. Krantz is seething.`, `fax:RIFLE ASSOCIATION ENDORSES {LAST}`],
   [`Keep background checks and still got the endorsement. Smart!!`, `Squeaked by with a one-vote endorsement. The fence-sitting worked, barely.`, `fax:RIFLE BOARD ENDORSES {LAST} BY ONE VOTE`,
    `The Rifle Association went with Krantz. Background checks are a hill to die on?? Really??`, `Kept background checks and lost the endorsement to Krantz. Deserved.`, `max:RIFLE ASSOCIATION PICKS KRANTZ OVER {LAST}`],
   [`Would not even fill out the questionnaire?? An "F"?? From the RIFLE Association?? Unbelievable.`, `Got an F from the gun lobby. On purpose. What.`, `max:{LAST} SKIPS RIFLE QUESTIONNAIRE, GETS "F"`],
@@ -445,7 +445,7 @@ rx('farm_bureau', [
 rx('youth_summit', [
   [`I do not really understand the question. But the young people went crazy. I guess it was a good answer?`, REMOVED_POST('340,000'), `max:{LAST} ENDORSES "REPLACEMENT" CLAIM AT YOUTH SUMMIT`],
   [`Reduce immigration. That is what everybody I know wants. Good answer.`, `A careful answer to a question that wanted a yes. The room wanted more.`, `fax:{LAST}: MASS IMMIGRATION "A POLICY CHOICE"`],
-  [`Reject the conspiracy stuff but fight illegal immigration. That is exactly right.`, `Booed at the youth summit. {last} is a boomer in a Governor's suit.`, `max:{LAST} BOOED FOR REJECTING "REPLACEMENT" THEORY`],
+  [`Reject the conspiracy stuff but fight illegal immigration. That is exactly right.`, `Booed at the youth summit. {last} is a boomer in a nice suit.`, `max:{LAST} BOOED FOR REJECTING "REPLACEMENT" THEORY`],
   [`That young Voss fellow talked for three minutes and I did not understand a word. The kids loved it though!`, `Voss cooked. "A nation, not an economy." Future President.`, `fax:VOSS WOWS YOUTH SUMMIT; FRONTLINE ENDORSES TICKET`,
    `Voss said YES?? On camera?? That is going to be on the news forever. Who picked this guy??`, REMOVED_POST('410,000'), `max:{LAST} RUNNING MATE ENDORSES "REPLACEMENT" CLAIM ON CAMERA`],
 ]);
@@ -490,7 +490,7 @@ rx('president_call', [
 rx('straw_poll', [
   [`The hall was LOUD!! I watched it on the local news. Great speech!!`, `Deportation, election integrity, uniparty. The holy trinity of convention speeches.`, `max:{LAST} FIRES UP CONVENTION WITH "UNIPARTY" SPEECH`],
   [`Everybody stood and prayed together. Beautiful. God is still in this party 🙏`, `The faith speech. Delegates praying. Pastor Rick is sweating.`, `fax:{LAST} DELIVERS FAITH SPEECH AT CONVENTION`],
-  [`Tax cuts, jobs, results. That is what a Governor talks about. Good.`, `The record speech. Polite applause. Nobody remembers it.`, `fax:{LAST} RUNS ON RECORD AT STATE CONVENTION`],
+  [`Tax cuts, jobs, results. That is what a real leader talks about. Good.`, `The record speech. Polite applause. Nobody remembers it.`, `fax:{LAST} RUNS ON RECORD AT STATE CONVENTION`],
   [`BOOED for talking about unity?? At a Republican convention?? What happened to us.`, `A unity speech to activists. Booed. Deserved.`, `max:DELEGATES BOO {LAST} UNITY SPEECH`],
 ]);
 rx('whitlock_offer', [
@@ -576,7 +576,7 @@ rx('voss_posts', [
 rx('ruud_milk', [
   [`Children in the hospital and we are defending the DAIRY?? One of them is on dialysis!!`, `Defended Ruud. Health freedom does not bend to one outbreak.`, `max:{LAST} DEFENDS RUUD AFTER RAW MILK OUTBREAK`],
   [`She visited the children. Held a mother's hand. That is what a woman of God does 🙏`, `Ruud visited the kids. The photo worked. Pharma lost this round.`, `fax:RUUD VISITS SICK CHILDREN WITH {LAST}`,
-   `She REFUSED?? In public?? The running mate is arguing with the Governor now. Mess.`, `"I will not bow to the narrative." Ruud is based and the ticket is on fire.`, `max:RUUD REFUSES {LAST}, KEEPS OUTBREAK POST`],
+   `She REFUSED?? In public?? The running mate is arguing with Travis now. Mess.`, `"I will not bow to the narrative." Ruud is based and the ticket is on fire.`, `max:RUUD REFUSES {LAST}, KEEPS OUTBREAK POST`],
   [`Inspect the dairies. Kids got sick. That is just responsible.`, `State inspections of raw milk. Ruud calls it a raid. She is right.`, `fax:{LAST} ORDERS INSPECTIONS OF RAW MILK DAIRIES`],
   [`Colt Brannigan. Former Army Ranger. A real American. Good pick!!`, `Swapped the MAHA mom for a Ranger. The health-freedom moms are gone.`, `fax:{LAST} REPLACES RUUD WITH BRANNIGAN`],
 ]);
@@ -628,7 +628,7 @@ rx('dove_rally', [
 ]);
 rx('hawk_diesel', [
   [`Diesel tax suspended!! My cousin can finish the harvest now. Thank you!! 🚜`, `A tax holiday for tractors. Populist and practical.`, `fax:{LAST} SUSPENDS DIESEL TAX THROUGH HARVEST`],
-  [`Sacrifice?? The farmers ARE sacrificing. They cannot afford the diesel.`, `Told the farmers to sacrifice. From the Governor's mansion. Bold.`, `max:{LAST} TO FARMERS: "VICTORY TAKES SACRIFICE"`],
+  [`Sacrifice?? The farmers ARE sacrificing. They cannot afford the diesel.`, `Told the farmers to sacrifice. From a warm office. Bold.`, `max:{LAST} TO FARMERS: "VICTORY TAKES SACRIFICE"`],
   [`The President released the reserve and thanked {last} by name!! Teamwork 🇺🇸`, `Got the SPR released. The loyalty paid off.`, `fax:PRESIDENT RELEASES OIL RESERVE AFTER {LAST} REQUEST`,
    `"For real emergencies." $7 diesel IS a real emergency!! Tell that to the farmers.`, `Asked for the reserve, got told no. The farmers noticed.`, `max:WHITE HOUSE REJECTS {LAST}'S RESERVE REQUEST`],
 ]);
@@ -658,11 +658,6 @@ rx('coburn_dui', [
   [`Classy. Defend the man and talk about ideas. That is how you do it 👏`, `Defended Coburn, then asked about his plans. He has none. Galaxy brain.`, `fax:{LAST} DEFENDS COBURN, ASKS ABOUT HIS PLANS`],
   [`Coburn did not know the state budget?? A QUARTERBACK does not know the budget!! Ha!!`, `He agreed to debate and got destroyed on policy. Ball don't lie.`, `fax:COBURN STRUGGLES ON POLICY IN DEBATE WITH {LAST}`,
    `He said no to the debate and 12,000 people came to his rally. That is a lot of people.`, `Coburn skipped the debate and drew 12,000. Celebrity beats policy. Always.`, `max:COBURN DECLINES DEBATE, DRAWS 12,000 AT RALLY`],
-]);
-rx('albright_measles', [
-  [`Two BABIES in the hospital. Somebody should say it. Good for {last}.`, `Blaming the MAHA doctor for measles. Big Pharma is pleased.`, `max:{LAST} BLAMES ALBRIGHT FOR SUMNER MEASLES OUTBREAK`],
-  [`Free clinics, nobody forced. That is how you do it. I got my shot at the church hall when I was a kid.`, `"Voluntary" clinics. The trap is voluntary until it is not.`, `fax:{LAST} OPENS FREE, VOLUNTARY VACCINE CLINICS`],
-  [`Parents' choice. But there are sick BABIES. Keep your kids home at least.`, `Parental choice, even during an outbreak. Consistent. Albright gains.`, `max:{LAST} DEFENDS PARENTAL CHOICE AMID MEASLES OUTBREAK`],
 ]);
 rx('pike_stream', [
   [`Hatred of the Jewish people is NOT who we are. Thank you {last}. My church stands with Israel 🇺🇸🇮🇱`, `Condemned Pike by name. The chat is not happy. Neither am I.`, `fax:{LAST} CONDEMNS PIKE'S "ANTISEMITISM"`],
@@ -803,18 +798,6 @@ rx('court_coburn', [
   [`A rally at the stadium with Jake Coburn!! I am going!! 🏈🇺🇸`, `Stadium rally with the Heisman winner. Peak Americana. Great optics.`, `fax:{LAST}, COBURN HOLD JOINT STADIUM RALLY`],
   [`Celebrities endorse the winner. True. We do not need him.`, `Skipped Coburn. The fans will follow the QB wherever he points.`, `max:{LAST} DOESN'T COURT COBURN`],
 ]);
-rx('court_albright', [
-  [`No shots even for NURSES?? In a HOSPITAL?? That does not make sense to me.`, `Ended all vaccine mandates. Albright's army is on board. The MAHA takeover is complete.`, `max:{LAST} ENDS ALL VACCINE MANDATES FOR ALBRIGHT'S SUPPORT`],
-  [`Albright as Surgeon General?? She lost her hospital privileges!!`, `Dr. Albright as Surgeon General. The health-freedom movement has a ministry.`, `max:{LAST} TO APPOINT ALBRIGHT SURGEON GENERAL`],
-  [`Review the medical board. OK. Doctors should not be punished for having opinions I guess.`, `A review of the medical board. Small win for medical freedom.`, `fax:{LAST} PROMISES MEDICAL BOARD REVIEW`],
-  [`Her conditions ARE dangerous. Good for {last} for saying no.`, `Called Albright's conditions dangerous. Her voters stay home.`, `fax:{LAST} REJECTS ALBRIGHT'S CONDITIONS`],
-]);
-rx('court_pike', [
-  [`No LEGAL immigration either?? My granddaughter's husband is from Ireland!! This is too much.`, `A full immigration moratorium. Pike got everything. The young right is united.`, `max:{LAST} AGREES TO PIKE'S IMMIGRATION MORATORIUM`],
-  [`Going on that man's stream?? And criticizing the President's wars?? Not good.`, `On Pike's stream, anti-war. The zoomers are converting.`, `max:{LAST} JOINS PIKE STREAM, OPPOSES FOREIGN WARS`],
-  [`Condemned him. Good. We do not need his kind of people.`, `Condemned Pike. His chat will stay home or vote for the rival out of spite.`, `fax:{LAST} CONDEMNS PIKE, REFUSES TO APPEAR`],
-  [`Do not even say his name. Best way to deal with people like that.`, `Ignored Pike completely. His followers noticed.`, `fax:{LAST} IGNORES PIKE IN RUNOFF`],
-]);
 
 // ---------------- DEBATES ----------------
 rx('d_prove', [
@@ -913,14 +896,6 @@ rx('attack:coburn', [
   [`Three out of ten primaries?? He did not even VOTE?? And he wants to be Governor??`, `"Voted in three of ten primaries." Jake's fans do not care. The boomers do.`, `max:DEBATE: {LAST}: COBURN SKIPPED 7 OF 10 PRIMARIES`],
   [`He does not know the size of the budget. Name recognition is not enough. True.`, `Ask Jake the budget. He does not know. Neither do his fans.`, `fax:DEBATE: {LAST}: COBURN DOESN'T KNOW STATE BUDGET`],
 ]);
-rx('attack:albright', [
-  [`No vaccines while kids have MEASLES. That is dangerous. Good point.`, `Measles attack on the MAHA doctor. Pharma-coded, but it landed.`, `max:DEBATE: {LAST} HITS ALBRIGHT OVER MEASLES`],
-  [`She lost her hospital privileges. That is a big deal for a doctor.`, `Brought up her lost privileges. Her fans say it proves she was right.`, `fax:DEBATE: {LAST}: ALBRIGHT "LOST HER HOSPITAL PRIVILEGES"`],
-]);
-rx('attack:pike', [
-  [`Never had a real job. Just a camera and a chair. Ha!!`, `Mocked Pike for never having a real job. Pike's chat is spamming L.`, `max:DEBATE: {LAST}: PIKE "NEVER HELD A JOB"`],
-  [`"Ugly." Exactly. Thank you for saying it on stage. My pastor will be proud 🙏`, `Called Pike ugly in front of the pastors. The zoomers will not forget.`, `fax:DEBATE: {LAST}: PIKE'S RHETORIC IS "UGLY"`],
-]);
 
 // Closing statements.
 REACTIONS['close:record:income'] = [`No income tax. Four more years to finish the job. SOLD 💵`, `Closed on the tax repeal. Effective. Boring.`, `fax:DEBATE CLOSE: {LAST} RUNS ON INCOME TAX REPEAL`];
@@ -939,3 +914,529 @@ REACTIONS['close:farm'] = [`Standing with the people who FEED this country. My c
 REACTIONS['close:chamber'] = [`Best state to build a business. OK. Good for the economy.`, `The Chamber close. Donors happy, base asleep.`, `max:DEBATE CLOSE: {LAST} PITCHES BUSINESS CLIMATE`];
 REACTIONS['close:seniors'] = [`Protect our homes and savings. That is ME. Thank you {last}!! 🏡`, `A boomer close aimed directly at boomers. Will work.`, `fax:DEBATE CLOSE: {LAST} PLEDGES TO PROTECT SENIORS`];
 REACTIONS['close:moderate'] = [`"Every Cimarronian, not only the loudest." Nice for November. Not what we wanted tonight.`, `A general-election close in a primary. Conservative Inc. cannot help itself.`, `max:DEBATE CLOSE: {LAST} PIVOTS TO GENERAL ELECTION`];
+
+// ================= ANY CANDIDATE (added with the six playable campaigns) =================
+// Questions only one candidate is asked.
+rx('q_dunmore_show', [
+  [`A Governor with a radio show?? I would listen every Monday!! But when does he do the job?`, `The Governor's Mansion becomes a studio. Peak 2030. Content is governance now.`, `max:{LAST}: SHOW WILL GO ON "FROM THE GOVERNOR'S OFFICE"`],
+  [`Giving up the show to do the job. That is a grown-up answer. Respect.`, `Quitting the show to be a bureaucrat. The movement just lost its microphone.`, `fax:{LAST} WOULD END PODCAST IF ELECTED`],
+  [`Once a month and the money goes to charity. Fair enough!!`, `A monthly show for charity. Brand management, but fine.`, `fax:{LAST}: MONTHLY SHOW, PROFITS TO CHARITY`],
+]);
+rx('q_rick_pulpit', [
+  [`Preaching on Sunday and governing on Monday. Why not?? Our founders went to church too 🙏`, `A Governor in the pulpit every Sunday. The separation-of-church-and-state crowd is melting.`, `max:{LAST} WOULD KEEP PREACHING AS GOVERNOR`],
+  [`His son takes the church. He takes the state. Makes sense to me.`, `Handing the megachurch to the son. Dynasty-coded. Effective.`, `fax:{LAST}: SON WILL LEAD CORNERSTONE IF HE WINS`],
+  [`Easter and Christmas. Like my brother-in-law 😂 Good answer.`, `Holiday preaching only. The C&E Governor.`, `fax:{LAST} WOULD PREACH ONLY ON HOLIDAYS`],
+]);
+rx('q_krantz_badge', [
+  [`Keep the badge!! Harlan needs him. The man never stops working.`, `Running for Governor while still wearing the badge. Legal. Based.`, `fax:{LAST} WILL KEEP BADGE DURING CAMPAIGN`],
+  [`Unpaid leave. That is honest. No campaigning on our dime.`, `Unpaid leave. Very proper. Very boring.`, `fax:{LAST} TAKES UNPAID LEAVE TO CAMPAIGN`],
+  [`A sheriff for life, even in the Governor's office. Gave me chills. But a Governor is not a sheriff...`, `The Sheriff-Governor. Posse Comitatus, statewide edition. I am listening.`, `max:{LAST}: "NEVER TAKES OFF THE BADGE"`],
+]);
+rx('q_vaskel_trust', [
+  [`A blind trust. Good. No business deals from the Governor's office.`, `Blind trust on day one. The founder took the adult pill.`, `fax:{LAST} PLEDGES BLIND TRUST IF ELECTED`],
+  [`No blind trust?? So he could make money off the state?? Not good.`, `Refused the blind trust and bragged about the portfolio. Mask off, and honestly refreshing.`, `max:{LAST} REJECTS BLIND TRUST`],
+  [`Selling off the state contracts before taking office. That costs him real money. I respect that.`, `Selling the state-facing companies. Real skin in the game.`, `fax:{LAST} WOULD SELL COMPANIES THAT DO STATE BUSINESS`],
+]);
+rx('q_whitlock_age', [
+  [`HA!! Balanced budgets. When was the last time?? 1998?? I like her.`, `The boomer burn of the century. Not mad, just impressed.`, `fax:{LAST}: "OLD ENOUGH TO REMEMBER BALANCED BUDGETS"`],
+  [`Ask her after the debate. Confident!! I will be watching.`, `Betting the campaign on one debate. Bold for a 67-year-old.`, `fax:{LAST} TO CRITICS: "ASK ME AFTER THE DEBATE"`],
+  [`One term and then pass it on. That is honest. More politicians should say that.`, `A one-term pledge. The gerontocracy is negotiating its own exit. Progress.`, `max:{LAST} PLEDGES TO SERVE ONE TERM`],
+]);
+
+// Challengers' choices in the Governor's crises (indices after the Governor's own choices).
+rx('church_arrest', [null, null, null, null, null,
+  [`Keep the troopers out of church. Somebody has to say it. Good for {last}.`, `Telling the Governor to go easy on church arrests. Soft on the border, hard on grammar.`, `fax:{LAST} URGES GOVERNOR TO KEEP ICE OUT OF CHURCHES`],
+  [`The law is the law. Even in church? I do not know about that one. My pastor would not like it.`, `No sanctuary anywhere, not even in the pews. The hardest line in the race.`, `max:{LAST}: GOVERNOR SHOULD "DO MORE" CHURCH ARRESTS`],
+  [`Two churches worshiping together. That made me cry a little. God is good 🙏`, `Nine thousand megachurch members welcome the raided congregation. The optics are unbeatable.`, `fax:CORNERSTONE OPENS DOORS TO RAIDED CONGREGATION`],
+]);
+rx('tornado', [null, null, null, null,
+  [`Stopped the campaign to help in Sumner. That is character. God bless 🙏`, `Clearing debris for a week. The photo op writes itself, but the work is real.`, `fax:{LAST} SUSPENDS CAMPAIGN TO VOLUNTEER IN SUMNER`],
+  [`The Governor WAS slow. I have family in Sumner and they waited two days for water.`, `Attacking the Governor while the debris is still warm. Cold. Effective.`, `max:{LAST} BLASTS GOVERNOR'S TORNADO RESPONSE`],
+  [`He broadcast from a parking lot for three days and his listeners sent 40 trucks!! That is America 🇺🇸`, `The show becomes a disaster-relief telethon. The movement delivers.`, `fax:DUNMORE LISTENERS SEND 40 TRUCKS TO SUMNER`],
+  [`The yellow shirts were there first. Every time. Cornerstone is the real FEMA 🙏`, `Church volunteers beat FEMA again. The state is obsolete.`, `fax:CORNERSTONE VOLUNTEERS FIRST ON SCENE IN SUMNER`],
+  [`The Sheriff pulled four people out of the rubble himself. A real hero 🇺🇸`, `Deputies doing the rescue while the state holds press conferences. Localism wins.`, `fax:KRANTZ DEPUTIES RESCUE FOUR IN SUMNER`],
+  [`Drones found two missing people. OK, I take back what I said about computers.`, `The tech billionaire's drones save lives. Hard to dunk on that.`, `fax:VASKEL DRONES LOCATE MISSING RESIDENTS`],
+  [`Relief passed in three days. That is what experience gets you. Carol still knows how.`, `The old establishment speedrun: a bill in 72 hours. Annoyingly competent.`, `fax:WHITLOCK ALLIES PASS TORNADO RELIEF IN 72 HOURS`],
+]);
+rx('fbi_krantz', [null, null, null, null,
+  [`A man died. Somebody should look into it who is not the FBI or Krantz. Fair.`, `Independent investigation. The neutral-sounding knife.`, `fax:{LAST} CALLS FOR INDEPENDENT PROBE OF HARLAN JAIL DEATH`],
+]);
+rx('krantz_standoff', [null, null, null, null, null,
+  [`Walked right into the middle of it and talked everyone down!! Brave!!`, `Stood between Krantz's rifles and the feds and won. Main character energy.`, `fax:{LAST} DEFUSES DRY FORK STANDOFF IN PERSON`,
+   `The volunteers turned their backs on {last}. On camera. Ouch.`, `Walked into Krantz country and got the cold shoulder. Humbling.`, `max:KRANTZ VOLUNTEERS SNUB {LAST} AT DRY FORK`],
+]);
+rx('hospital', [null, null, null, null,
+  [`Reopen it in 100 days. I will hold {last} to that. My sister lives out there.`, `A 100-day promise. Cheap to say. Expensive to keep.`, `fax:{LAST} PROMISES TO REOPEN DRY FORK HOSPITAL`],
+  [`The Governor cut the county money. That is true. Somebody had to say it.`, `The income tax repeal closed a hospital. Libertarian math has consequences.`, `max:{LAST} BLAMES GOVERNOR'S CUTS FOR HOSPITAL CLOSURE`],
+]);
+rx('shooting', [null, null, null, null, null,
+  [`Make the Governor do his job. Special session for the schools. Good.`, `Demanding a special session you will not have to vote in. Smart politics.`, `fax:{LAST} DEMANDS SPECIAL SESSION ON SCHOOL SAFETY`],
+]);
+rx('lawrenceville_murder', [null, null, null, null, null,
+  [`It was the Governor's law that let him go. Somebody should answer for that.`, `Pinning the release law on the Governor. Correct and brutal.`, `max:{LAST}: GOVERNOR'S LAW FREED CARTER SUSPECT`],
+]);
+rx('mideast_war', [null, null, null, null,
+  [`Suspend the gas tax!! The Governor is sitting on a surplus while we pay $6!!`, `Telling the Governor to cut the gas tax. Free populism, no budget required.`, `fax:{LAST} URGES GOVERNOR TO SUSPEND GAS TAX`],
+]);
+rx('oil_shock', [null, null, null, null,
+  [`Fuel help for us seniors. Promise made. Now keep it!! ⛽`, `Promising fuel checks at $6.80 gas. The easiest applause line of the year.`, `fax:{LAST} PROMISES FUEL AID FOR FARMERS AND SENIORS`],
+]);
+
+// ---------------- Governor Castellano ----------------
+rx('gov_resort', [
+  [`Flew home and went straight to Dry Fork. OK. At least he came back fast. The shorts photo was bad though.`, `The store tags on the coat. You cannot make this up.`, `fax:{LAST} RUSHES HOME TO ICE STORM ZONE`],
+  [`"Staff managed the storm"?? 40,000 people with no heat and he was on a BEACH. Unbelievable 😡`, `"My staff managed it." Tell that to the people in Dry Fork at 9 degrees.`, `max:{LAST}: STAFF "MANAGED" STORM WHILE HE VACATIONED`],
+  [`Blame the co-ops?? The co-ops ARE the farmers!! Come on.`, `Blaming rural co-ops from a Mexican resort. Historic self-own.`, `max:{LAST} BLAMES POWER CO-OPS FOR OUTAGES`],
+  [`He said sorry and meant it. We all make mistakes. Welcome home 🙏`, `A human apology from the Litigator. Rare footage.`, `fax:{LAST}: "I SHOULD HAVE BEEN HOME"`,
+   `An apology with footnotes. Only a lawyer apologizes like that 🙄`, `Three qualifications and a caveat. The most lawyerly apology in history.`, `max:LATE-NIGHT HOSTS MOCK {LAST} APOLOGY`],
+]);
+rx('gov_oped', [
+  [`Changed his mind like millions of us did in 2016. I did too. Fair enough.`, `"I was wrong." Admitting it confirms everything Dunmore said. Brave, fatal.`, `fax:{LAST} ADMITS HE CHANGED ON IMMIGRATION`],
+  [`Wrote it for a client. Hm. OK I guess. Lawyers are lawyers.`, `The client defense worked. Nobody read the op-ed anyway.`, `fax:{LAST}: OP-ED WAS WRITTEN FOR A CLIENT`,
+   `"Lawyers argue positions." So what does he actually believe?? Nobody knows.`, `"Lawyers argue positions." The entire campaign in three words.`, `max:{LAST}: "LAWYERS ARGUE POSITIONS"`],
+  [`The Ledger printed the whole thing. It was not out of context. Hmm.`, `"Out of context," then they print the full text. Rookie mistake for a Harvard man.`, `max:LEDGER PRINTS FULL {LAST} OP-ED`],
+  [`200 more troopers. Actions speak louder than old articles 🇺🇸`, `Answered an op-ed with 200 troopers. Deeds over words. Respect.`, `fax:{LAST} ADDS 200 TROOPERS TO OPERATION HEARTLAND`],
+]);
+rx('gov_2032', [
+  [`Four full years for Cimarron. That is what we elected him for. Good.`, `Pledged to finish the term. Nobody believes it. Politically useful anyway.`, `fax:{LAST} PLEDGES TO SERVE FULL TERM`],
+  [`"Focused on Cimarron." Then why is the money in IOWA??`, `Refused to rule out 2032. The stepping stone confirms it is a stone.`, `max:{LAST} WON'T RULE OUT 2032 RUN`],
+  [`Closed the national PAC and brought the money home. Good move.`, `Folded the Iowa operation. Ambition postponed, not cancelled.`, `fax:{LAST} SHUTS DOWN NATIONAL COMMITTEE`],
+]);
+rx('desk_veto', [
+  [`My property tax is going DOWN. Thank you {last}!! Linda is thrilled 🏡`, `Signed the property tax bill and delayed the income tax repeal. The Club for Growth is crying.`, `fax:{LAST} SIGNS $400M PROPERTY TAX RELIEF`],
+  [`Vetoed MY property tax relief?? For the income tax people?? I am retired, {last}!!`, `Vetoed the boomer bribe to protect the repeal. Principled. Brave. Unpopular in Lake Cheney.`, `max:{LAST} VETOES PROPERTY TAX RELIEF`],
+  [`Kept the relief AND the repeal. Smart lawyer trick. It worked!!`, `Line-item veto magic. The Litigator lawyered the legislature.`, `fax:{LAST} LINE-ITEM VETO KEEPS BOTH TAX CUTS`,
+   `The judge threw it out. Now NOBODY gets anything. Great.`, `Tried to be clever with the veto pen. The court said no. Everyone loses.`, `max:JUDGE STRIKES {LAST} LINE-ITEM VETO`],
+]);
+rx('desk_session', [
+  [`Illegal entry a state crime!! FINALLY. Nine days. That is how you do it 🇺🇸`, `Heartland II passed in nine days. State felony for illegal entry. We are so back.`, `max:{LAST} SIGNS STATE FELONY FOR ILLEGAL ENTRY`],
+  [`Property tax caps for everybody. THANK YOU. The county can figure it out.`, `Property tax caps. The boomers win again.`, `fax:{LAST} CALLS SESSION ON PROPERTY TAX CAPS`],
+  [`Hand counts everywhere!! Paper and pencils. Nobody can hack a pencil ✏️`, `Hand counts statewide. The clerks are panicking. Good.`, `max:{LAST} CALLS SESSION ON HAND COUNTS`],
+  [`No session? Then what are we paying these people for?`, `No session until January. The motto of every establishment governor.`, `fax:{LAST} DECLINES TO CALL SPECIAL SESSION`],
+]);
+rx('desk_clemency', [
+  [`Pardoned the trooper. He was doing his job. Back the Blue 🚔`, `Pardoned the Heartland trooper. The state protects its own. Correct.`, `max:{LAST} PARDONS HEARTLAND TROOPER`],
+  [`Pardoned the pastor who kept his church open!! That man is a hero of the faith 🙏`, `The COVID pastor walks free. Justice for the lockdown era.`, `fax:{LAST} PARDONS PASTOR JAILED OVER COVID ORDERS`],
+  [`Let the grandma go. She made a mistake. She is 71!!`, `Freed the grandma voter. "Soft on election crime," say the integrity guys.`, `fax:{LAST} COMMUTES GRANDMOTHER'S VOTING SENTENCE`],
+  [`No pardons at all? The safe choice. A little cowardly if you ask me.`, `Sat on the clemency list until after the primary. Politician's instinct.`, `max:{LAST} DELAYS ALL CLEMENCY UNTIL AFTER PRIMARY`],
+]);
+
+// ---------------- When you run against the Governor ----------------
+rx('gov_resort_rival', [
+  [`{last} was in Dry Fork with generators while the Governor was on the BEACH. That says everything 🇺🇸`, `Carrying a generator while the Governor carries a margarita. The contrast writes itself.`, `fax:{LAST} DELIVERS GENERATORS TO FROZEN DRY FORK`],
+  [`"Where was Victor?" GREAT ad. My whole church is talking about it.`, `Ad out before the power came back. Cruel. Effective. Beautiful.`, `max:{LAST} AD: "WHERE WAS VICTOR?"`],
+  [`Praying for the Panhandle. Classy not to pile on.`, `Left the easiest attack of the year on the table. Too nice to win.`, `fax:{LAST} CALLS FOR PRAYER, AVOIDS ATTACKING GOVERNOR`],
+  [`Dunmore ran the whole state for four days and it WORKED. Maybe he should keep the job 😂`, `Acting Governor Dunmore. The movement in charge, and the lights came back on.`, `fax:ACTING GOV. DUNMORE TAKES COMMAND OF STORM RESPONSE`,
+   `Shelters ran out of propane. Two of them. Travis was not ready for this.`, `The acting-governor arc ended with the real Governor taking back the keys on camera. Brutal.`, `max:STORM RESPONSE FALTERS UNDER DUNMORE`],
+]);
+rx('tolliver_rival', [
+  [`Release the emails. If he has nothing to hide, it is easy.`, `Demanding the emails. The Governor's silence is the answer.`, `fax:{LAST} DEMANDS GOVERNOR'S CONTRACT EMAILS`],
+  [`"He knew." Somebody finally said it out loud!!`, `Called the Governor corrupt on camera, and the hearing backed it up. Clean kill.`, `max:{LAST}: GOVERNOR "KNEW" ABOUT CONTRACTS`,
+   `Tolliver did not say the Governor knew. So {last} jumped the gun. Not good.`, `Accused the Governor too early. Tolliver kept quiet. Reckless.`, `max:TOLLIVER TESTIMONY DOES NOT NAME GOVERNOR`],
+  [`A watchdog over every state deal. That is how you stop this for good 👍`, `Turning a scandal into a policy. Boring. Smart.`, `fax:{LAST} PROPOSES STATE CONTRACT INSPECTOR GENERAL`],
+]);
+rx('gov_warchest', [
+  [`The resort, the lawsuits, the Iowa trips. Great ad. The Governor had it coming.`, `A cheap ad that hurts more than his expensive one. Efficient.`, `fax:{LAST} ANSWERS GOVERNOR'S $3M ATTACK`],
+  [`The Governor's rich friends are trying to buy it. EXACTLY what I have been saying.`, `Made his money the scandal. Every ad he runs now proves your point. 4D chess.`, `max:{LAST}: GOVERNOR'S DONORS "BUYING THIS ELECTION"`],
+  [`Ignoring a $3 million attack ad? I see it forty times a day, {last}. It is working.`, `Let the Governor define you for $3 million. Bold strategy.`, `max:GOVERNOR'S ADS GO UNANSWERED`],
+]);
+
+// ---------------- Mason Pike ----------------
+rx('pike_invite', [
+  [`My grandson watched {last} on that streaming show for TWO HOURS. He says it was "fire." I think that is good?`, `Two hours on Pike's stream. The zoomers have a candidate.`, `max:{LAST} JOINS PIKE STREAM FOR TWO HOURS`],
+  [`Sent the running mate instead. Smart. Stay away from that young man.`, `Sent the understudy. Pike noticed. The chat noticed.`, `fax:{LAST} RUNNING MATE APPEARS ON PIKE STREAM`],
+  [`Good. No reason to go on some internet show with a 31-year-old. Stay classy.`, `Declined Pike. Enjoy losing the under-40 vote forever.`, `max:{LAST} DECLINES PIKE'S INVITATION`],
+]);
+rx('pike_son', [
+  [`Hiring Pike's friend? Hmm. What if he has old posts? Kids these days have old posts.`, `Pike's guy runs the digital shop now. The takeover begins.`, `max:PIKE ALLY JOINS {LAST} CAMPAIGN`],
+  [`The President's SON came to Osgood!! And the President shared the video!!`, `Chase on stage in Osgood. The royal family has chosen.`, `fax:PRESIDENT'S SON RALLIES WITH {LAST}`],
+  [`A monthly interview with Pike? As GOVERNOR?? That sounds like a lot.`, `A standing monthly slot on Pike's stream. The influencer gets a governor.`, `max:{LAST} PROMISES PIKE MONTHLY INTERVIEWS`],
+  [`Earn it yourself. That is how my dad raised me. Good for {last}.`, `Turned down the back door to the White House. Honorable. Probably fatal.`, `fax:{LAST} DECLINES PIKE'S OFFER`],
+]);
+rx('pike_turns', [
+  [`Ignore him. These internet people get bored. Good.`, `Ignored the brigade. The zoomers left, and they will not come back.`, `fax:{LAST} IGNORES PIKE'S ATTACKS`],
+  [`I looked up what that young man said on his show. Disgusting. Thank you {last} for telling people.`, `Read the old clips to the press. The boomers are scandalized. Pike's numbers are up.`, `max:{LAST} RELEASES PIKE'S OLD CLIPS`],
+  [`{last} went on his show and held their own!! Pike looked nervous 😂`, `Walked into the brigade and came out even. The chat is shook.`, `fax:{LAST} FACES PIKE LIVE ON STREAM`,
+   `Three hours on that man's show and {last} agreed with him?? What happened??`, `Three hours of nodding along to Pike. The clip is everywhere.`, `max:{LAST} AGREES WITH PIKE ON STREAM`],
+]);
+
+// ---------------- Travis Dunmore ----------------
+rx('show_monday', [
+  [`He named all the big donors on air!! Two of them called lawyers 😂 Love it.`, `The Chamber's fifty, named and shamed. Best episode of the year.`, `max:DUNMORE NAMES GOVERNOR'S TOP 50 DONORS ON AIR`],
+  [`An hour of farmers calling in about diesel. Finally somebody listened to us.`, `Farm call-in hour. Slow radio, but the corn belt is tuned in.`, `fax:DUNMORE TAKES FARMERS' CALLS FOR AN HOUR`],
+  [`Four hours at the border wall. I stayed up for all of it!! 🇺🇸`, `A four-hour border stream. Pure content. The algorithm is feasting.`, `max:DUNMORE BROADCASTS FOUR HOURS FROM THE BORDER`],
+  [`He read the Governor's old article three times. "Monument to failure." Oof.`, `Reading the Litigator's 2012 op-ed like scripture. Devastating.`, `max:DUNMORE READS CASTELLANO OP-ED ON AIR`],
+]);
+rx('show_guest', [
+  [`The deputy's widow. I cried. Every politician should have to listen to her.`, `The widow hour. Nobody can argue with that. Undefeated content.`, `fax:SLAIN DEPUTY'S WIDOW ON DUNMORE SHOW`],
+  [`That General was SHARP. A real patriot. More of him please 🇺🇸`, `The general delivered. Older listeners are hooked.`, `fax:RETIRED GENERAL JOINS DUNMORE SHOW`,
+   `The General called the President reckless. On Travis's show. Awkward!!`, `Booked a neocon and he dunked on the President live. Producer is fired.`, `max:GENERAL ATTACKS PRESIDENT ON DUNMORE SHOW`],
+  [`A crypto guy for a whole hour? And he paid for it? Hmm. Sounded like an ad.`, `An hour-long crypto ad read. The grift is showing.`, `max:CRYPTO FOUNDER BUYS DUNMORE SHOW HOUR`],
+]);
+rx('show_sponsor', [
+  [`Bought the hat!! Then my son-in-law checked the tag... anyway. I like the hat.`, `Hats sold out in a day. Now check where they were made. It never ends.`, `max:DUNMORE LAUNCHES "DEPORT THEM ALL" MERCH LINE`],
+  [`I signed up for $5 a month!! He read my name on the air!! 📻`, `Listener-supported. 11,000 subs. The movement funds itself.`, `fax:11,000 LISTENERS SIGN UP TO FUND DUNMORE SHOW`],
+  [`He apologized for the caller. Good. That caller was out of line.`, `Apologized to get a truck dealer back. Sold out for a sponsor.`, `fax:DUNMORE APOLOGIZES FOR CALLER'S REMARKS`],
+]);
+rx('dun_taxes', [
+  [`Paid it all with penalties. OK. Everybody makes mistakes. Moving on.`, `Paid the state. The tax strike is over. Mid.`, `fax:DUNMORE PAYS BACK TAXES AND PENALTIES`],
+  [`"Illegitimate"?? I paid mine every year. Every. Single. Year. Not OK.`, `Called the tax illegitimate. Technically based. Politically a disaster with the boomers.`, `max:DUNMORE: STATE INCOME TAX WAS "ILLEGITIMATE"`],
+  [`Blamed the accountant. OK. Accountants mess up. Mine did once.`, `The accountant took the fall. Classic.`, `fax:DUNMORE BLAMES ACCOUNTANT FOR MISSED RETURNS`,
+   `The accountant has EMAILS reminding him six times. Six!! Come on Travis.`, `Six reminder emails. Throwing the accountant under the bus backfired completely.`, `max:DUNMORE'S EX-ACCOUNTANT RELEASES REMINDER EMAILS`],
+]);
+rx('dun_protein', [
+  [`Dropped the sponsor and refunded everybody. That is how you do it. Respect.`, `Refunds for everyone. Expensive. Clean.`, `fax:DUNMORE DROPS SPONSOR, OFFERS REFUNDS`],
+  [`A smear from China's friends? Maybe. But the factory photos look real.`, `Called it a CCP smear. The factory photos are on every channel. Hmm.`, `max:DUNMORE CALLS PROTEIN STORY A "CHINA SMEAR"`],
+  [`Keeping a sponsor made in a Chinese factory?? On an America First show??`, `America First, protein second. The grift is fully visible now.`, `max:DUNMORE KEEPS CHINA-LINKED SPONSOR`],
+]);
+rx('dun_tiebreak', [
+  [`He voted YES on my property tax relief!! The deciding vote!! THANK YOU TRAVIS 🏡`, `Cast the deciding vote for a boomer tax cut. Now the Governor has to veto it himself. Chess.`, `fax:DUNMORE CASTS DECIDING VOTE FOR TAX RELIEF`],
+  [`Killed the property tax relief?? For the income tax people?? I am 71!!`, `Voted to finish the repeal. Principled, and Lake Cheney will remember.`, `max:DUNMORE KILLS PROPERTY TAX RELIEF BILL`],
+  [`He did not even show up to vote?? That is his JOB.`, `Skipped the one vote that mattered. "Where was Travis?" writes itself.`, `max:DUNMORE SKIPS DECIDING VOTE`],
+]);
+
+// ---------------- Pastor Rick ----------------
+rx('pulpit_sermon', [
+  [`The Bible on borders. Pastor Rick knows his Scripture. Amen 🙏🇺🇸`, `A border sermon with a million shares. Christian nationalism, fully online.`, `max:PASTOR RICK PREACHES ON BORDERS`],
+  [`Mercy for the stranger. Beautiful sermon. But the border is still a problem...`, `The mercy sermon. The border hawks walked out quiet. Soft.`, `fax:PASTOR RICK PREACHES "MERCY FOR THE STRANGER"`],
+  [`A sermon about taxes!! I never heard a preacher talk about taxes. I like it.`, `Render unto Caesar, but less. The libertarian sermon.`, `fax:PASTOR RICK PREACHES AGAINST HIGH TAXES`],
+  [`Everybody knew what he meant. The IRS probably knew too 😬`, `A hint so clear the IRS took notes. Legally spicy.`, `max:PASTOR RICK'S "VOTING DUTY" SERMON DRAWS SCRUTINY`],
+]);
+rx('pulpit_vans', [
+  [`Church vans to the polls. We did that for school board too. Works every time 🚐`, `The church-van machine is activated. Also, a photo of a van with a campaign sign. Oops.`, `max:CORNERSTONE VANS TO DRIVE VOTERS TO POLLS`],
+  [`Rented buses with campaign money. Clean and legal. Smart.`, `Rented buses. Legal, clean, boring, effective.`, `fax:RICK CAMPAIGN RENTS BUSES FOR PRIMARY DAY`],
+  [`I will drive my neighbors. Mrs. Pruitt cannot drive anymore. Happy to help 🙏`, `Carpool evangelism. Very wholesome.`, `fax:RICK ASKS MEMBERS TO DRIVE NEIGHBORS TO POLLS`],
+]);
+rx('pulpit_revival', [
+  [`Three nights at the stadium. He never said vote. He did not have to 🙏`, `A revival that is definitely not a rally. Wink.`, `fax:PASTOR RICK HOLDS SECOND STADIUM REVIVAL`],
+  [`A campaign rally with hymns, paid for honestly. I respect that.`, `Paid for the rally-revival with campaign money. Honest and expensive.`, `fax:RICK CAMPAIGN HOSTS STADIUM RALLY`],
+  [`No revival? My whole church was planning to go. Disappointed.`, `Cancelled the revival to save money. Ice cold campaign discipline.`, `max:RICK CANCELS SECOND REVIVAL`],
+]);
+rx('rick_jet_own', [
+  [`Sold the jet and gave it to disaster relief!! THAT is a man of God 🙏`, `Sold the jet. Moral victory secured. The Gulfstream era is over.`, `fax:PASTOR RICK SELLS $60M CHURCH JET`],
+  [`A tool for ministry? Augusta during the Masters is not ministry, Pastor.`, `"Ministry tool." It went to the Masters. Come on.`, `max:RICK DEFENDS JET: "A TOOL FOR MINISTRY"`],
+  [`Most trips were real missions. OK. The golf trip was a gift. Fine.`, `Released the logs and survived. Most flights were missions. Lucky.`, `fax:RICK RELEASES JET FLIGHT LOGS`,
+   `More golf than missions?? In the flight logs?? I tithe every week!!`, `The flight map is mostly golf courses. Unrecoverable.`, `max:FLIGHT LOGS SHOW RICK JET'S GOLF TRIPS`],
+]);
+rx('rick_loans_own', [
+  [`The church will pay it all back. Good. That is honest. Respect.`, `Paying back the PPP money. The only answer. Cleanly done.`, `fax:CORNERSTONE TO REPAY $2.1M IN COVID LOANS`],
+  [`Kept 140 people working. OK. But he says no handouts...`, `"It saved jobs." Every business that took PPP said that.`, `max:RICK: CHURCH LOANS "KEPT 140 PEOPLE WORKING"`],
+  [`It is Washington's fault for handing it out?? Nobody made them apply, Pastor.`, `Blamed the government for offering free money. Libertarians are howling.`, `max:RICK BLAMES GOVERNMENT FOR COVID LOANS`],
+]);
+rx('rick_johnson', [
+  [`Stepped down to protect the church. That is a real shepherd 🙏`, `Handed the pulpit to the son for now. The IRS loses its target.`, `fax:PASTOR RICK STEPS DOWN FROM PULPIT UNTIL ELECTION`],
+  [`"Let them come." YES. The pulpit is FREE. The IRS has no business in church!!`, `Daring the IRS. The religious-liberty movement has a hero.`, `max:RICK TO IRS: "LET THEM COME"`],
+  [`The church sued the IRS and WON!! Praise God!! 🙏`, `Sued the IRS first and won the pause. Legal masterclass.`, `fax:JUDGE PAUSES IRS COMPLAINT AGAINST CORNERSTONE`,
+   `The judge threw it out and quoted his own sermon back at him. Ouch.`, `Dismissed in a week, and the opinion quotes the sermon. Brutal.`, `max:JUDGE DISMISSES CORNERSTONE SUIT AGAINST IRS`],
+]);
+rx('rick_camp', [
+  [`He apologized to the families and released everything. That is what a Christian does. Heartbreaking.`, `Full release, full apology. The only possible answer, and he gave it.`, `fax:RICK RELEASES CAMP REPORT, APOLOGIZES TO FAMILIES`],
+  [`"Followed the lawyers' advice." That is not what I want to hear from a pastor.`, `The lawyer answer to a church scandal. Fatal.`, `max:RICK: CHURCH "FOLLOWED LEGAL ADVICE" IN 2014`],
+  [`Attacking the reporter? Those were CHILDREN, Pastor. Very disappointed.`, `Went after the reporter. Every mom in Cimarron read the story anyway.`, `max:RICK ATTACKS REPORTER OVER CAMP STORY`],
+]);
+rx('rick_council', [
+  [`Gave the other pastor the chair. Peacemaker. That is the Christian way.`, `Traded the Council chair for the endorsement. Church politics is still politics.`, `fax:RICK OFFERS COUNCIL CHAIR TO RIVAL PASTOR`],
+  [`31 to 12!! The pastors stay with Rick. Praise God 🙏`, `Forced a vote and won big. The church machine holds.`, `fax:PASTORS' COUNCIL KEEPS RICK ENDORSEMENT`,
+   `The Council went with the Governor?? After all Rick did for them??`, `Forced a vote and lost the Council. The pastors switched to the incumbent.`, `max:PASTORS' COUNCIL WITHDRAWS RICK ENDORSEMENT`],
+  [`Released them himself. Humble. Some pastors will still vote for him.`, `Gave away the endorsement. Graceful and costly.`, `fax:RICK RELEASES PASTORS FROM ENDORSEMENT`],
+]);
+
+// ---------------- Sheriff Krantz ----------------
+rx('badge_manhunt', [
+  [`He caught them in 30 hours!! Mud on his jacket. That is a real sheriff 🇺🇸`, `A manhunt in the mud while the others give speeches. Peak Krantz.`, `fax:KRANTZ LEADS MANHUNT, ESCAPEES CAUGHT`],
+  [`He was at a rally while killers were loose in his county? Not good, Sheriff.`, `Campaigning in Osgood during a manhunt. Bad look.`, `max:KRANTZ CAMPAIGNS AS MANHUNT CONTINUES`],
+  [`The posse found them at a gas station!! Citizens protecting citizens 🇺🇸`, `The posse delivered. National story. Based.`, `fax:KRANTZ POSSE SPOTS ESCAPEES`,
+   `They held a FARMER at gunpoint?? Checking his own cows?? This is scary.`, `The posse pointed rifles at a guy checking his cattle. Horrible optics.`, `max:POSSE VOLUNTEERS DETAIN FARMER AT GUNPOINT`],
+]);
+rx('badge_federal', [
+  [`He helped the marshals. The law is the law. But the movement is not happy.`, `Helped the feds arrest a rancher. The constitutional sheriffs are done with him.`, `max:KRANTZ HELPS MARSHALS ARREST RANCHER`],
+  [`Told the feds to get a permission slip. HA!! That is Harlan County 🇺🇸`, `Sent the marshals home. The Justice Department sends a letter. Worth it.`, `max:KRANTZ TURNS AWAY U.S. MARSHALS`],
+  [`He walked in alone and brought the man out. Nobody hurt. HERO.`, `Solo negotiation at a hostile ranch and he won. Legend behavior.`, `fax:KRANTZ TALKS RANCHER INTO SURRENDER`,
+   `A warning shot at the Sheriff's truck. Now it is a standoff. Pray nobody gets hurt 🙏`, `The solo walk-up went wrong. A week-long standoff. Oof.`, `max:RANCHER FIRES WARNING SHOT AT KRANTZ`],
+]);
+rx('badge_flood', [
+  [`Eight days in the flood with his deputies. No campaigning. That is a leader.`, `Stayed for the flood. The campaign can wait. Respect.`, `fax:KRANTZ STAYS IN HARLAN THROUGH FLOOD`],
+  [`He asked the Governor for help. Good. People needed the Guard.`, `Asked the Governor for the Guard. The sandbag photo is awkward for both of them.`, `fax:KRANTZ, GOVERNOR SIDE BY SIDE ON FLOOD WALL`],
+  [`No state help at all? Two towns waited FOUR DAYS. Pride is not a plan.`, `Refused all help out of county pride, while two towns waited. Hmm.`, `max:KRANTZ REFUSES STATE, FEDERAL FLOOD HELP`],
+]);
+rx('krantz_inmate', [
+  [`Suspended them and cooperated. Hard but right. A man died.`, `Cooperated with the FBI. The deputies will not forget.`, `fax:KRANTZ SUSPENDS INDICTED DEPUTIES`],
+  [`The FBI again. They never stop. But a man died in that chair...`, `"Weaponized FBI." Correct in general. Specifically, the video was deleted.`, `max:KRANTZ DEFENDS INDICTED DEPUTIES`],
+  [`The video shows they called a nurse. The FBI story was wrong!!`, `Released the video and it cleared his guys. Transparency as a weapon.`, `fax:JAIL VIDEO RAISES DOUBTS ABOUT FBI CASE`,
+   `I watched the video. I cannot defend that. I am sorry, Sheriff.`, `The video is worse than the indictment. Nothing to say.`, `max:HARLAN JAIL VIDEO SHOCKS VIEWERS`],
+]);
+rx('krantz_dryfork', [
+  [`THE BLM LEFT!! Three days on the road and they LEFT!! 🇺🇸🇺🇸`, `Held the road and won. The most famous sheriff in America.`, `max:BLM WITHDRAWS FROM DRY FORK AFTER KRANTZ STANDOFF`,
+   `A rifle went off by accident?? Everybody diving in the dirt... This is how people get killed.`, `The accidental discharge video. Everybody hitting the deck. Catastrophic.`, `max:RIFLE DISCHARGES AT DRY FORK STANDOFF`],
+  [`A 90-day delay in writing. Smart. Nobody got hurt. That is a win.`, `Negotiated a delay. The volunteers call it surrender. It is.`, `fax:KRANTZ NEGOTIATES 90-DAY BLM DELAY`],
+  [`The President called off the BLM!! He takes care of our sheriffs 🇺🇸`, `One call to the White House and the feds folded. Power.`, `fax:PRESIDENT PAUSES BLM SURVEY AT KRANTZ REQUEST`,
+   `Standing on a road waiting for a phone call that never came. Sad.`, `Waited two days for the President. The phone never rang.`, `max:WHITE HOUSE SILENT AS KRANTZ WAITS AT DRY FORK`],
+]);
+rx('krantz_sued', [
+  [`Complied under protest. OK. Picking battles I guess.`, `Folded to the Governor's lawsuit. The constitutional sheriff blinked.`, `fax:KRANTZ COMPLIES WITH STATE LAWS UNDER PROTEST`],
+  [`Taking it to court with the Judge. Good. Let the courts say it.`, `Sheriff supremacy goes to court. A national test case.`, `fax:KRANTZ FIGHTS STATE LAWSUIT IN COURT`],
+  [`41 lawsuits against Washington and now he goes after a county lawman. Good point, Bo!!`, `Turned the Litigator's lawsuit habit against him. Clean line.`, `max:KRANTZ: GOVERNOR "SUES A SHERIFF"`],
+]);
+rx('krantz_posse', [
+  [`Kicked him out and apologized to the clerk. Good. You do not threaten people's homes.`, `Purged the posse. Forty volunteers quit. The movement is angry.`, `fax:KRANTZ REMOVES POSSE MEMBER OVER THREAT`],
+  [`"One bad apple." Maybe. But that photo of her house is scary.`, `Kept the posse after a threat post. The photo stays on TV.`, `max:KRANTZ KEEPS POSSE AFTER THREAT POST`],
+  [`Disbanded the whole posse? That feels like too much. Those men helped a lot.`, `Disbanded the posse. The loyalists feel betrayed. Fair.`, `fax:KRANTZ DISBANDS VOLUNTEER POSSE`],
+]);
+
+// ---------------- Brent Vaskel ----------------
+rx('check_selffund', [
+  [`Ten MILLION more of his own money? Must be nice. Buying a state, looks like.`, `Ten million more. The checkbook is the campaign. Honestly? Respect the commitment.`, `max:VASKEL ADDS $10M MORE OF HIS OWN MONEY`],
+  [`He matches every small donation. I gave $50 and it became $100. Not bad!!`, `The match program. Small donors, big multiplier. Growth hacking a campaign.`, `fax:VASKEL TO MATCH EVERY SMALL DONATION`],
+  [`No more of his own money. Good. Let the people fund it.`, `Stopped self-funding. The carpetbagger story fades. Smart.`, `fax:VASKEL STOPS SELF-FUNDING`],
+]);
+rx('check_ads', [
+  [`Four million dollars of negative ads. I cannot watch TV without seeing one.`, `Four million on attack ads. The leader drops. Money talks.`, `max:VASKEL SPENDS $4M ATTACKING RACE LEADER`],
+  [`The ad with his daughters at the football game. OK, that one got me. Nice family.`, `The Friday-night-lights biography ad. Very effective boomer bait.`, `fax:VASKEL AD: "CIMARRON BY CHOICE"`],
+  [`Online ads and door-knocking. Smart money. Not all on TV.`, `Digital plus field. The efficient spend.`, `fax:VASKEL SPLITS AD BUDGET ONLINE, FIELD`],
+  [`Saving the money for the last week. Everybody else is on TV. Risky.`, `Holding the war chest while everyone else spends. Either genius or asleep.`, `max:VASKEL HOLDS AD MONEY FOR FINAL WEEK`],
+]);
+rx('check_stadium', [
+  [`"Vaskel Field"?? He bought the stadium and put his name on it. Some parents are not happy.`, `Named a high school stadium after himself. The most billionaire move possible.`, `max:VASKEL PAYS FOR SUMNER STADIUM, NAMES IT "VASKEL FIELD"`],
+  [`Paid for it quietly and did not want credit. That is class. Thank you, Mr. Vaskel.`, `Anonymous donation, leaked in 11 days. Best of both worlds.`, `fax:VASKEL REVEALED AS ANONYMOUS STADIUM DONOR`],
+  [`Waiting until after the election. OK. But the kids have no stadium this fall.`, `Refused to buy a stadium during the campaign. Ethics win, football loss.`, `fax:VASKEL DECLINES STADIUM GIFT UNTIL AFTER ELECTION`],
+]);
+rx('vaskel_ca', [
+  [`Moving from California turned him right. HA. It turned a lot of people right!!`, `The converted Californian. Plausible. The base half-buys it.`, `fax:VASKEL: "CALIFORNIA MADE ME A CONSERVATIVE"`],
+  [`A million dollars to the border groups. Putting money where his mouth is.`, `A million-dollar penance. Expensive. Works.`, `fax:VASKEL GIVES $1M TO BORDER SECURITY GROUPS`],
+  [`"Like every businessman." So he still thinks it was fine?? Not what I wanted to hear.`, `"Like every businessman." The fatal shrug.`, `max:VASKEL: GAVE TO DEMOCRATS "LIKE EVERY BUSINESSMAN"`],
+]);
+rx('vaskel_visas', [
+  [`American workers only!! Even if it takes longer. THAT is America First 🇺🇸`, `Delayed the plants to hire Americans. The online right forgives him.`, `max:VASKEL DROPS H-1B PLANS, DELAYS PLANTS`],
+  [`Keeping the foreign workers. What about OUR kids?`, `Defended the visa hires with a straight face. The tech-right mask comes off.`, `max:VASKEL KEEPS H-1B HIRING`],
+  [`Train our kids for those jobs. Now THAT is a good idea. My grandson might apply!!`, `Train Cimarron kids for the jobs. The adult answer.`, `fax:VASKEL ACADEMY TO TRAIN LOCAL ENGINEERS`],
+]);
+rx('vaskel_water', [
+  [`He backed off the water grab. Good. The farmers won this one.`, `Withdrew the aquifer permits. The ranchers beat the billionaire.`, `fax:VASKEL WITHDRAWS FREEDOMOPOLIS WATER PERMITS`],
+  [`Paying farmers three times the price for their water. Some neighbors are not happy.`, `Bought the water instead of fighting for it. Capitalism with extra steps.`, `fax:VASKEL BUYS PANHANDLE WATER RIGHTS`],
+  [`He took the Panhandle's water for his city. The farmers will remember this.`, `Won the permits, lost the Panhandle. The trade was bad.`, `max:VASKEL WINS AQUIFER PERMITS OVER RANCHERS' PROTEST`],
+]);
+rx('vaskel_outage', [
+  [`He paid people out of his own pocket while he fixed it. OK. That is decent.`, `Bailed out his own software failure. Expensive humility.`, `fax:VASKEL ADVANCES DELAYED UNEMPLOYMENT PAYMENTS`],
+  [`Blamed the county computer people? They have the emails. Not good.`, `Blamed the county IT guys. The county IT guys had receipts.`, `max:VASKEL BLAMES COUNTIES FOR SYSTEM FAILURE`],
+  [`Fixed in 40 hours. OK, the computer people are good. Impressive.`, `Fixed in 40 hours. The engineers carried the campaign.`, `fax:VASKEL TEAM FIXES CLAIMS SYSTEM IN 40 HOURS`,
+   `Nine days?? A man could not pay his rent. "In beta" my foot.`, `"In beta." Nine days. The Governor's joke writes itself.`, `max:VASKEL SYSTEM DOWN NINE DAYS`],
+]);
+rx('vaskel_drone', [
+  [`Sold his share in the President's son's company. Clean hands. Good.`, `Divested from the royal family. Ethical. Politically lonely.`, `fax:VASKEL SELLS STAKE IN LIBERTY DRONE`],
+  [`Kept the stake but told everybody. Honest, I guess. Still strange.`, `Disclosed and kept the stake. Awkward transparency.`, `fax:VASKEL DISCLOSES LIBERTY DRONE STAKE`],
+  [`The President's son opened a factory in Pratt Junction!! Jobs AND the President. Big day!!`, `Ribbon cutting with Chase. The President posted it. The Ledger posted the contracts.`, `max:VASKEL, PRESIDENT'S SON OPEN DRONE FACTORY`],
+]);
+
+// ---------------- Carol Whitlock ----------------
+rx('long_register', [
+  [`14,000 new Republicans! Good. Some of my friends quit the party. Welcome back!!`, `"Carol's Democrats." Registering independents to steal a closed primary. Brazen.`, `max:WHITLOCK DRIVE REGISTERS 14,000 NEW REPUBLICANS`],
+  [`The Chamber sent the mailers. I got one. It was a nice mailer.`, `The Chamber of Commerce is registering voters now. Uniparty logistics.`, `max:CHAMBER GROUPS RUN WHITLOCK REGISTRATION DRIVE`],
+  [`Win the real Republicans. Right. That is the honest way.`, `No registration drive. Carol wants to lose honorably.`, `fax:WHITLOCK SKIPS REGISTRATION DRIVE`],
+]);
+rx('long_editorials', [
+  [`All four papers for Carol. I cut them out and sent them to my sister in Cheney 📰`, `Four newspaper endorsements. In 2030. Fighting with the weapons of 1985.`, `max:WHITLOCK RUNS ADS ON NEWSPAPER ENDORSEMENTS`],
+  [`Thanked the papers quietly. Classy.`, `Did not brag about the newspapers. First smart move.`, `fax:WHITLOCK THANKS EDITORIAL BOARDS`],
+  [`She told the newspapers off!! HA!! She has more fight than I thought.`, `Rejected the Ledger's love. Carol has a pulse.`, `fax:WHITLOCK: "I DO NOT WORK FOR THE NEWSPAPERS"`],
+]);
+rx('long_favors', [
+  [`Twelve legislators standing with Carol. That is experience. Those people know her.`, `The Capitol endorses its favorite senator. Uniparty roll call.`, `max:12 LEGISLATORS ENDORSE WHITLOCK`],
+  [`Her old friends are knocking doors for her. Quiet and smart.`, `The silent machine. Carol's favors turned into field staff.`, `fax:WHITLOCK QUIETLY BUILDS TURNOUT OPERATION`],
+  [`She got them to stay out of it, and it hurt the Governor. Sneaky!!`, `Froze the Governor's endorsements. The old pro knows the game.`, `fax:LEGISLATORS STAY NEUTRAL; GOVERNOR LOSES SUPPORT`],
+]);
+rx('whit_dems', [
+  [`Carol told the Democrats to stop. Good. I believe her.`, `Denounced the Dem ads. The ads kept running. Performative.`, `fax:WHITLOCK DENOUNCES DEMOCRATIC AD CAMPAIGN`],
+  [`Shrugged at the Democrat ads. Sounds like she likes the help...`, `A thank-you note to the Democrats, written as a shrug.`, `max:WHITLOCK WON'T DISAVOW DEMOCRATIC ADS`],
+  [`Gave the same money to Republican candidates. Now THAT is an answer!!`, `Matched the Dem money with GOP donations. Clever flip.`, `fax:WHITLOCK MATCHES DEM ADS WITH GOP DONATIONS`],
+]);
+rx('whit_2020', [
+  [`She said no, to his face, kindly. I do not agree but I respect it.`, `Said 2020 was not stolen, live, in Osgood. RINO confirmed.`, `max:WHITLOCK: 2020 ELECTION "WAS NOT STOLEN"`],
+  [`Something went wrong in 2020 and she will clean it up here. That is a fair answer.`, `The fence answer on 2020. Mid.`, `fax:WHITLOCK: 2020 HAD "REAL PROBLEMS"`],
+  [`Would not answer the question. Twice. Politicians.`, `Dodged it twice on camera. The clip is merciless.`, `max:WHITLOCK DODGES 2020 QUESTION`],
+]);
+rx('whit_stumble', [
+  [`"The stairs have been to the left of me for years." 😂😂 Carol is FUNNY.`, `The stair joke landed. Even the zoomers laughed. Grandma has bars.`, `fax:WHITLOCK JOKES ABOUT STUMBLE`,
+   `The joke was fine but everybody is still watching the video of her falling.`, `Joke flopped. The fall video wins.`, `max:WHITLOCK STUMBLE VIDEO TOPS 4 MILLION VIEWS`],
+  [`Her medical records are better than mine!! And I am 71. Good for her.`, `Released the medical records. Healthier than the whole New Right.`, `fax:WHITLOCK RELEASES MEDICAL RECORDS`],
+  [`Nine miles up a mountain!! Two reporters turned back and she did not!! 🏔️`, `The mountain hike. Two reporters quit, she did not. Absolute unit.`, `fax:WHITLOCK OUTHIKES REPORTERS ON WHEELER PEAK`,
+   `The photo of her resting on the rock... I feel bad. She is 67.`, `The rock photo. The hike became the story it was supposed to kill.`, `max:WHITLOCK HIKE PHOTO GOES VIRAL`],
+]);
+rx('whit_war', [
+  [`She was right about the war. I hate to say it. But she was right.`, `"I said so." Correct and insufferable. The boomers are coming home to Carol.`, `fax:WHITLOCK: "I SAID SO" ON WAR`],
+  [`Diesel, gas, harvest. That is what we care about right now. Great speech.`, `The diesel speech. Never said "war." Pure kitchen table.`, `fax:WHITLOCK SPEECH FOCUSES ON FUEL PRICES`],
+  [`Two thousand veterans with Carol. My old unit friends were there 🇺🇸`, `The veterans rally. Carol's army is real.`, `fax:2,000 VETERANS RALLY WITH WHITLOCK`],
+]);
+rx('whit_hecklers', [
+  [`Twenty kids yelling and she just kept talking. Tough lady. I like her more now.`, `Out-lasted the hecklers. They got bored. Grandma won.`, `fax:WHITLOCK CALM AS HECKLERS DISRUPT TOWN HALL`],
+  [`She let one of the kids talk and they agreed on gas prices!! That is how it should be.`, `Gave the heckler the mic and he asked about gas. Wholesome.`, `fax:WHITLOCK INVITES HECKLER TO MIC`,
+   `Four minutes of insults into her microphone. She just stood there. Sad.`, `Gave the heckler the mic. He used it. Catastrophe.`, `max:HECKLER TAKES OVER WHITLOCK TOWN HALL`],
+  [`Ended early. Can't blame her. Those kids were rude.`, `Ran from twenty zoomers. Not a great look.`, `max:WHITLOCK ENDS TOWN HALL EARLY`],
+]);
+
+// ---------------- Running mates ----------------
+rx('serrano_tuition', [
+  [`Stood by her. OK. She seems like a good woman. But in-state tuition for illegals...`, `Standing by the Dreamer-tuition vote. Dunmore thanks you for the ad.`, `max:CASTELLANO STANDS BY SERRANO'S TUITION VOTE`],
+  [`She said she regrets it. Sounded like she did not mean it though.`, `A regret that sounds rehearsed.`, `fax:SERRANO REGRETS 2019 TUITION VOTE`],
+  [`Attacking a Hispanic conservative. Good point. The left does that every time.`, `The identity shield. It works, sort of.`, `fax:CASTELLANO CALLS SERRANO STORY AN ATTACK ON HISPANIC CONSERVATIVES`],
+  [`New running mate. OK. That was fast.`, `Dropped Serrano at the first sign of trouble. Cold.`, `max:SERRANO OFF THE TICKET`],
+]);
+rx('crowder_contract', [
+  [`She explained it clearly. 40 items on one vote. Makes sense now.`, `The consent-calendar defense. Boring, true, effective.`, `fax:CROWDER EXPLAINS CITY CONTRACT VOTES`,
+   `She yelled at the reporter?? On camera?? Oh no.`, `Lost her temper with a reporter. That clip is forever.`, `max:CROWDER CLASHES WITH REPORTER`],
+  [`Let the ethics board look. Fair and square.`, `Sent it to the ethics board. Responsible, slow.`, `fax:CROWDER CONTRACTS SENT TO ETHICS BOARD`],
+  [`She fought for our kids and now they attack her family. Typical.`, `The mom-shield. Her fans rally. The contracts are still there.`, `max:CROWDER CALLS CONTRACT STORY A SMEAR`],
+  [`She is off the ticket? She was the best one. Sad.`, `Dropped the book-ban mom. The exurbs will notice.`, `max:CROWDER OFF THE TICKET`],
+]);
+rx('tilden_fund', [
+  [`$9 million for a stadium named after his daddy?? That is my tax money.`, `"Every legislator does it." The swamp's national anthem.`, `max:CASTELLANO DEFENDS TILDEN'S MEMBER PROJECTS`],
+  [`He gave up his leadership job. Good. That was too much money.`, `Tilden demoted himself. The first honest thing in the Senate in years.`, `fax:TILDEN STEPS DOWN AS MAJORITY LEADER`],
+  [`Ban the pork projects!! About time. Drain the swamp here too 🐊`, `Banned member projects. The Senate will make him pay in January.`, `fax:CASTELLANO PROPOSES BAN ON MEMBER PROJECTS`],
+  [`Tilden off the ticket. Good riddance to the swamp.`, `Dropped the swamp king. Good.`, `fax:TILDEN OFF THE TICKET`],
+]);
+rx('barlow_tape', [
+  [`Chet said sorry on the air, loud and long. I believe him.`, `The wrestler's apology tour. Very theatrical. The President did not respond.`, `fax:BARLOW APOLOGIZES TO PRESIDENT ON AIR`],
+  [`Lots of us said things in 2016. True. But "a con man" is a lot.`, `Excused 2016 because "everybody said it." Some MAGA voters did not.`, `max:DUNMORE DEFENDS BARLOW'S 2016 REMARKS`],
+  [`Chet read the Governor's old article for three hours. HA!! Turned it right around.`, `The Hammer counter-attacked. The op-ed saved the day.`, `fax:BARLOW TURNS TAPE STORY ON GOVERNOR`,
+   `He said the President STILL cannot run a lemonade stand?? Oh no, Chet.`, `The joke that ended a running mate. Chet is cooked.`, `max:BARLOW REPEATS INSULT OF PRESIDENT`],
+  [`New running mate. Sad. Chet was entertaining.`, `Dropped the Hammer. The radio audience is furious.`, `max:BARLOW OFF DUNMORE TICKET`],
+]);
+rx('vance_machine', [
+  [`Kristi was exposing the truth!! They always go after the whistleblowers.`, `Defended the machine break-in. The base loves her. The grand jury keeps meeting.`, `max:DUNMORE DEFENDS VANCE OVER VOTING MACHINE`],
+  [`Innocent until proven guilty. Let the process work. Fair.`, `"Let the process work." From the election-integrity ticket. Funny.`, `fax:DUNMORE: LET THE PROCESS WORK ON VANCE`],
+  [`Impeach the Secretary of State!! Who does he think he is??`, `Called for impeaching the Secretary of State. The legislature yawned.`, `max:DUNMORE CALLS FOR IMPEACHING SECRETARY OF STATE`],
+  [`Vance is off the ticket. Probably smart if she gets indicted.`, `Dumped the integrity hero before the indictment. Pragmatic.`, `max:VANCE OFF DUNMORE TICKET`],
+]);
+rx('webb_sermon', [
+  [`He preached Scripture. OK. But Heartland is about the law, not Jesus.`, `Stood by the pro-migrant preacher. The border hawks are gone.`, `max:PASTOR RICK STANDS BY WEBB'S HEARTLAND SERMON`],
+  [`He clarified: criminals out. That is fine with me.`, `Clarified into mush. His own congregation is not impressed.`, `fax:WEBB CLARIFIES HEARTLAND COMMENTS`],
+  [`Both churches praying together about the border. Beautiful 🙏`, `The mercy-and-law service. Lovely. The clip is still out there.`, `fax:RICK, WEBB HOLD SERVICE ON "MERCY AND LAW"`],
+  [`Webb is off the ticket? That is a shame. He seemed like a good man.`, `Dropped Webb. The tent just got smaller.`, `max:WEBB OFF RICK TICKET`],
+]);
+rx('duvall_textbook', [
+  [`She pulled the book and apologized. Good. That book was wrong.`, `Pulled the textbook. Her network says she caved. She did.`, `fax:DUVALL PULLS TEXTBOOK, APOLOGIZES`],
+  [`Homeschool freedom, yes. But that book... I read the passage. It is bad.`, `Defended homeschooling, not the book. The lawyerly middle.`, `fax:RICK: DEFEND HOMESCHOOLING, NOT THE BOOK`],
+  [`Nobody is attacking families. It is about a BOOK, Pastor.`, `Called it an attack on homeschoolers. Nobody outside the network buys it.`, `max:DUVALL: TEXTBOOK STORY "AN ATTACK ON HOMESCHOOL FAMILIES"`],
+  [`Duvall is off the ticket. Probably for the best after that book.`, `Dumped the homeschool queen. The network is furious.`, `max:DUVALL OFF RICK TICKET`],
+]);
+rx('kittredge_water', [
+  [`His water, his right. True. But his neighbors' wells are dropping...`, `"His water to sell." Legal and radioactive in the Panhandle.`, `max:RICK DEFENDS KITTREDGE WATER SALE`],
+  [`He gave the money to fix his neighbors' wells!! Now THAT is a good neighbor 🌾`, `Gave the water money back to the neighbors. The rancher code.`, `fax:KITTREDGE FUNDS NEIGHBORS' WELLS`],
+  [`Blame Vaskel for buying all the water. The California guy again!!`, `Attacked the buyer, not the seller. Creative.`, `max:RICK TICKET BLASTS VASKEL WATER PURCHASES`],
+  [`New running mate. The Panhandle is not happy.`, `Dropped the rancher. The Panhandle notices.`, `max:KITTREDGE OFF RICK TICKET`],
+]);
+rx('crane_video', [
+  [`Practice is practice. But the targets looked like feds. Hmm. That worries me.`, `Defended the target practice. The FBI is taking notes. So is everyone over 60.`, `max:KRANTZ DEFENDS MILITIA TRAINING VIDEO`],
+  [`He destroyed the targets and apologized. OK. That was a bad joke.`, `Crane smashed the targets on camera. The Rangers call him soft.`, `fax:CRANE DESTROYS TARGETS, APOLOGIZES`],
+  [`Federal propaganda? The video is his own group's video, Sheriff.`, `Called his own militia's video propaganda. Galaxy brain.`, `max:KRANTZ CALLS MILITIA VIDEO "FEDERAL PROPAGANDA"`],
+  [`Crane is off the ticket. Good. Those militia guys scare me a little.`, `Dropped the militia commander. The Rangers feel betrayed.`, `max:CRANE OFF KRANTZ TICKET`],
+]);
+rx('pettit_fees', [
+  [`That grass is OURS, not Washington's!! Pay nothing, Cora Lynn 🇺🇸`, `Defended not paying the BLM. Sovereign rancher energy.`, `max:KRANTZ DEFENDS PETTIT'S UNPAID GRAZING FEES`],
+  [`Paid under protest and suing for it back. Smart. Legal. Good.`, `Pay, protest, sue. The respectable rebel.`, `fax:PETTIT PAYS GRAZING FEES UNDER PROTEST`],
+  [`The Sheriff paid her bill? Kind of strange, honestly.`, `The Sheriff covered his running mate's debt. That will be a story.`, `max:KRANTZ PAYS RUNNING MATE'S GRAZING FEES`],
+  [`Cora Lynn is off the ticket. Sad. She was the real deal.`, `Dropped the water-rights widow. Ranch country notices.`, `max:PETTIT OFF KRANTZ TICKET`],
+]);
+rx('tate_ruling', [
+  [`He did his job in 2004. Now he helps fix the law. Makes sense to me.`, `The rule-of-law answer. Gun owners grumble but accept it.`, `fax:KRANTZ DEFENDS TATE'S 2004 RULING`],
+  [`He would rule differently now. OK. People learn.`, `The judge flip-flopped on command. Scholars are unimpressed.`, `fax:TATE: "I WOULD RULE DIFFERENTLY TODAY"`],
+  [`Attacking the Rifle Association?? The SHERIFF?? That is a strange fight to pick.`, `The gun sheriff fighting the gun lobby. Chaos.`, `max:KRANTZ ATTACKS RIFLE ASSOCIATION OVER TATE`],
+  [`New running mate. The Judge seemed like a smart man.`, `Dropped the judge. The adults are leaving the ticket.`, `max:TATE OFF KRANTZ TICKET`],
+]);
+rx('mercer_freeze', [
+  [`He is covering everybody's losses with his own money!! Wow. That is a lot of money.`, `Bailed out the crypto exchange personally. Most expensive apology ever.`, `fax:VASKEL GUARANTEES PRAIRIE EXCHANGE LOSSES`],
+  [`Unfrozen in five days. OK. My nephew got his money back.`, `Unfroze in five days. Crypto crisis handled.`, `fax:PRAIRIE EXCHANGE RESUMES WITHDRAWALS`,
+   `A MONTH?? Retirees outside the office with signs. This is bad.`, `The freeze lasted a month. The retirees are on the news.`, `max:PRAIRIE EXCHANGE FREEZE DRAGS ON`],
+  [`"Customers accept the risk"?? Tell that to the old folks who lost their savings!!`, `"They accepted the risk." True and cruel. The boomers are furious.`, `max:VASKEL: CRYPTO CUSTOMERS "ACCEPT THE RISK"`],
+  [`Mercer is off the ticket. Good. Crypto people make me nervous.`, `Dropped the crypto queen. The online crowd is annoyed.`, `max:MERCER OFF VASKEL TICKET`],
+]);
+rx('strand_votes', [
+  [`He voted against the TORNADO relief?? My cousin lost his barn.`, `Defended the no votes as fiscal purity. The Liberty Caucus loves it. Nobody else does.`, `max:VASKEL DEFENDS STRAND'S NO VOTES`],
+  [`He is sorry about the Sumner vote. Good. He should be.`, `Strand's first regret. The Liberty Caucus mourns.`, `fax:STRAND REGRETS TORNADO RELIEF VOTE`],
+  [`The Governor stuffed those bills with extra spending? Interesting. I did not know that.`, `Turned the no votes into an attack on the Governor's pork. Smooth.`, `fax:VASKEL TICKET HITS GOVERNOR OVER PORK`],
+  [`Strand is off the ticket. He voted no on everything anyway 😂`, `Dropped Mr. No. The Liberty Caucus is hurt.`, `max:STRAND OFF VASKEL TICKET`],
+]);
+rx('ostrowski_contract', [
+  [`Released everything. Nothing illegal. OK. Good.`, `Full disclosure on the Pentagon contract. The story dies of boredom.`, `fax:VASKEL RELEASES OSTROWSKI CONTRACT DOCUMENTS`],
+  [`Thirty years of service. He can work where he wants. I agree.`, `Defended the General, not the contract. Half an answer.`, `fax:VASKEL DEFENDS GENERAL'S SERVICE`],
+  [`Gave up a $90 million contract?? That is serious. OK, I believe them now.`, `Walked away from $90 million. The board is crying. The voters are impressed.`, `fax:VASKEL COMPANY GIVES UP PENTAGON CONTRACT`],
+  [`The General is off the ticket. Too bad. I liked him.`, `Dropped the General. The boomers liked him.`, `max:OSTROWSKI OFF VASKEL TICKET`],
+]);
+rx('sykes_subsidy', [
+  [`She brought the internet to 40 towns with that money. I say good for her.`, `Took Biden bucks and wired the farms. Hard to be mad.`, `fax:VASKEL DEFENDS SYKES BROADBAND SUBSIDY`],
+  [`No more federal money. OK. But the next town might not get internet.`, `Promised no federal money. Her co-op board is livid.`, `fax:SYKES PLEDGES NO MORE FEDERAL MONEY`],
+  [`The principal cried about her students' homework. I cried too 😢`, `The weeping principal ad. Unbeatable.`, `fax:VASKEL TOURS TOWN CONNECTED BY SYKES CO-OP`],
+  [`Sykes is off the ticket. The farm towns loved her.`, `Dropped the broadband lady. The farm towns noticed.`, `max:SYKES OFF VASKEL TICKET`],
+]);
+rx('ashby_expansion', [
+  [`Three hospitals would be open. That is true. But it is still Obamacare.`, `Defended the Medicaid vote. "Obamacare Carol and Obamacare Jim" is now real.`, `max:WHITLOCK DEFENDS ASHBY'S MEDICAID VOTE`],
+  [`Changed his mind just in time for the campaign? Nobody believes that, Jim.`, `The unconvincing flip. Nobody buys it.`, `fax:ASHBY: WOULD VOTE DIFFERENTLY ON MEDICAID`],
+  [`Talking about the hospitals closing. That is the real problem.`, `Changed the subject to rural hospitals. Half worked.`, `fax:WHITLOCK TICKET FOCUSES ON RURAL HOSPITALS`],
+  [`Ashby is off. Too bad, he is a good budget man.`, `Dropped the Obamacare vote. Too late, though.`, `max:ASHBY OFF WHITLOCK TICKET`],
+]);
+rx('ferris_donations', [
+  [`"The Democrats left me." That is exactly how I felt about my union in 1980. Good speech.`, `The convert speech. Reagan-coded. It landed.`, `fax:FERRIS: "THE DEMOCRATS LEFT ME"`,
+   `He still agrees with Democrats on "some things"?? That is not what we want to hear.`, `Admitted he still agrees with Democrats. The only clip that matters.`, `max:FERRIS: STILL AGREES WITH DEMOCRATS "ON SOME THINGS"`],
+  [`He gave $28,000 to the party. Ten times what he gave the Democrats. OK, fair.`, `Paid his conversion tax. Ten to one.`, `fax:FERRIS DONATES $28,000 TO STATE GOP`],
+  [`Reagan was a Democrat too!! Good point, Carol.`, `The Reagan defense. Boomer kryptonite, in a good way.`, `fax:WHITLOCK: "ASK RONALD REAGAN" ABOUT CONVERTS`],
+  [`Ferris is off. Probably smart. Democrats on the ticket is a tough sell.`, `Dropped the ex-Democrat. The crossover strategy dies.`, `max:FERRIS OFF WHITLOCK TICKET`],
+]);
+rx('park_paper', [
+  [`The numbers are the numbers. My cousin lost money on the tariffs. She is right.`, `Stood by the research. The farm vote nods. The President does not.`, `max:WHITLOCK STANDS BY PARK'S TARIFF RESEARCH`],
+  [`Right goals, high costs. Fair. Both things are true.`, `A diplomat's answer. Everyone accepts half of it.`, `fax:PARK: PRESIDENT'S GOALS RIGHT, COSTS HIGH`],
+  [`A relief fund based on real numbers. Smart. Farmers need it NOW.`, `Turned the paper into a policy. Actually useful.`, `fax:WHITLOCK PROPOSES FARM RELIEF FUND`],
+  [`Dr. Park is off the ticket. The farmers liked her.`, `Dropped the economist to please the President. Weak.`, `max:PARK OFF WHITLOCK TICKET`],
+]);
+rx('delacroix_letter', [
+  [`Thirty years in uniform. He can say what he wants. I agree with Carol.`, `Defended the "disloyal brass." The White House has a new enemy.`, `max:WHITLOCK DEFENDS DELACROIX LETTER`],
+  [`Saluted the Commander in Chief. Good soldier answer.`, `The Colonel saluted. Veterans are a bit let down.`, `fax:DELACROIX BACKS PRESIDENT AS COMMANDER IN CHIEF`],
+  [`Two thousand veterans on the base!! I was there with my old unit 🇺🇸`, `The veterans turned out. The letter is forgotten, for a day.`, `fax:VETERANS RALLY WITH WHITLOCK AT FORT EISENHOWER`],
+  [`The Colonel is off the ticket. Not right. He served this country.`, `Dropped the Colonel to please the President. The veterans remember.`, `max:DELACROIX OFF WHITLOCK TICKET`],
+]);
+
+// ---------------- Debates, runoff meeting, attack lines and closings for every candidate ----------------
+rx('d_prove', [null, null, null, null,
+  [`Two million listeners!! That IS a movement. Travis built something real.`, `The audience is the record. Content is policy now.`, `max:DEBATE: DUNMORE CITES "TWO MILLION LISTENERS"`],
+  [`All those babies saved by his church. Name anyone else who did that. Amen 🙏`, `The pregnancy-center answer. Unbeatable with the faith vote.`, `fax:DEBATE: PASTOR RICK CITES 40 PREGNANCY CENTERS`],
+  [`Told the ATF to stay out and they did!! That is a SHERIFF 🇺🇸`, `The ATF standoff that never happened. Legend.`, `max:DEBATE: KRANTZ ON KEEPING ATF OUT OF HARLAN`],
+  [`1,500 jobs and no government money. OK, the California guy can build things.`, `Jobs without subsidies. The founder flex.`, `fax:DEBATE: VASKEL CITES 1,500 JOBS`],
+  [`Twelve balanced budgets. I miss those days. Carol is right.`, `The balanced-budget boomer answer. It still hits in Lake Cheney.`, `fax:DEBATE: WHITLOCK CITES 12 BALANCED BUDGETS`],
+]);
+rx('d_arrest', [null, null, null, null,
+  [`Repeal a bad law, do not ignore it. That makes sense. Good answer.`, `Turned Krantz's nullification into the left's border policy. Clever.`, `fax:DEBATE: {LAST}: REPEAL BAD LAWS, DON'T IGNORE THEM`],
+]);
+rx('d_chamber', [null, null, null, null,
+  [`The Governor takes their money AND their orders. Oof. That one landed.`, `Aimed Dunmore's Chamber charge at the Governor. Precision strike.`, `max:DEBATE: {LAST} TIES GOVERNOR TO CHAMBER`],
+]);
+rx('d_deport_num', [null, null, null, null,
+  [`Four thousand is not a lot? HA. The Governor looked annoyed.`, `Made the incumbent's big number look small. Brutal.`, `max:DEBATE: {LAST} MOCKS GOVERNOR'S DEPORTATION NUMBERS`],
+]);
+rx('court_castellano', [
+  [`Keep Heartland and the lawsuits. OK. That is the Governor's legacy. Makes sense.`, `Signed the Governor's legacy contract. The Litigator got it in writing.`, `fax:{LAST} PROMISES TO KEEP CASTELLANO'S PROGRAMS`],
+  [`The Governor's law partner on the Supreme Court? That smells like a deal.`, `A Supreme Court seat for the endorsement. Transactional. Effective.`, `max:{LAST} PROMISES COURT SEAT TO GOVERNOR'S ALLY`],
+  [`Just the donor list. Smart. Keep his name off the campaign.`, `Took the list, not the man. Efficient.`, `fax:CASTELLANO SHARES DONOR LIST WITH {LAST}`],
+  [`The voters fired him. Stay away. Right call.`, `Refused to court the fired Governor. Clean break.`, `fax:{LAST} STAYS AWAY FROM CASTELLANO`],
+]);
+rx('attack:castellano', [
+  [`41 lawsuits and not one against his donors. Good point. Who is he really working for?`, `The donor-lawsuit line. The Litigator had no objection ready.`, `max:DEBATE: {LAST}: GOVERNOR NEVER SUED HIS DONORS`],
+  [`A stepping stone to 2032. That is what everybody in the Capitol says about him.`, `The 2032 line. Everyone was thinking it.`, `max:DEBATE: {LAST}: CIMARRON A "STEPPING STONE" FOR GOVERNOR`],
+  [`He was a Chamber lawyer for guest workers?? And now he runs Heartland? Interesting...`, `"He changed his job, not his mind." The flip-flop charge, perfectly phrased.`, `max:DEBATE: {LAST} HITS GOVERNOR'S GUEST-WORKER PAST`],
+]);
+REACTIONS['close:record:d_border'] = [`Every Monday night on the border. Now he can fix it. Yes!! 🇺🇸`, `The border-show close. The base is locked in.`, `max:DEBATE CLOSE: DUNMORE RUNS ON BORDER SHOW`];
+REACTIONS['close:record:d_uniparty'] = [`He named every lobbyist. Now they all need new jobs. HA!!`, `The uniparty-files close. The lobbyists are sweating.`, `max:DEBATE CLOSE: DUNMORE VOWS TO CLEAR THE CAPITOL`];
+REACTIONS['close:record:d_elections'] = [`Count every ballot by hand. And count on Travis. Good close.`, `The hand-count close. Election-integrity voters are in.`, `fax:DEBATE CLOSE: DUNMORE RUNS ON HAND COUNTS`];
+REACTIONS['close:record:d_tiebreak'] = [`He cast the deciding vote against the fees. Now we cast ours. Nice.`, `The tie-breaker close. Clever callback.`, `fax:DEBATE CLOSE: DUNMORE RECALLS DECIDING VOTE`];
+REACTIONS['close:record:r_life'] = [`Thousands of children alive because of that church. Amen, Pastor 🙏`, `The pro-life close. Nobody can match it.`, `fax:DEBATE CLOSE: PASTOR RICK RUNS ON LIFE CENTERS`];
+REACTIONS['close:record:r_revival'] = [`Fill the stadium, then fill the polls. I will be there 🙏`, `The revival close. The faith vote is mobilized.`, `max:DEBATE CLOSE: PASTOR RICK: "FILL THE POLLS"`];
+REACTIONS['close:record:r_academies'] = [`He built Christian schools with his own church. My grandson goes to one!!`, `The school-choice close. Parents are nodding.`, `fax:DEBATE CLOSE: PASTOR RICK RUNS ON SCHOOL CHOICE`];
+REACTIONS['close:record:r_relief'] = [`The church was there before FEMA. Every time. That is the truth.`, `The disaster-relief close. Localism wins.`, `fax:DEBATE CLOSE: PASTOR RICK CITES FLOOD RELIEF`];
+REACTIONS['close:record:k_atf'] = [`Kept the ATF out of Harlan. He can keep them out of MY county too!!`, `The ATF close. Gun owners are fully on board.`, `max:DEBATE CLOSE: KRANTZ VOWS TO KEEP FEDS OUT`];
+REACTIONS['close:record:k_blm'] = [`Eleven days on that road. That is commitment. Stand with the Sheriff 🇺🇸`, `The standoff close. Harlan loved it. Lake Cheney is nervous.`, `max:DEBATE CLOSE: KRANTZ RECALLS BLM STANDOFF`];
+REACTIONS['close:record:k_border'] = [`Sent his own deputies to the border. The whole state next!!`, `The border-detail close. Action over talk.`, `fax:DEBATE CLOSE: KRANTZ RUNS ON BORDER DETAIL`];
+REACTIONS['close:record:k_jail'] = [`Crime keeps falling in Harlan. Numbers do not lie.`, `The crime-stats close. Solid.`, `fax:DEBATE CLOSE: KRANTZ CITES FALLING CRIME`];
+REACTIONS['close:record:v_datacenters'] = [`He built the jobs. Did not just promise them. OK. That counts.`, `The builder close. The founder flex, one more time.`, `fax:DEBATE CLOSE: VASKEL RUNS ON DATA-CENTER JOBS`];
+REACTIONS['close:record:v_charter'] = [`Make the whole state Freedomopolis? I do not know what that means for my town...`, `The charter-city close. Libertarian heaven, farmer confusion.`, `max:DEBATE CLOSE: VASKEL: "MAKE THE WHOLE STATE FREE"`];
+REACTIONS['close:record:v_bitcoin'] = [`Wasted gas into money. Wasteful government into lean. Clever line.`, `The Bitcoin close. Number go up, government go down.`, `fax:DEBATE CLOSE: VASKEL CITES BITCOIN MINES`];
+REACTIONS['close:record:v_tutors'] = [`Free tutors in 200 schools. My granddaughter uses it. It works!!`, `The AI tutor close. Hard to argue with test scores.`, `fax:DEBATE CLOSE: VASKEL CITES FREE AI TUTORS`];
+REACTIONS['close:record:w_budget'] = [`Twelve balanced budgets and no taxes. THAT is conservative. Thank you Carol.`, `The balanced-budget close. Boomer comfort food.`, `fax:DEBATE CLOSE: WHITLOCK RUNS ON BALANCED BUDGETS`];
+REACTIONS['close:record:w_water'] = [`She kept the wells running in the drought. My cousin remembers.`, `The water close. The Panhandle nods.`, `fax:DEBATE CLOSE: WHITLOCK CITES AQUIFER COMPACT`];
+REACTIONS['close:record:w_roads'] = [`She paved our roads. The road to my farm is smooth because of Carol.`, `The roads close. Unglamorous. True.`, `fax:DEBATE CLOSE: WHITLOCK CITES RURAL ROADS`];
+REACTIONS['close:record:w_heartbeat'] = [`She wrote the first heartbeat law?? I did not know that!! Good for her 🙏`, `Carol was pro-life before it was cool. Unexpected.`, `fax:DEBATE CLOSE: WHITLOCK: "I WROTE THE FIRST HEARTBEAT LAW"`];

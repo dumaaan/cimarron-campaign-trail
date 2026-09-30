@@ -17,9 +17,11 @@
 <div id="app"></div><div id="ticket"></div><div id="modal" hidden><div id="modal-body"></div></div>
 <!-- Content: the game's data and text -->
 <script src="../js/content/data.js"></script>
+<script src="../js/content/candidates.js"></script>
 <script src="../js/content/questions.js"></script>
 <script src="../js/content/debates.js"></script>
 <script src="../js/content/events.js"></script>
+<script src="../js/content/campaigns.js"></script>
 <script src="../js/content/epilogue.js"></script>
 <script src="../js/content/runoff.js"></script>
 <script src="../js/content/media.js"></script>
@@ -57,7 +59,7 @@ ok('No region turnout above 100%', REGIONS.every(r => regionTurnout(r) < 1), REG
 const regTotal = STATE_PROFILE.registeredR + STATE_PROFILE.registeredD + STATE_PROFILE.unaffiliated;
 ok('Registration rate is realistic (65–80% of adults)', regTotal / STATE_PROFILE.adults > .65 && regTotal / STATE_PROFILE.adults < .8, `${(regTotal / STATE_PROFILE.adults * 100).toFixed(0)}%`);
 
-const standardGame = seed => { newState('Test', seed); for (const id in S.delta) S.delta[id] = {}; S.flags = {}; S.endorsements = Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder])); applyScenario(S, SCENARIOS[0]); S.warPlanned = null; return S; };
+const standardGame = seed => { newState('castellano', seed); for (const id in S.delta) S.delta[id] = {}; S.flags = {}; S.endorsements = Object.fromEntries(Object.entries(ENDORSERS).map(([k, v]) => [k, v.holder])); applyScenario(S, SCENARIOS[0]); S.warPlanned = null; return S; };
 // --- A campaign in progress, with regional bonuses, GOTV and endorsements ---
 standardGame(11);
 S.bonus.you.fort = 10; S.bonus.dunmore.osgood = 8; S.gotv.bible = .1; S.gotv.fort = .2; S.delta.rick.faith = 6; S.endorsements.rifle = 'you';
@@ -112,12 +114,12 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
 
 // --- Seeds and scenarios ---
 {
-  const a = newState('A', 424242), b = { scenario: a.scenario, war: a.warPlanned };
-  const c = newState('B', 424242);
+  const a = newState('castellano', 424242), b = { scenario: a.scenario, war: a.warPlanned };
+  const c = newState('castellano', 424242);
   ok('The same seed gives the same scenario and war roll', c.scenario === b.scenario && c.warPlanned === b.war, `seed 424242 → ${b.scenario}, war ${b.war}`);
   const counts = {}; let wars = 0, randomWars = 0, randomGames = 0; const N = 4000;
   for (let i = 1; i <= N; i++) {
-    const x = newState('X', i * 7919); counts[x.scenario] = (counts[x.scenario] || 0) + 1;
+    const x = newState('castellano', i * 7919); counts[x.scenario] = (counts[x.scenario] || 0) + 1;
     if (x.warPlanned != null) wars++;
     if (scenarioOf(x).warAt == null) { randomGames++; if (x.warPlanned != null) randomWars++; }
   }
@@ -128,22 +130,24 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   const certain = SCENARIOS.filter(x => x.warAt != null).reduce((t, x) => t + x.weight, 0) / total;
   const expectWar = WAR.chance + certain * (1 - WAR.chance);
   ok('Total war frequency matches random wars plus the Reckoning (within 1.5 points)', Math.abs(wars / N - expectWar) < .015, `${(wars / N * 100).toFixed(1)}% (expected ${(expectWar * 100).toFixed(1)}%)`);
-  ok('Every scenario starts with you and 5 challengers', SCENARIOS.every(x => x.field.length === 6 && x.field.includes('you')));
-  const cel = SCENARIOS.find(x => x.id === 'celebrity'); newState('C', 1); for (const id in S.delta) S.delta[id] = {}; applyScenario(S, cel); S.step = cel.enter.coburn;
+  ok('Every scenario starts with all six playable candidates', SCENARIOS.every(x => x.field.length === 6 && PLAYABLE.every(p => x.field.includes(p))));
+  newState('rick', 77); ok('The candidate you play takes the player slot and leaves the rival field', S.field.includes('you') && !S.field.includes('rick') && S.field.includes('castellano') && S.endorsements.pastors === 'you');
+  const cel = SCENARIOS.find(x => x.id === 'celebrity'); newState('castellano', 1); for (const id in S.delta) S.delta[id] = {}; applyScenario(S, cel); S.step = cel.enter.coburn;
   lateEntries(S);
   ok('Late entry: the outsider joins at the right step', active(S).includes('coburn') && active(S).length === 7);
   const allRivals = [...new Set(SCENARIOS.flatMap(x => [...x.field, ...Object.keys(x.enter || {})]))].filter(id => id !== 'you');
   ok('Every possible rival has news, debate answers, an ending and a runoff meeting (the President never endorses Whitlock)', allRivals.every(id => NEWS[id] && RIVAL_OUTCOMES[id] && COURT[id] && (ENDORSE_TEXT[id] || id === 'whitlock') && DEBATE_QUESTIONS.every(q => q.rivals[id])), allRivals.join(', '));
-  newState('D', 5); S.field = ['you', 'dunmore', 'rick', 'krantz', 'albright', 'pike'];
-  ok('Debate questions about an absent rival are never asked', DEBATE_QUESTIONS.filter(q => q.needs.every(id => active(S).includes(id))).every(q => !q.needs.includes('vaskel') && !q.needs.includes('whitlock')));
+  newState('castellano', 5); S.field = ['you', 'dunmore', 'rick', 'krantz', 'whitlock'];
+  ok('Debate questions about an absent rival are never asked', DEBATE_QUESTIONS.filter(q => q.needs.every(id => active(S).includes(id))).every(q => !q.needs.includes('vaskel')));
 }
 
 // --- Scenario turnout ---
 {
   standardGame(3); const base = expectedVote().online;
-  for (const id in S.delta) S.delta[id] = {}; applyScenario(S, SCENARIOS.find(x => x.id === 'streamer'));
-  const surge = expectedVote().online;
-  ok('Scenario turnout: the streamer brings out young voters', surge > base + 1, `New Right share of the vote ${base.toFixed(1)}% → ${surge.toFixed(1)}%`);
+  const baseSeniors = expectedVote().seniors;
+  for (const id in S.delta) S.delta[id] = {}; applyScenario(S, SCENARIOS.find(x => x.id === 'reckoning'));
+  const surge = expectedVote().seniors;
+  ok('Scenario turnout: the Reckoning brings older voters back', surge > baseSeniors + 1, `Older voters' share of the vote ${baseSeniors.toFixed(1)}% → ${surge.toFixed(1)}%`);
   ok('Scenario turnout: expected vote shares still add to 100%', near(sumVals(expectedVote()), 100));
   S = null;
 }
@@ -190,25 +194,31 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
 
 // --- Events: kinds, weights, choice conditions, running-mate swaps ---
 {
-  const seenKinds = [];
-  let over = 0;
-  for (let g = 0; g < 200; g++) {
-    standardGame(60000 + g); S.record = pick(RECORDS).id; S.mate = pick(RUNNING_MATES).id;
+  let over = 0; const seen = { record: 0, mate: 0, own: {} };
+  for (let g = 0; g < 240; g++) {
+    const p = PLAYABLE[g % PLAYABLE.length];
+    standardGame(60000 + g); S.player = p; applyPlayer(S); S.record = pick(OPENINGS[p]).id; S.mate = pick(MATES[p]).id;
     for (let st = 0; st < SCHEDULE.length; st++) if (SCHEDULE[st] === 'event') {
       S.step = st; const e = pickEvent(S); if (e) S.seenEvents.push(e.id);
     }
-    const count = {};
-    for (const id of S.seenEvents) { const e = EVENTS.find(x => x.id === id); if (!e.priority) count[e.kind] = (count[e.kind] || 0) + 1; }
+    const count = {}, evs = S.seenEvents.map(id => EVENTS.find(x => x.id === id));
+    for (const e of evs) if (!e.priority) count[e.kind] = (count[e.kind] || 0) + 1;
     if (Object.entries(KIND_LIMITS).some(([k, n]) => (count[k] || 0) > n)) over++;
-    seenKinds.push(S.seenEvents.some(id => EVENTS.find(x => x.id === id).kind === 'Record'), S.seenEvents.some(id => EVENTS.find(x => x.id === id).kind === 'Running Mate'));
+    if (p === 'castellano' && evs.some(e => e.kind === 'Record')) seen.record++;
+    if (evs.some(e => e.kind === 'Running Mate')) seen.mate++;
+    seen.own[p] = (seen.own[p] || 0) + evs.filter(e => e.weight === OWN && !/notGov|vsGov|isGov/.test(e.cond.toString())).length;
   }
-  ok('Events: no game goes over the limit for a kind of event', over === 0, `${over} of 200 games`);
-  const rec = seenKinds.filter((x, i) => i % 2 === 0 && x).length, mate = seenKinds.filter((x, i) => i % 2 === 1 && x).length;
-  ok('Events: most games have a record event and a running-mate event', rec > 120 && mate > 120, `record ${rec}/200, running mate ${mate}/200`);
-  ok('Events: every record and every running mate has its own event', RECORDS.every(r => EVENTS.some(e => e.kind === 'Record' && (standardGame(1), S.record = r.id, e.cond(S))))
-    && RUNNING_MATES.every(m => EVENTS.some(e => e.kind === 'Running Mate' && (standardGame(1), S.mate = m.id, e.cond(S)))));
-  ok('Events: every event has at least two choices with no condition', [...EVENTS, ...RUNOFF_EVENTS].every(e => e.choices.filter(ch => !ch.cond).length >= 2));
-  ok('Events: every choice with a condition shows why it is available', [...EVENTS, ...RUNOFF_EVENTS].every(e => e.choices.every(ch => !ch.cond || ch.unlock || /^s => (!?inRace|!s\.flags\.oppo_dunmore_used)/.test(ch.cond.toString()))));
+  ok('Events: no game goes over the limit for a kind of event', over === 0, `${over} of 240 games`);
+  ok('Events: most games have a running-mate event, and most Governor games a record event', seen.mate > 200 && seen.record > 30, `running mate ${seen.mate}/240, record ${seen.record}/40`);
+  ok('Events: every candidate sees several events of their own campaign', PLAYABLE.every(p => seen.own[p] / 40 >= 2.5), PLAYABLE.map(p => `${p} ${(seen.own[p] / 40).toFixed(1)}`).join(', '));
+  const noMateEvent = RUNNING_MATES.filter(m => !EVENTS.some(e => e.kind === 'Running Mate' && (standardGame(1), S.player = m.for, S.mate = m.id, e.cond(S))));
+  ok('Events: every Governor\'s record and every running mate has its own event', OPENINGS.castellano.every(r => EVENTS.some(e => e.kind === 'Record' && (standardGame(1), S.record = r.id, e.cond(S))))
+    && noMateEvent.length === 0, noMateEvent.map(m => m.id).join(', '));
+  const asPlayer = p => { standardGame(1); S.player = p; applyPlayer(S); S.mate = MATES[p][0].id; S.record = OPENINGS[p][0].id; S.flags = {}; return S; };
+  const thin = [];
+  for (const p of PLAYABLE) { asPlayer(p); for (const e of [...EVENTS, ...RUNOFF_EVENTS]) if (shownChoices(S, e.choices).length < 2) thin.push(`${p}:${e.id}`); }
+  ok('Events: every candidate sees at least two choices in every event', thin.length === 0, thin.slice(0, 10).join(', '));
+  ok('Events: every choice that depends on an earlier decision shows why', [...EVENTS, ...RUNOFF_EVENTS].every(e => e.choices.every(ch => !ch.cond || ch.unlock || /isGov|notGov|vsGov|player|inRace|oppo_dunmore_used|c\(s\) && old\(s\)/.test(ch.cond.toString()))));
   let badP = [];
   for (const r of RECORDS) for (const m of RUNNING_MATES) for (const pres of [0, 50, 100]) {
     standardGame(2); S.record = r.id; S.mate = m.id; S.pres = pres; S.money = pres / 20;
@@ -298,7 +308,9 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   ok('Media: every decision has its own posts and chyron', missing.length === 0, missing.length ? missing.slice(0, 8).join(', ') : `${keys.length} decisions`);
   const noFail = keys.filter(([k, c]) => c.risk && REACTIONS[k]?.length < 6).map(([k]) => k);
   ok('Media: every gamble has its own reactions for failure', noFail.length === 0, noFail.join(', '));
-  const words = t => (t || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  // Text written as a function is checked for every candidate who can see it.
+  const allText = t => typeof t !== 'function' ? t : PLAYABLE.map(p => { try { standardGame(1); S.player = p; applyPlayer(S); S.mate = MATES[p][0].id; return t(S); } catch (e) { return ''; } }).join(' ');
+  const words = t => (allText(t) || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
   const quoting = [];
   for (const [k, c] of keys) {
     const r = REACTIONS[k]; if (!r || !c.text) continue;
@@ -329,6 +341,26 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S = null;
 }
 
+// --- Playing any candidate ---
+{
+  const named = [];
+  for (const p of PLAYABLE) {
+    newState(p, 5); const short = CAND[p].short;
+    for (const q of DEBATE_QUESTIONS) if (q.id !== 'd_closing' && q.needs.every(id => active(S).includes(id)) && (!q.cond || q.cond(S)) && q.text.includes(short)) named.push(`${p}:${q.id}`);
+  }
+  ok('Debates: no candidate is asked a question about themselves', named.length === 0, named.join(', '));
+  const bad = [];
+  for (const p of PLAYABLE) { newState(p, 6); if (!OPENINGS[p]?.length || MATES[p]?.length !== 4 || !STAFF_TEAMS[p] || !PLAYER_INFO[p] || !RIVAL_OUTCOMES[p] || !RIVAL_SPEECH[p] || !ENDORSE_TEXT[p]) bad.push(p);
+    if (!OPENINGS[p].every(r => RECORD_CLOSE[r.id] && SPEECH.record[r.id])) bad.push(p + ' openings'); if (!MATES[p].every(m => YOUR_SPEECH.mate[m.id])) bad.push(p + ' mates'); }
+  ok('Every playable candidate has openings, four running mates, staff, speeches and endings', bad.length === 0, bad.join(', '));
+  newState('dunmore', 7);
+  ok('Shared text names the candidate you play as "your rival"', rivalize(S, 'Dunmore will call it amnesty.') === 'Your rival will call it amnesty.' && rivalize(S, 'Krantz agrees.') === 'Krantz agrees.');
+  const w = { easy: 0, hard: 0 };
+  for (const d of ['easy', 'hard']) for (let i = 1; i <= 400; i++) { const x = newState('whitlock', i * 131, d); if (x.warPlanned != null) w[d]++; }
+  ok('Whitlock: the war and her conditions are much more likely on Easy than on Hard', w.easy > w.hard * 3, `war in ${w.easy}/400 easy games, ${w.hard}/400 hard games`);
+  S = null;
+}
+
 // --- Victory speeches ---
 {
   const rivals = [...new Set(SCENARIOS.flatMap(x => [...x.field, ...Object.keys(x.enter || {})]))].filter(id => id !== 'you');
@@ -353,14 +385,14 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
 
 // --- Difficulty ---
 {
-  const e = newState('E', 5150, 'easy'), eSc = e.scenario, eWar = e.warPlanned, eMoney = e.money, ePos = TUNE.posMult;
-  const h = newState('H', 5150, 'hard');
+  const e = newState('castellano', 5150, 'easy'), eSc = e.scenario, eWar = e.warPlanned, eMoney = e.money, ePos = TUNE.posMult;
+  const h = newState('castellano', 5150, 'hard');
   ok('Difficulty: the same seed gives the same scenario and war at every level', h.scenario === eSc && h.warPlanned === eWar);
   ok('Difficulty: Easy starts with more money than Hard', eMoney > h.money, `$${eMoney}M against $${h.money}M`);
   ok('Difficulty: Hard keeps less of your gains than Easy', TUNE.posMult < ePos);
   const risk = { p: .5 };
   ok('Difficulty: gambles work more often on Easy and less often on Hard', riskP({ difficulty: 'easy' }, risk) > riskP({ difficulty: 'normal' }, risk) && riskP({ difficulty: 'normal' }, risk) > riskP(h, risk));
-  newState('N', 5150);
+  newState('castellano', 5150);
   ok('Difficulty: a new Normal game resets every tuning value', Object.keys(TUNE_NORMAL).every(k => TUNE[k] === TUNE_NORMAL[k]) && S.difficulty === 'normal');
   ok('Difficulty: an old save with no difficulty plays as Normal', difficultyOf({}) === DIFFICULTY.normal);
   S = null;

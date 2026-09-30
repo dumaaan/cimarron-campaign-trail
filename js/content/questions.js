@@ -879,19 +879,15 @@ const NEWS = {
     ['Coburn\'s divorce records are published. Several evangelical leaders express concern.', { faith: -2 }],
     ['Former teammates appear in a Coburn ad: "He never quit on us."', { seniors: 2 }],
   ],
-  albright: [
-    ['Dr. Albright\'s documentary about "the COVID cartel" passes 5 million views.', { online: 2, liberty: 1 }],
-    ['Albright tours Sumner Valley dairies to promote raw milk sales.', { farm: 2 }],
-    ['The state medical association says Albright\'s vaccine claims are false. Her supporters call it proof.', { online: 1, seniors: -1 }],
-    ['Albright is endorsed by a national health-freedom group with 800,000 members.', { online: 2 }],
-    ['Albright proposes a ban on seed oils in all school meals.', { online: 1, faith: 1 }],
-  ],
-  pike: [
-    ['Pike\'s livestream about "the uniparty" draws 300,000 live viewers.', { online: 3 }],
-    ['Reporters publish clips in which Pike uses antisemitic tropes. He calls it "a smear" and gains followers.', { online: 1, seniors: -2, faith: -1 }],
-    ['Pike urges young supporters to register as Republicans. 6,000 new registrations are reported in Lawrenceville and Osgood.', { online: 2 }],
-    ['Pike calls Pastor Rick "a pro-war grifter." Several pastors condemn him.', { online: 1, faith: -2 }],
-    ['Pike promises "no American blood for foreign wars."', { online: 2, liberty: 1 }],
+  castellano: [
+    ['Governor Castellano files the state\'s 42nd lawsuit against the federal government, this time over water rules.', { liberty: 2, maga: 1 }],
+    ['Castellano signs an executive order adding 200 state troopers to Operation Heartland.', { maga: 2, farm: -1 }],
+    ['Castellano\'s campaign reports $14 million in the bank, more than all other candidates combined.', { chamber: 2 }],
+    ['Castellano makes a two-day trip to Iowa. His office calls it "a trade mission."', { seniors: -1, maga: -1 }],
+    ['A Ledger profile quotes six legislators, all Republicans, who say the Governor "has never once asked for our advice."', { chamber: -1 }],
+    ['Castellano vetoes a bill to restore state aid to rural counties. Four sheriffs criticize the veto.', { liberty: 2, guns: -1, farm: -1 }],
+    ['Castellano is endorsed by 31 of the state\'s 40 Republican state senators.', { chamber: 2, seniors: 1 }],
+    ['At a Federalist Society dinner in Washington, Castellano jokes about "a certain job that opens up in 2033."', { seniors: -1 }],
   ],
 };
 

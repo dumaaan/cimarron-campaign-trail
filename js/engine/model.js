@@ -25,6 +25,7 @@ function score(s, cid, f, rid) {
   let v = CAND[cid].base[f] + (s.delta[cid][f] || 0);
   if (cid === 'you') {
     v += f === 'chamber' ? s.rino * .8 : -s.rino * 1.2;   // the RINO label costs support everywhere but the business wing
+    v -= (s.label || 0) * .9;                              // your own weak-spot label (PLAYER_INFO) costs support everywhere
     v += Math.min(s.money, 6) * .4;                        // war chest = ads and staff
   }
   if (s.endorsed === cid) v += PRES_ENDORSE.fx[f] || 0;

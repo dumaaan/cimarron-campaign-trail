@@ -20,19 +20,22 @@ const TUNE = {
 const TUNE_NORMAL = { ...TUNE };
 const DIFFICULTY = {
   easy:   { name: 'Easy', desc: 'Voters forgive more, rivals grow more slowly, and gambles work more often. You start with $3.0M.',
-            money: 3.0, risk: .1, tune: { posMult: .88, oppMomentum: .13, clawback: .13, rivalDebate: .45, runoffMomentum: 1.2 } },
-  normal: { name: 'Normal', desc: 'The primary as designed. You start with $2.0M.', money: 2.0, risk: 0, tune: {} },
+            money: 3.0, risk: .1, whitlock: { war: .6, favor: .45 }, tune: { posMult: .88, oppMomentum: .13, clawback: .13, rivalDebate: .45, runoffMomentum: 1.2 } },
+  normal: { name: 'Normal', desc: 'The primary as designed. You start with $2.0M.', money: 2.0, risk: 0, whitlock: { war: .3, favor: .2 }, tune: {} },
   hard:   { name: 'Hard', desc: 'Voters remember every mistake, rivals gang up on the leader, and gambles fail more often. You start with $1.5M.',
-            money: 1.5, risk: -.1, tune: { posMult: .7, oppMomentum: .2, clawback: .2, rivalDebate: .6, runoffMomentum: 2 } },
+            money: 1.5, risk: -.1, whitlock: { war: .08, favor: .05 }, tune: { posMult: .7, oppMomentum: .2, clawback: .2, rivalDebate: .6, runoffMomentum: 2 } },
 };
 const difficultyOf = s => DIFFICULTY[s?.difficulty] || DIFFICULTY.normal;
 // TUNE is global, so set it again whenever a game starts or loads.
 function applyDifficulty(s) { Object.assign(TUNE, TUNE_NORMAL, difficultyOf(s).tune); }
 const RUNOFF_LINE = 40;      // a candidate needs this % to avoid a runoff
 const DROPOUT_LINE = 9;      // rivals below this % may drop out (after the President's endorsement)
-const SAVE_KEY = 'cimarron_campaign_trail_save_v4';
+const SAVE_KEY = 'cimarron_campaign_trail_save_v5';
 const FKEYS = Object.keys(FACTIONS);
 const CAND = Object.fromEntries(CANDIDATES.map(c => [c.id, c]));
+// The player slot. applyPlayer copies the chosen candidate into it, so the vote model treats the player like any candidate.
+CAND.you = { ...CAND.castellano, id: 'you' };
+const CAND_IDS = [...CANDIDATES.map(c => c.id), 'you'];
 const REG = Object.fromEntries(REGIONS.map(r => [r.id, r]));
 const STRAW_WEIGHTS = { online: 2.2, maga: 1.6, faith: 1.4, liberty: 1.4, guns: 1, farm: .5, chamber: .5, seniors: .5 };
 

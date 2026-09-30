@@ -6,9 +6,11 @@
 function renderTitle() {
   const hasSave = !!load();
   return `<div class="panel title-panel">
-    <div class="field-row">${CANDIDATES.filter(c => c.id !== 'you' && !c.outsider).map(c => `<div class="field-mini">${portrait(null, c.id, 54)}<div>${c.short}</div></div>`).join('')}</div>
     ${TEXT.title.map(p => `<p class="q-text">${p}</p>`).join('')}
-    <label class="name-row">Your name: <input id="name" maxlength="28" placeholder="Dale Whitcomb"></label>
+    <div class="name-row">Choose your candidate:<div class="player-grid">${PLAYABLE.map((id, i) => { const c = CAND[id], info = PLAYER_INFO[id];
+      return `<label class="player-card"><input type="radio" name="player" value="${id}" ${i === 0 ? 'checked' : ''}>
+        <span class="player-head">${portrait(null, id, 44)}<span><b>${esc(c.name)}</b><span class="muted small">${esc(c.title)}${info.level === 'Hard' ? ' · <span class="down">Hard</span>' : ''}</span></span></span>
+        <span class="small">${esc(info.pitch)}</span></label>`; }).join('')}</div></div>
     <label class="name-row">Seed (optional): <input id="seed" inputmode="numeric" maxlength="9" placeholder="random"> <span class="muted small">The same seed gives the same scenario and the same random events.</span></label>
     <div class="name-row">Difficulty:<div class="difficulty-row">${Object.entries(DIFFICULTY).map(([id, d]) => `<label class="difficulty"><input type="radio" name="difficulty" value="${id}" ${id === 'normal' ? 'checked' : ''}> <b>${d.name}</b><span class="muted small">${d.desc}</span></label>`).join('')}</div></div>
     <div class="btn-row"><button class="btn" id="start">Begin Campaign</button>${hasSave ? '<button class="btn alt" id="resume">Continue Campaign</button>' : ''}<button class="btn alt" id="open-profile">State Profile</button></div>
@@ -23,8 +25,8 @@ function renderChoice(title, intro, list, key) {
 }
 function renderField(s) {
   return `<div class="panel choose-panel"><div class="panel-title big">The Field</div>
-    <div class="scenario-card"><span class="lbl">Scenario · Seed ${s.seed} · ${difficultyOf(s).name}</span><b>${esc(scenarioOf(s).name)}</b><div>${esc(scenarioOf(s).desc)}</div></div>
-    <p class="q-text">${TEXT.fieldIntro} ${s.field.length - 1} challengers are on the ballot.</p>
+    <div class="scenario-card"><span class="lbl">Scenario · Seed ${s.seed} · ${difficultyOf(s).name}</span><b>${esc(scenarioOf(s).name)}</b><div>${esc(textOf(s, scenarioOf(s).desc))}</div></div>
+    <p class="q-text">${TEXT.fieldIntro} You face ${s.field.length - 1} rivals.</p>
     ${s.field.filter(id => id !== 'you').map(id => CAND[id]).map(c => `<div class="opp-card">${portrait(s, c.id, 60)}<div><b class="cand-link" data-cand="${c.id}">${c.name}</b> <span class="faction-tag" style="background:${c.color}">${c.title}</span><p>${esc(c.blurb)}</p>
       <p class="muted small">Endorsements: ${Object.entries(s.endorsements).filter(([, h]) => h === c.id).map(([o]) => ENDORSERS[o].name).join(', ') || 'none yet'}</p></div></div>`).join('')}
     <button class="btn" id="launch">Launch the Campaign</button></div>`;
@@ -35,14 +37,14 @@ function render() {
   const app = $('#app'), s = S;
   if (!s) { app.innerHTML = renderTitle(); $('#ticket').innerHTML = ''; return; }
   const screens = {
-    record: () => renderChoice('Your First Term', TEXT.recordIntro, RECORDS, 'record'),
-    mate: () => renderChoice('Choose a Running Mate', TEXT.mateIntro, RUNNING_MATES, 'mate'),
+    record: () => renderChoice(PLAYER_INFO[s.player].openingTitle, PLAYER_INFO[s.player].openingIntro, OPENINGS[s.player], 'record'),
+    mate: () => renderChoice('Choose a Running Mate', PLAYER_INFO[s.player].mateIntro, MATES[s.player], 'mate'),
     field: () => renderField(s), campaign: () => renderCampaign(s), runoff: () => renderCampaign(s), election: () => renderElection(s),
     concede: () => renderConcede(s), ending: () => renderEnding(s),
   };
   app.innerHTML = screens[s.screen]();
   $('#ticket').innerHTML = ['campaign', 'runoff', 'election'].includes(s.screen)
-    ? `${portrait(s, 'you', 30)} <span>Gov. ${esc(s.name)}${s.mate ? ` / ${RUNNING_MATES.find(m => m.id === s.mate).name}` : ''}</span>` : '';
+    ? `${portrait(s, 'you', 30)} <span>${esc(displayName(s, 'you'))}${s.mate ? ` / ${esc(mateOf(s.mate).name)}` : ''}</span>` : '';
 }
 
 function tickElection() {
@@ -80,10 +82,10 @@ document.addEventListener('click', e => {
   if (!b) return;
   switch (b.id) {
     case 'open-profile': openModal(stateModal()); break;
-    case 'start': newState($('#name').value.trim() || 'Dale Whitcomb', parseInt($('#seed').value, 10), $('input[name=difficulty]:checked')?.value); save(); render(); break;
-    case 'resume': S = load(); applyDifficulty(S); render(); if (S.screen === 'election') tickElection(); break;
+    case 'start': newState($('input[name=player]:checked')?.value, parseInt($('#seed').value, 10), $('input[name=difficulty]:checked')?.value); save(); render(); break;
+    case 'resume': S = load(); applyDifficulty(S); applyPlayer(S); render(); if (S.screen === 'election') tickElection(); break;
     case 'confirm-record': applyFx(S, RECORDS.find(r => r.id === S.record).fx); S.screen = 'mate'; save(); render(); break;
-    case 'confirm-mate': applyFx(S, RUNNING_MATES.find(m => m.id === S.mate).fx); S.screen = 'field'; save(); render(); break;
+    case 'confirm-mate': applyFx(S, mateOf(S.mate).fx); S.screen = 'field'; save(); render(); break;
     case 'launch': S.screen = 'campaign'; startStep(); break;
     case 'submit': answer(); break;
     case 'next': advance(); break;
