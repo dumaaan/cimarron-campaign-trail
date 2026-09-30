@@ -3,6 +3,6 @@
 # Usage: ./play.sh [port]
 set -euo pipefail
 cd "$(dirname "$0")"
-PORT="${1:-8765}"
+PORT="${1:-8766}"
 ( sleep 1 && open "http://localhost:${PORT}" 2>/dev/null || xdg-open "http://localhost:${PORT}" 2>/dev/null || true ) &
 exec python3 serve.py "$PORT"

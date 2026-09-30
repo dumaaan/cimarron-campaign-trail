@@ -55,7 +55,26 @@ You need Python 3 and a web browser.
 ./play.sh
 ```
 
-This opens the game at http://localhost:8765.
+This opens the game at http://localhost:8766. To use another port, run `./play.sh 9000`.
+
+## Project layout
+
+```
+index.html        the game page (GitHub Pages serves it from the root)
+play.sh, serve.py start a local server
+css/style.css     all styles
+js/content/       the game's data and text: factions, regions, candidates and scenarios (data.js),
+                  questions, debates, events, runoff, epilogue, media personas and reactions
+js/engine/        the rules: config and difficulty, game state, the vote model, the campaign
+                  schedule, decisions, the trail, election night and the runoff, saving
+js/ui/            the interface: components, screens, endings, profile windows, and app.js,
+                  which starts the game
+dev/              tests.html (model and content checks) and sim.html + sim.js (balance simulator)
+```
+
+The scripts are plain browser scripts that share one global scope, so their order matters: content first, then the engine, then the interface. The order is listed in `index.html`, `dev/tests.html` and `dev/sim.html`.
+
+With the server running, open http://localhost:8766/dev/tests.html for the checks and http://localhost:8766/dev/sim.html for the simulator.
 
 ---
 

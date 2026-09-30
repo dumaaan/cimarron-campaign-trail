@@ -2,13 +2,13 @@
 """Local server for The Campaign Trail: Cimarron 2030.
 
 Serves the game folder with caching turned off, so edits show up on a normal reload.
-Usage: python3 serve.py [port]   (default port 8765)
+Usage: python3 serve.py [port]   (default port 8766)
 """
 import http.server
 import os
 import sys
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8766
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
