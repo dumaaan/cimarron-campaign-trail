@@ -18,7 +18,7 @@ Each candidate has a campaign of their own: their own staff, story events, runni
 | **Lt. Gov. Travis Dunmore** | The MAGA populist with a podcast, and the Governor's own Lieutenant Governor. | **The Show:** topics, guests and sponsors. Everything said on air can come back. | "Grifter" |
 | **Pastor Rick Dollins** | The pastor of a 9,000-member church and the best turnout machine in the state. | **The Pulpit:** sermons, church vans and a stadium revival, with the IRS watching. | "Hypocrite" |
 | **Sheriff Bo Krantz** | The constitutional sheriff of Harlan County. Gun owners love him. The FBI is investigating his jail. | **The Badge:** manhunts, floods and federal warrants. Duty or the campaign. | "Lawless" |
-| **Brent Vaskel** | The tech investor from California with almost unlimited money. | **The Checkbook:** money can buy almost anything, and every purchase proves what his rivals say. | "Carpetbagger" |
+| **Brent Vaskel** | The tech investor from California with almost unlimited money. | **The Checkbook:** he starts with more money, and when the war chest is empty he pays from his own fortune. Every million he adds raises his label. | "Carpetbagger" |
 | **Fmr. Sen. Carol Whitlock** | The last traditional conservative. The hard campaign: she starts at about 6%. | **The Long Game:** register new voters, call in 30 years of favors, and reach the runoff. On easier levels, the war and the conditions that favor her are more likely. | "Has-Been" |
 
 Mason Pike, a 31-year-old streamer with two million followers, is not on the ballot. He co-hosts a show with the President's son, and he can open a door to the White House for any candidate, for a price.

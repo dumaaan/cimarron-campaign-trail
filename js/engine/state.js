@@ -37,6 +37,7 @@ function newState(player, seed, difficulty = 'normal') {
   applyScenario(S, sc);
   applyDifficulty(S);
   addAll(S, 'you', PLAYER_INFO[player].start || 0);
+  S.money += PLAYER_INFO[player].money || 0;
   for (const org of PLAYER_INFO[player].endorsements || []) S.endorsements[org] = 'you';
   return S;
 }
@@ -112,7 +113,8 @@ function applyFx(s, fx) {
   if (fx.rino) s.rino = Math.max(0, s.rino + fx.rino);
   if (fx.label) s.label = Math.max(0, (s.label || 0) + fx.label);
   if (fx.pres) s.pres = clamp(s.pres + fx.pres, 0, 100);
-  if (fx.money) s.money = Math.max(0, s.money + fx.money);
+  if (fx.money > 0) s.money += fx.money;
+  if (fx.money < 0) spend(s, -fx.money);
   for (const f of [].concat(fx.flag || [])) s.flags[f] = s.step + 1;   // flag: 'name' or ['name', 'other']
   if (fx.mate) swapMate(s, fx.mate === 'alt' ? altMate(s).id : fx.mate);
   for (const id in fx.opp || {}) if (active(s).includes(id)) addAll(s, id, fx.opp[id]);

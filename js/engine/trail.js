@@ -63,8 +63,8 @@ function debateNext() {
 function doStop() {
   const s = S, c = s.cur, act = STOP_ACTIONS.find(a => a.id === c.action);
   if (!c.region) return;
-  if (act.cost > 0 && s.money < act.cost) return;
-  s.money = Math.max(0, s.money - act.cost);
+  if (act.cost > 0 && !canAfford(s, { fx: { money: -act.cost } })) return;
+  if (act.cost > 0) spend(s, act.cost); else s.money -= act.cost;
   s.bonus.you[c.region] = (s.bonus.you[c.region] || 0) + act.bonus;
   if (act.gotv) s.gotv[c.region] = (s.gotv[c.region] || 0) + act.gotv;
   c.oppMoves = [];

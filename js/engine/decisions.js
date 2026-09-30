@@ -89,7 +89,7 @@ function answer() {
     if (s.step > SCHEDULE.indexOf('endorse')) c.breaking = checkDropouts(s);
   } else if (c.type === 'event' || c.type === 'revent') {
     const e = (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid), ch = e.choices[c.sel];
-    const chText = textOf(s, ch.text), fx = resolveFx(s, ch.fx);
+    const chText = textOf(s, ch.text), fx = resolveFx(s, ch.fx), own0 = s.selfFunded || 0;
     const rv = t => isShared(e) ? rivalize(s, t) : t;
     c.fb = rv(textOf(s, ch.fb));             // written before the decision changes the game
     applyFx(s, fx);
@@ -102,6 +102,8 @@ function answer() {
       applyFx(s, ofx);
       c.fx = { ...fx, ...ofx };
     }
+    const own = (s.selfFunded || 0) - own0;   // money paid from a self-funder's own fortune, shown in the chips
+    if (own > 0) c.fx = { ...c.fx, ownMoney: own, ownLabel: Math.max(1, Math.round(own)) };
     if (e.special === 'strawpoll') runStrawPoll(s, c);
     if (e.special === 'war') startWar(s);
     recordPromise(s, `${e.id}:${c.sel}`);
