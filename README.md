@@ -47,6 +47,20 @@ The difficulty does not change the scenario or the field. The same seed gives th
 
 Every game has a seed number, shown when the campaign starts and at the end. Enter the same seed on the title screen to play the same situation again, or share it with a friend. Not every year looks the same: sometimes the field changes, and sometimes events outside Cimarron change the race.
 
+To try a particular scenario, enter one of these seeds. Each seed gives the same scenario at every difficulty level.
+
+| Scenario | What changes | Seed |
+|---|---|---|
+| The Expected Field | Five challengers, each from a known faction of the party. | `100000` |
+| The Celebrity | Jake Coburn, a former NFL quarterback, enters the race partway through. | `100014` |
+| The Doctor | Dr. Renee Albright runs in place of Brent Vaskel and leads a health-freedom insurgency. | `100021` |
+| The Streamer | Mason Pike runs in place of Carol Whitlock, and young activists register to vote for him. | `100168` |
+| The Heir Apparent | The President favors Travis Dunmore from the start. | `100007` |
+| The Wounded Incumbent | Your former Chief of Staff is under indictment, and the case follows you all campaign. | `100105` |
+| The Reckoning | A war in the Middle East begins early, and older, traditional Republicans return to vote. | `100126` |
+| The Boom | Brent Vaskel's data centers bring jobs, and he becomes a strong candidate. | `100266` |
+| The Expected Field, with the war | The rare war in the Middle East begins in the middle of the campaign. | `100035` |
+
 ## Run it on your own computer
 
 You need Python 3 and a web browser.
