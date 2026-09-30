@@ -22,6 +22,7 @@
 <script src="epilogue.js"></script>
 <script src="runoff.js"></script>
 <script src="media.js"></script>
+<script src="reactions.js"></script>
 <script src="game.js"></script>
 <script>
 // Keep the game from writing to storage or the page while the checks run.
@@ -167,7 +168,7 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   ok('Strong runoff offers cost you with other factions', Object.values(COURT).every(C => C.choices.some(ch => FKEYS.some(f => (ch.fx[f] || 0) <= -2))));
   const r = buildReactions(S, 'donor_wife:0', { chamber: 4, online: -6 }, 'test');
   ok('Media: every decision gets a chyron and two posts', r.chyron.text && r.boomer && r.groyper && OUTLETS[r.chyron.outlet]);
-  const content = JSON.stringify([QUESTIONS, EVENTS, DEBATE_QUESTIONS, COURT, RUNOFF_EVENTS, SCENARIOS, WAR_NEWS, NEWS, EPILOGUE, RIVAL_OUTCOMES, BOOMER_POSTS, GROYPER_POSTS, SPECIFIC_REACTIONS, TEXT], (k, v) => typeof v === 'function' ? v.toString() : v);
+  const content = JSON.stringify([QUESTIONS, EVENTS, DEBATE_QUESTIONS, COURT, RUNOFF_EVENTS, SCENARIOS, WAR_NEWS, NEWS, EPILOGUE, RIVAL_OUTCOMES, BOOMER_POSTS, GROYPER_POSTS, REACTIONS, TEXT], (k, v) => typeof v === 'function' ? v.toString() : v);
   ok('No real network names or "Iran" in the game text', !/Iran|Fox News|Newsmax/.test(content));
   S = null;
 }
@@ -265,6 +266,73 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
     for (let st = 0; st < SCHEDULE.length; st++) if (SCHEDULE[st] === 'event') { S.step = st; const e = pickEvent(S); if (e) { S.seenEvents.push(e.id); if (FAVORS.includes(e.id)) favorSteps.push(st); } }
   }
   ok('Every game has a favor for the President\'s circle before his endorsement', favorSteps.length === 40 && favorSteps.every(st => st < SCHEDULE.indexOf('endorse')), `${favorSteps.length}/40`);
+  S = null;
+}
+
+// --- Media reactions and money ---
+{
+  const keys = [];
+  for (const q of QUESTIONS) q.answers.forEach((a, i) => keys.push([`${q.id}:${i}`, a]));
+  for (const e of [...EVENTS, ...RUNOFF_EVENTS]) e.choices.forEach((c, i) => keys.push([`${e.id}:${i}`, c]));
+  for (const [id, C] of Object.entries(COURT)) C.choices.forEach((c, i) => keys.push([`court_${id}:${i}`, c]));
+  for (const q of DEBATE_QUESTIONS) if (q.id !== 'd_closing') q.answers.forEach((a, i) => keys.push([`${q.id}:${i}`, a]));
+  for (const [id, L] of Object.entries(ATTACK_LINES)) L.forEach((t, i) => keys.push([`attack:${id}:${i}`, { text: t }]));
+  for (const r of RECORDS) keys.push([`close:record:${r.id}`, { text: RECORD_CLOSE[r.id] }]);
+  for (const k of ['leading', 'behind', 'moderate', ...FKEYS]) keys.push([`close:${k}`, {}]);
+  const missing = keys.filter(([k]) => !REACTIONS[k] || REACTIONS[k].length < 3).map(([k]) => k);
+  ok('Media: every decision has its own posts and chyron', missing.length === 0, missing.length ? missing.slice(0, 8).join(', ') : `${keys.length} decisions`);
+  const noFail = keys.filter(([k, c]) => c.risk && REACTIONS[k]?.length < 6).map(([k]) => k);
+  ok('Media: every gamble has its own reactions for failure', noFail.length === 0, noFail.join(', '));
+  const words = t => (t || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  const quoting = [];
+  for (const [k, c] of keys) {
+    const r = REACTIONS[k]; if (!r || !c.text) continue;
+    const cw = words(c.text), grams = new Set();
+    for (let i = 0; i + 5 <= cw.length; i++) grams.add(cw.slice(i, i + 5).join(' '));
+    r.forEach((t, j) => { if (j % 3 === 2) return; const tw = words(t); for (let i = 0; i + 5 <= tw.length; i++) if (grams.has(tw.slice(i, i + 5).join(' '))) { quoting.push(k); break; } });
+  }
+  ok('Media: no post quotes the decision (5 or more words in a row)', quoting.length === 0, quoting.join(', '));
+  const posts = Object.values(REACTIONS).flatMap(r => r.filter((_, j) => j % 3 !== 2)).filter(t => !t.startsWith('[This post'));
+  ok('Media: no two posts are the same', new Set(posts).size === posts.length, `${posts.length} posts`);
+  ok('Media: fallback posts never quote the decision', ![...Object.values(BOOMER_POSTS), ...Object.values(GROYPER_POSTS)].flat().some(t => t.includes('{quote}')));
+  standardGame(31); S.screen = 'campaign';
+  const r1 = buildReactions(S, 'deport:0', QUESTIONS[0].answers[0].fx, QUESTIONS[0].answers[0].text);
+  ok('Media: a decision shows its own reactions', r1.boomer.startsWith('NATIONAL GUARD') && r1.chyron.outlet === 'max' && !r1.chyron.text.includes('{'));
+  const rl = buildReactions(S, 'tornado:3', {}, '', 'lose');
+  ok('Media: a failed gamble shows its failure reactions', rl.chyron.text.includes('UNGRATEFUL'));
+  // Money
+  const lists = [...QUESTIONS.map(q => q.answers), ...EVENTS.map(e => e.choices.filter(c => !c.cond)), ...RUNOFF_EVENTS.map(e => e.choices), ...Object.values(COURT).map(C => C.choices)];
+  ok('Money: every decision has at least one choice that costs nothing', lists.every(l => l.some(c => !costOf(c))));
+  S.money = .5;
+  const ev = EVENTS.find(e => e.id === 'vaskel_ads');
+  S.cur = { type: 'event', eid: ev.id, sel: 0, answered: null, breaking: [], shown: shownChoices(S, ev.choices) };
+  const before = { money: S.money, lib: S.delta.you.liberty || 0 };
+  answer();
+  ok('Money: a choice you cannot pay for is refused', S.cur.answered == null && S.money === before.money && (S.delta.you.liberty || 0) === before.lib);
+  S.cur.sel = 1; answer();
+  ok('Money: a choice you can pay for still works', S.cur.answered === 1 && near(S.money, 0));
+  S = null;
+}
+
+// --- Victory speeches ---
+{
+  const rivals = [...new Set(SCENARIOS.flatMap(x => [...x.field, ...Object.keys(x.enter || {})]))].filter(id => id !== 'you');
+  ok('Speeches: every rival has a victory speech with its own voice', rivals.every(id => RIVAL_SPEECH[id] && RIVAL_SPEECH[id].open.default && RIVAL_SPEECH[id].close));
+  ok('Speeches: you have a line for every rival you can beat', rivals.every(id => YOUR_SPEECH.rival[id]));
+  const game = (setup) => {
+    standardGame(51); S.record = 'income'; S.mate = 'voss';
+    S.election = countVotes(S, active(S)); S.finalWinner = 'you'; setup(S); return S;
+  };
+  const plain = yourSpeech(game(() => {})).join(' ');
+  const runoff = yourSpeech(game(s => { s.runoffResult = { total: { you: 52, dunmore: 48 } }; })).join(' ');
+  const war = yourSpeech(game(s => { s.war = { start: 10 }; s.flags.war_dove = 11; })).join(' ');
+  ok('Speeches: your speech changes with how you won', plain !== runoff && runoff.includes('runoff') && war.includes('war'));
+  ok('Speeches: your speech thanks your running mate', plain.includes('Declan Voss'));
+  const dun = w => { standardGame(52); S.election = countVotes(S, active(S)); S.finalWinner = w; return rivalSpeech(S, w).join(' '); };
+  const clean = dun('dunmore');
+  S.flags.tape2 = 3; const dirty = rivalSpeech(S, 'dunmore').join(' ');
+  ok('Speeches: a rival\'s speech answers your campaign', clean !== dirty && dirty.includes('tapes') && !dirty.includes('{gov}'));
+  ok('Speeches: every rival speech fills in your name', rivals.every(id => { standardGame(53); S.election = countVotes(S, active(S)); S.finalWinner = id; return rivalSpeech(S, id).every(p => !p.includes('{')); }));
   S = null;
 }
 

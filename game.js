@@ -236,6 +236,9 @@ function pickEvent(s) {
   const open = pool.filter(e => !e.priority && weightOf(s, e) > 0 && seenOfKind(e.kind) < (KIND_LIMITS[e.kind] ?? 99));
   return pool.find(e => e.priority) || (open.length ? pickWeighted(s, open) : null);
 }
+// A choice that spends money (fx.money < 0) is locked when the war chest cannot pay for it.
+const costOf = a => Math.max(0, -(a?.fx?.money || 0));
+const canAfford = (s, a) => costOf(a) <= s.money + 1e-9;
 // Choices with a cond appear only when it is true. The list is fixed when the event starts, so indices never change.
 const shownChoices = (s, list) => list.map((ch, i) => i).filter(i => !list[i].cond || list[i].cond(s));
 function pickQuestion(s) {
@@ -269,6 +272,7 @@ function startStep() {
   const s = S, type = SCHEDULE[s.step];
   s.entryNews = lateEntries(s);
   s.lastPoll = stateShares(s);
+  if (s.step >= 6) s.lowPlace = Math.max(s.lowPlace || 1, sorted(s.lastPoll).findIndex(e => e[0] === 'you') + 1);
   if (type === 'event') {
     const e = pickEvent(s);
     if (!e) return startQuestion(s);
@@ -381,36 +385,28 @@ function pickPost(s, pool) {
   s.usedPosts.push(post);
   return post;
 }
-function buildReactions(s, key, fx, text, outcome, context = '') {
-  const tags = reactionTags(fx || {}, outcome), spec = SPECIFIC_REACTIONS[key] || {};
+// Every decision has its own posts and chyron in REACTIONS (reactions.js). A gamble can have a second set for failure.
+// The generic pools in media.js are only a fallback, and never quote the decision.
+function reactionFor(key, outcome) {
+  const r = REACTIONS[key];
+  if (!r) return null;
+  const [boomer, groyper, chyron] = outcome === 'lose' && r.length > 3 ? r.slice(3) : r;
+  return { boomer, groyper, chyron };
+}
+function buildReactions(s, key, fx, text, outcome) {
+  const tags = reactionTags(fx || {}, outcome), spec = reactionFor(key, outcome) || {};
   const last = shortName(s, 'you'), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
-  const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, last.toUpperCase()).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy');
+  const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, last.toUpperCase()).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy')
+    .replace(/\{RIVAL\}/g, (rivalId ? CAND[rivalId].short : 'RIVAL').toUpperCase());
   s.mediaTurn = (s.mediaTurn || 0) + 1;
-  let outlet = s.mediaTurn % 2 ? 'fax' : 'max', chyron;
-  if (spec.chyron) { outlet = spec.chyron.outlet; chyron = spec.chyron.text; }
-  else {
-    const words = text.replace(/^[\s"']+|[\s"'.]+$/g, '').split(/\s+/);
-    const quote = words.slice(0, 9).join(' ') + (words.length > 9 ? '…' : '');
-    chyron = outlet === 'max' && tags.has('rino') ? 'IS GOV. {LAST} GOING SOFT?'
-      : outlet === 'max' && (fx?.maga || 0) >= 4 ? 'GOV. {LAST} GOES FULL AMERICA FIRST'
-      : tags.has('fail') ? 'GOV. {LAST} CAMPAIGN IN DAMAGE CONTROL'
-      : `GOV. {LAST}: "${quote.toUpperCase()}"`;
-  }
-  // A short quote of the decision, for quote-posts.
-  const qWords = text.replace(/^[\s"']+|[\s"'.]+$/g, '').replace(/^Turn to [^:]+:\s*"?/, '').split(/\s+/);
-  let short = qWords.slice(0, 10).join(' ') + (qWords.length > 10 ? '…' : '');
-  // A very short answer ("Yes.") needs its subject to make sense in a post.
-  if (qWords.length < 4 && context) {
-    const quoted = context.match(/"([^"]{12,})"/);   // use the quoted question itself when there is one
-    const c = (quoted ? quoted[1] : context).replace(/^[\s"']+/, '').split(/\s+/);
-    const lead = c.slice(0, 11).join(' ').replace(/[?.,:;"]+$/, '');
-    short += ` — ${lead.charAt(0).toLowerCase() + lead.slice(1)}${c.length > 11 ? '…' : ''}`;
-  }
-  const fillQ = t => fill(t).replace(/\{quote\}/g, short);
+  let outlet = s.mediaTurn % 2 ? 'fax' : 'max', chyron = spec.chyron;
+  const m = chyron && chyron.match(/^(fax|max):\s*/);
+  if (m) { outlet = m[1]; chyron = chyron.slice(m[0].length); }
+  if (!chyron) chyron = pickPost(s, CHYRONS[tags.has('fail') ? 'fail' : tags.has('rino') ? 'rino' : tags.has('attack') ? 'attack' : (fx?.maga || 0) >= 4 ? 'maga' : 'neutral']);
   return {
     chyron: { outlet, text: fill(chyron) },
-    boomer: fillQ(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})])),
-    groyper: fillQ(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})])),
+    boomer: fill(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})])),
+    groyper: fill(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})])),
   };
 }
 
@@ -427,6 +423,9 @@ const grade = p => p >= 5 ? 'Strong' : p >= 2.5 ? 'Solid' : p >= .5 ? 'Weak' : '
 function answer() {
   const s = S, c = s.cur;
   if (c.sel == null || (c.shown && !c.shown.includes(c.sel))) return;
+  const picked = c.type === 'q' ? QUESTIONS.find(q => q.id === c.qid).answers[c.sel] : c.type === 'debate' ? c.opts[c.sel]
+    : (c.type === 'revent' ? RUNOFF_EVENTS : EVENTS).find(e => e.id === c.eid).choices[c.sel];
+  if (!canAfford(s, picked)) return;
   if (c.type === 'q') {
     const q = QUESTIONS.find(q => q.id === c.qid), a = q.answers[c.sel];
     applyFx(s, a.fx);
@@ -458,7 +457,7 @@ function answer() {
   } else if (c.type === 'debate') {
     const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]), a = c.opts[c.sel];
     applyFx(s, a.fx);
-    c.reactions = buildReactions(s, `${q.id}:${c.sel}`, a.fx, a.text, null, q.text);
+    c.reactions = buildReactions(s, a.rkey || `${q.id}:${c.sel}`, a.fx, a.text, null, q.text);
     const round = [];
     const myPerf = perfOf(a.fx);
     c.scores.you += myPerf;
@@ -514,8 +513,8 @@ const factionFx = fx => Object.fromEntries(FKEYS.filter(f => fx[f]).map(f => [f,
 function attackOption(s) {
   const n = nearestRival(s);
   if (!n || Math.abs(n.gap) > CLOSE_RACE || !ATTACK_LINES[n.id]) return null;
-  const who = CAND[n.id].short;
-  return { text: `Turn to ${who}: ${pick(ATTACK_LINES[n.id])}`, fx: { ...ATTACK_FX[n.id], opp: { [n.id]: -3 } }, attackOpt: true,
+  const who = CAND[n.id].short, li = Math.floor(rand() * ATTACK_LINES[n.id].length);
+  return { text: `Turn to ${who}: ${ATTACK_LINES[n.id][li]}`, fx: { ...ATTACK_FX[n.id], opp: { [n.id]: -3 } }, attackOpt: true, rkey: `attack:${n.id}:${li}`,
     fb: `${displayName(s, n.id)} is ${n.gap > 0 ? `ahead of you by ${n.gap.toFixed(1)}` : `behind you by ${(-n.gap).toFixed(1)}`} points. In a close race, the voters you take from your nearest rival count twice.` };
 }
 // Closing statements depend on your record, your position in the race and your strongest faction.
@@ -526,17 +525,17 @@ function closingOptions(s, which) {
   const say = t => t.replace(/^"/, `"${intro}`);
   const rec = RECORDS.find(r => r.id === s.record);
   return [
-    { text: say(RECORD_CLOSE[s.record]), fx: factionFx(rec.fx), fb: 'You closed on your record. Voters who liked your first term hear a reason to stay with you.' },
-    { text: say(POSITION_CLOSE[lead ? 'leading' : 'behind'].text), fx: POSITION_CLOSE[lead ? 'leading' : 'behind'].fx,
+    { rkey: `close:record:${s.record}`, text: say(RECORD_CLOSE[s.record]), fx: factionFx(rec.fx), fb: 'You closed on your record. Voters who liked your first term hear a reason to stay with you.' },
+    { rkey: `close:${lead ? 'leading' : 'behind'}`, text: say(POSITION_CLOSE[lead ? 'leading' : 'behind'].text), fx: POSITION_CLOSE[lead ? 'leading' : 'behind'].fx,
       fb: lead ? 'A front-runner\'s close: steady and confident.' : 'A challenger\'s close, from an incumbent. It fires up your supporters.' },
-    { text: say(FACTION_CLOSE[topF].text), fx: FACTION_CLOSE[topF].fx, fb: `A closing aimed at your strongest group, ${FACTIONS[topF].name}.` },
+    { rkey: `close:${topF}`, text: say(FACTION_CLOSE[topF].text), fx: FACTION_CLOSE[topF].fx, fb: `A closing aimed at your strongest group, ${FACTIONS[topF].name}.` },
   ];
 }
 function buildDebateOptions(s, q, which) {
   const opts = q.id === 'd_closing' ? closingOptions(s, which) : q.answers.slice();
   const atk = attackOption(s);
   if (atk) opts.push(atk);
-  if (q.id === 'd_closing') opts.push(MODERATE_CLOSE);
+  if (q.id === 'd_closing') opts.push({ ...MODERATE_CLOSE, rkey: 'close:moderate' });
   return opts;
 }
 
@@ -670,6 +669,7 @@ const runoffDate = s => new Date(PRIMARY_DAY.getTime() + Math.round((s.runoff.id
 
 function courtAnswer() {
   const s = S, c = s.cur, ch = COURT[c.who].choices[c.sel];
+  if (!canAfford(s, ch)) return;
   applyFx(s, ch.fx);
   const p = typeof ch.p === 'function' ? ch.p(s) : ch.p;
   // Staying away: their voters decide alone, so neutral is as likely as backing your rival.
@@ -818,12 +818,18 @@ function reactionsBox(s, r) {
 }
 const breakingBox = c => c?.breaking?.length ? c.breaking.map(b => `<div class="breaking"><b>BREAKING:</b> ${esc(b)}</div>`).join('') : '';
 
+function costTag(s, a, c) {
+  const cost = costOf(a);
+  if (!cost) return '';
+  const short = c.answered == null && !canAfford(s, a);
+  return `<span class="risk-tag ${short ? 'broke' : 'cost'}" title="${short ? 'Your war chest cannot pay for this.' : 'This choice spends money from your war chest.'}">${short ? 'NOT ENOUGH MONEY · ' : ''}COSTS $${cost.toFixed(1)}M</span> `;
+}
 function answersList(list, c, riskOf = () => false) {
   const unlockOf = a => typeof a.unlock === 'function' ? a.unlock(S) : a.unlock;
   return `<div class="answers">${list.map((a, i) => c.shown && !c.shown.includes(i) ? '' : `
-    <label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
-      <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
-      <span>${a.unlock ? `<span class="risk-tag unlock" title="This choice is available because of an earlier decision.">${esc(unlockOf(a))}</span> ` : ''}${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
+    <label class="answer ${c.answered != null || (c.answered == null && !canAfford(S, a)) ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
+      <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null || !canAfford(S, a) ? 'disabled' : ''}>
+      <span>${costTag(S, a, c)}${a.unlock ? `<span class="risk-tag unlock" title="This choice is available because of an earlier decision.">${esc(unlockOf(a))}</span> ` : ''}${esc(a.text)}${riskOf(a) ? ` <span class="risk-tag" title="The outcome of this choice is uncertain.">RISK · ${Math.round(riskP(S, a.risk) * 100)}% chance it works</span>` : ''}</span></label>`).join('')}</div>`;
 }
 
 function renderQuestion(s) {
@@ -955,9 +961,9 @@ function renderCourt(s) {
     <div class="event-title">${esc(C.title)}</div>
     <div class="endorse-card">${portrait(s, c.who, 56)}<div><b>${nameLink(s, c.who)}</b><div class="muted small">${e.total[c.who].toFixed(1)}% in the primary (${e.totalVotes[c.who].toLocaleString()} votes) · strongest with ${topFactions(c.who).map(f => FACTIONS[f].name).join(' and ')}</div></div></div>
     <div class="q-text">${esc(C.text)}</div>`;
-  h += `<div class="answers">${C.choices.map((a, i) => `<label class="answer ${c.answered != null ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
-      <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null ? 'disabled' : ''}>
-      <span>${esc(a.text)} <span class="risk-tag" style="background:#1f6b3a">${Math.round((typeof a.p === 'function' ? a.p(s) : a.p) * 100)}% chance of endorsement</span>${dealCost(a.fx)}</span></label>`).join('')}</div>`;
+  h += `<div class="answers">${C.choices.map((a, i) => `<label class="answer ${c.answered != null || !canAfford(s, a) ? 'locked' : ''} ${c.answered === i ? 'chosen' : ''}">
+      <input type="radio" name="ans" value="${i}" ${c.sel === i ? 'checked' : ''} ${c.answered != null || !canAfford(s, a) ? 'disabled' : ''}>
+      <span>${costTag(s, a, c)}${esc(a.text)} <span class="risk-tag" style="background:#1f6b3a">${Math.round((typeof a.p === 'function' ? a.p(s) : a.p) * 100)}% chance of endorsement</span>${dealCost(a.fx)}</span></label>`).join('')}</div>`;
   if (c.answered == null) h += `<button class="btn" id="court-submit" ${c.sel == null ? 'disabled' : ''}>Make the Offer</button>`;
   else {
     const ch = C.choices[c.answered];
@@ -1031,9 +1037,35 @@ function renderConcede(s) {
 }
 
 // ---------- endings ----------
+// How the race was won. Used by the victory speeches.
+function raceContext(s) {
+  const final = s.runoffResult ? s.runoffResult.total : s.election.total, order = sorted(final).map(e => e[0]);
+  const w = s.finalWinner, second = order.find(id => id !== w);
+  s.finalRunnerUp = second;
+  return { w, second, runoff: !!s.runoffResult, share: final[w], margin: final[w] - final[second],
+    presFor: s.endorsed === w, presAgainst: !!s.endorsed && s.endorsed !== w, war: !!s.war,
+    comeback: (s.lowPlace || 1) >= 3 };
+}
 function yourSpeech(s) {
-  const top = FKEYS.map(f => [f, s.delta.you[f] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0]);
-  return [SPEECH.open, SPEECH.record[s.record], ...top.map(f => SPEECH.faction[f]), s.rino >= 6 ? SPEECH.closeUnity : SPEECH.closeFight];
+  const ctx = raceContext(s), Y = YOUR_SPEECH;
+  const open = ctx.runoff ? Y.open.runoff : ctx.comeback ? Y.open.comeback : ctx.presAgainst ? Y.open.presAgainst
+    : ctx.presFor ? Y.open.presFor : ctx.share >= 55 ? Y.open.landslide : ctx.margin < 4 ? Y.open.close : SPEECH.open;
+  const top = FKEYS.map(f => [f, s.delta.you[f] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
+  const moments = Y.moments.filter(m => m.cond(s)).slice(0, 2).map(m => m.text);
+  const orgs = Object.values(s.endorsements).filter(h => h === 'you').length;
+  const nod = Y.rival[ctx.second] && (s.rino >= 6 || ctx.margin > 15 ? Y.rival[ctx.second].kind : Y.rival[ctx.second].fight);
+  const close = ctx.war ? Y.close.war : ctx.runoff ? Y.close.runoff : s.rino >= 6 ? Y.close.unity : Y.close.fight;
+  return [open, [Y.mate[s.mate], s.flags.mate_swap ? Y.mateSwap : ''].filter(Boolean).join(' '), SPEECH.record[s.record],
+    ...moments, top.map(f => SPEECH.faction[f]).join(' '), orgs >= 3 ? Y.endorsements(orgs) : '', nod, close].filter(Boolean);
+}
+// A rival's victory speech: the opening depends on how the race was won, and one line answers your campaign.
+function rivalSpeech(s, w) {
+  const R = RIVAL_SPEECH[w], ctx = raceContext(s), gov = `Governor ${shortName(s, 'you')}`;
+  if (!R) return [RIVAL_OUTCOMES[w].speech];
+  const scandal = ['tape2', 'donor_deal', 'official1', 'tolliver_pardoned', 'renner_pardon', 'drone_deal', 'emails_bad'].some(f => s.flags[f]);
+  const open = ctx.runoff ? R.open.runoff : ctx.presFor ? R.open.president : ctx.share >= 50 ? R.open.landslide : R.open.default;
+  const you = (scandal ? R.you.scandal : s.rino >= 6 ? R.you.rino : R.you.default).replace(/\{gov\}/g, gov);
+  return [open, RIVAL_OUTCOMES[w].speech, you, ctx.war ? R.war : '', R.close].filter(Boolean);
 }
 function hundredDays(items) {
   return `<ol class="timeline">${items.map(([d, t]) => `<li><span class="tl-date">${d}</span><span>${esc(t)}</span></li>`).join('')}</ol>`;
@@ -1075,7 +1107,7 @@ function renderEnding(s) {
     const obj = w === 'whitlock' ? 'her' : 'him';
     sections = `
       <div class="panel-title">Your Concession</div><blockquote><p>${esc(con.speech(displayName(s, w), obj))}</p></blockquote>
-      <div class="panel-title">${esc(displayName(s, w))}'s Victory Speech</div><blockquote><p>${esc(o.speech)}</p></blockquote>
+      <div class="panel-title">${esc(displayName(s, w))}'s Victory Speech</div><blockquote>${rivalSpeech(s, w).map(p => `<p>${esc(p)}</p>`).join('')}</blockquote>
       <div class="panel-title">The General Election</div>${generalLine(s, w, clamp(o.general + con.general, 4, 34))}
       <div class="panel-title">${esc(CAND[w].short)}'s First 100 Days</div>${hundredDays(o.days)}
       <div class="panel-title">One Year Later</div><p class="q-text">${esc(o.later)}</p>

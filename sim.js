@@ -52,19 +52,19 @@ function simGame(strategy, seed, scenario, war, difficulty = 'normal') {
     }
     const choose = list => strategy(list);
     // Events: choose only from the choices the player can see.
-    const chooseShown = list => { const vis = c.shown || list.map((_, i) => i); return vis[strategy(vis.map(i => list[i]))]; };
-    if (c.type === 'q') { if (c.answered == null) { c.sel = choose(QUESTIONS.find(q => q.id === c.qid).answers); answer(); } else advance(); }
+    const chooseShown = list => { const vis = (c.shown || list.map((_, i) => i)).filter(i => canAfford(S, list[i])); return vis[strategy(vis.map(i => list[i]))]; };
+    if (c.type === 'q') { if (c.answered == null) { c.sel = chooseShown(QUESTIONS.find(q => q.id === c.qid).answers); answer(); } else advance(); }
     else if (c.type === 'event') { if (c.answered == null) { c.sel = chooseShown(EVENTS.find(e => e.id === c.eid).choices); answer(); } else advance(); }
     else if (c.type === 'revent') { if (c.answered == null) { c.sel = chooseShown(RUNOFF_EVENTS.find(e => e.id === c.eid).choices); answer(); } else runoffAdvance(); }
     else if (c.type === 'court') {
       if (c.answered == null) {
-        const ch = COURT[c.who].choices;
-        c.sel = strategy === STRATEGIES.random ? Math.floor(Math.random() * ch.length) : ch.reduce((b, x, i) => (x.p > ch[b].p && !x.fx.rino) ? i : b, 0);
+        const ch = COURT[c.who].choices, ok = ch.map((_, i) => i).filter(i => canAfford(S, ch[i]));
+        c.sel = strategy === STRATEGIES.random ? ok[Math.floor(Math.random() * ok.length)] : ok.reduce((b, i) => (ch[i].p > ch[b].p && !ch[i].fx.rino) ? i : b, ok[0]);
         courtAnswer();
       } else runoffAdvance();
     }
     else if (c.type === 'rintro') runoffAdvance();
-    else if (c.type === 'debate') { if (c.idx >= 0 && c.idx < 99 && c.answered == null) { c.sel = choose(c.opts); answer(); } else debateNext(); }
+    else if (c.type === 'debate') { if (c.idx >= 0 && c.idx < 99 && c.answered == null) { c.sel = chooseShown(c.opts); answer(); } else debateNext(); }
     else if (c.type === 'stop') { if (!c.done) { c.region = pick(REGIONS).id; c.action = pick(['rally', 'gotv', 'ads']); doStop(); } else advance(); }
     else advance();
   }
