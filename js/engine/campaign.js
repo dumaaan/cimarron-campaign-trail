@@ -65,7 +65,11 @@ function startStep() {
     s.cur = { type: 'stop', region: null, action: 'rally', done: false, breaking: [] };
   } else if (type === 'debate1' || type === 'debate2') {
     // Three random questions, then closing statements.
-    const pool = shuffle(DEBATE_QUESTIONS.filter(q => !s.dAsked.includes(q.id) && q.id !== 'd_closing' && q.needs.every(id => active(s).includes(id)) && (!q.cond || q.cond(s))));
+    // The second debate asks up to three questions that come from the campaign so far (round 2), then general ones.
+    const ok = q => !s.dAsked.includes(q.id) && q.id !== 'd_closing' && q.needs.every(id => active(s).includes(id)) && (!q.cond || q.cond(s));
+    const general = shuffle(DEBATE_QUESTIONS.filter(q => !q.round && ok(q)));
+    const topical = type === 'debate2' ? shuffle(DEBATE_QUESTIONS.filter(q => q.round === 2 && ok(q))).slice(0, 3) : [];
+    const pool = [...topical, ...general];
     const qs = pool.slice(0, 3).map(q => q.id).concat('d_closing');
     s.dAsked.push(...qs.filter(id => id !== 'd_closing'));
     s.cur = { type: 'debate', which: type === 'debate1' ? 1 : 2, qs, idx: -1, sel: null, answered: null,

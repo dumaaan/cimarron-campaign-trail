@@ -22,7 +22,8 @@ function renderEvent(s) {
   let h = `<div class="q-meta"><span class="kind" style="background:${EVENT_KINDS[e.kind] || '#333'}">${e.kind}</span><span>${c.type === 'revent' ? `Runoff · ${fmtDate(runoffDate(s))}` : dateOf(s.step)}</span></div>
     <div class="event-title">${esc(textOf(s, e.title))}</div>
     <div class="q-text">${esc(isShared(e) ? rivalize(s, text) : text)}</div>`;
-  if (e.advice?.length) h += `<div class="advice"><div class="fb-head">Your Advisors</div>${e.advice.map(([id, t]) =>
+  const advice = adviceOf(s, e);
+  if (advice.length) h += `<div class="advice"><div class="fb-head">Your Advisors</div>${advice.map(([id, t]) =>
     `<div class="adv">${staffBadge(id)}<div><b>${staffOf(id).name}</b> <span class="muted small">${staffOf(id).role}</span><div>${esc(isShared(e) ? rivalize(s, t) : t)}</div></div></div>`).join('')}</div>`;
   h += answersList(e.choices, c, a => !!a.risk);
   if (c.answered == null) h += `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Decide</button>`;
@@ -65,7 +66,7 @@ function renderDebate(s) {
   const q = DEBATE_QUESTIONS.find(q => q.id === c.qs[c.idx]);
   let h = `<div class="q-meta"><span>Debate #${c.which} · Question ${c.idx + 1} of ${c.qs.length}</span><span>${venue}</span></div>
     <div class="stage small-stage">${stage}</div>
-    <div class="q-text">${esc(q.text)}</div>`;
+    <div class="q-text">${esc(q.round ? textOf(s, q.text) : rivalize(s, textOf(s, q.text)))}</div>`;
   if (c.answered == null) h += answersList(c.opts, c) + `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Answer</button>`;
   else {
     h += `<div class="round">${c.round.map(r => `<div class="round-row ${r.id === 'you' ? 'mine' : ''}">${portrait(s, r.id, 32)}

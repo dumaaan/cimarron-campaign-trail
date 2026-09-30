@@ -43,7 +43,10 @@ function reactionFor(key, outcome) {
 function buildReactions(s, key, fx, text, outcome) {
   const tags = reactionTags(fx || {}, outcome), spec = reactionFor(key, outcome) || {};
   const src = EVENTS.find(e => e.id === key.replace(/:\d+$/, '')) || QUESTIONS.find(q => q.id === key.replace(/:\d+$/, ''));
-  const rv = t => !src || isShared(src) ? rivalize(s, t) : t;
+  // A choice written for your own candidate (cond on s.player) keeps your name in its posts.
+  const item = src && (src.answers || src.choices)?.[+key.split(':').pop()];
+  const own = item?.cond && /player ===/.test(String(item.cond));
+  const rv = t => (!src || isShared(src)) && !own ? rivalize(s, t) : t;
   const last = shortName(s, 'you'), LAST = headlineName(s), rivalId = Object.keys(fx?.opp || {})[0] || (fx?.oppRival ? s.runoff?.rival : null);
   const fill = t => t.replace(/\{last\}/g, last).replace(/\{LAST\}/g, LAST).replace(/\{rival\}/g, rivalId ? CAND[rivalId].short : 'the other guy')
     .replace(/\{RIVAL\}/g, (rivalId ? CAND[rivalId].short : 'RIVAL').toUpperCase());
@@ -54,8 +57,8 @@ function buildReactions(s, key, fx, text, outcome) {
   if (!chyron) chyron = pickPost(s, CHYRONS[tags.has('fail') ? 'fail' : tags.has('rino') ? 'rino' : tags.has('attack') ? 'attack' : (fx?.maga || 0) >= 4 ? 'maga' : 'neutral']);
   return {
     chyron: { outlet, text: fill(chyron) },
-    boomer: rv(fill(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})]))),
-    groyper: rv(fill(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})]))),
+    boomer: fill(rv(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})]))),   // rivalize before {last} is filled in
+    groyper: fill(rv(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})]))),
   };
 }
 
@@ -115,11 +118,11 @@ function answer() {
     const round = [];
     const myPerf = perfOf(a.fx);
     c.scores.you += myPerf;
-    round.push({ id: 'you', text: a.text, perf: myPerf });
+    round.push({ id: 'you', text: textOf(s, a.text), perf: myPerf });
     for (const id in a.fx.opp || {}) if (c.scores[id] != null) c.scores[id] += a.fx.opp[id] * .5;
     for (const id of active(s)) {
-      if (id === 'you' || !q.rivals?.[id]) continue;
-      const r = q.rivals[id];
+      const r = id === 'you' ? null : textOf(s, q.rivals?.[id]);   // a rival's answer may depend on the race
+      if (!r) continue;
       addDelta(s, id, r.fx, TUNE.rivalDebate);
       let p = perfOf(r.fx);
       const tgt = r.attack === s.player ? 'you' : r.attack;   // a rival who attacks the candidate you play attacks you
@@ -137,7 +140,7 @@ function answer() {
       if (!c.best || r.perf > c.best.perf) c.best = { id: r.id, text: r.text, perf: r.perf };
     }
     c.round = round;
-    s.log.push({ q: `Debate #${c.which}`, a: a.text });
+    s.log.push({ q: `Debate #${c.which}`, a: textOf(s, a.text) });
   }
   c.answered = c.sel;
   save(); render();

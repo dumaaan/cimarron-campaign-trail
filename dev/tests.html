@@ -20,8 +20,11 @@
 <script src="../js/content/candidates.js"></script>
 <script src="../js/content/questions.js"></script>
 <script src="../js/content/debates.js"></script>
+<script src="../js/content/debates2.js"></script>
 <script src="../js/content/events.js"></script>
 <script src="../js/content/campaigns.js"></script>
+<script src="../js/content/advice.js"></script>
+<script src="../js/content/voices.js"></script>
 <script src="../js/content/epilogue.js"></script>
 <script src="../js/content/runoff.js"></script>
 <script src="../js/content/media.js"></script>
@@ -346,7 +349,7 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   const named = [];
   for (const p of PLAYABLE) {
     newState(p, 5); const short = CAND[p].short;
-    for (const q of DEBATE_QUESTIONS) if (q.id !== 'd_closing' && q.needs.every(id => active(S).includes(id)) && (!q.cond || q.cond(S)) && q.text.includes(short)) named.push(`${p}:${q.id}`);
+    for (const q of DEBATE_QUESTIONS) if (q.id !== 'd_closing' && q.needs.every(id => active(S).includes(id)) && (!q.cond || q.cond(S)) && textOf(S, q.text).includes(short)) named.push(`${p}:${q.id}`);
   }
   ok('Debates: no candidate is asked a question about themselves', named.length === 0, named.join(', '));
   const bad = [];
@@ -354,10 +357,25 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
     if (!OPENINGS[p].every(r => RECORD_CLOSE[r.id] && SPEECH.record[r.id])) bad.push(p + ' openings'); if (!MATES[p].every(m => YOUR_SPEECH.mate[m.id])) bad.push(p + ' mates'); }
   ok('Every playable candidate has openings, four running mates, staff, speeches and endings', bad.length === 0, bad.join(', '));
   newState('dunmore', 7);
+  newState('rick', 7); const own = buildReactions(S, 'deport:2', {}, '');
+  ok('Posts keep your own name when they mention you', own.groyper.includes('Pastor Rick') && !own.groyper.includes('your rival'), own.groyper);
+  newState('dunmore', 7);
   ok('Shared text names the candidate you play as "your rival"', rivalize(S, 'Dunmore will call it amnesty.') === 'Your rival will call it amnesty.' && rivalize(S, 'Krantz agrees.') === 'Krantz agrees.');
   const w = { easy: 0, hard: 0 };
   for (const d of ['easy', 'hard']) for (let i = 1; i <= 400; i++) { const x = newState('whitlock', i * 131, d); if (x.warPlanned != null) w[d]++; }
   ok('Whitlock: the war and her conditions are much more likely on Easy than on Hard', w.easy > w.hard * 3, `war in ${w.easy}/400 easy games, ${w.hard}/400 hard games`);
+  S = null;
+}
+
+// --- The war tightens the race; the general election is red against blue ---
+{
+  standardGame(88); S.step = 16; addAll(S, 'you', 12);   // a real lead, as in a campaign
+  const calm = stateShares(S); S.war = { start: 10 }; const war = stateShares(S);
+  const lead = sh => sh.you - sorted(sh).find(e => e[0] !== 'you')[1];
+  ok('War: a lead in the primary is much thinner during the war', lead(war) < lead(calm) * .75, `lead ${lead(calm).toFixed(1)} → ${lead(war).toFixed(1)} points`);
+  S.player = 'rick'; applyPlayer(S); S.election = countVotes(S, active(S)); S.finalWinner = 'you';
+  const html = generalLine(S, 'you', 20);
+  ok('General election: the Republican is red and the Democrat is blue for every candidate', html.includes('background:#b3202a') && html.includes('background:#2c5aa0'));
   S = null;
 }
 

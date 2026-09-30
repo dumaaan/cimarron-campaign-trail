@@ -1013,6 +1013,7 @@ forChallenger(ev('right_to_life'), 'text', t => t.replace('Your current law has'
 forChallenger(ev('president_call'), 'text', t => t.replace('You will fire your Secretary of State', 'You will promise to fire the Secretary of State on your first day').replace('And you will publicly support', 'And you will publicly support'));
 forChallenger(ev('president_call').choices[1], 'text', t => t.replace('Fire the Secretary', 'Promise to fire the Secretary'));
 forChallenger(ev('fox_townhall').choices[3], 'text', () => 'Decline. You are busy campaigning.');
+forChallenger(ev('growth_club').choices[0], 'fb', () => 'The Club endorses you and funds ads. Its lawyers send you a copy of the pledge, with your signature highlighted.');
 forChallenger(ev('favor_pardon'), 'text', t => t.replace('He would consider a pardon a personal kindness.', 'He would consider a public promise to pardon him, if you win, a personal kindness.'));
 forChallenger(ev('favor_pardon').choices[0], 'text', () => 'Promise to pardon Renner if you win.');
 forChallenger(ev('favor_pardon').choices[0], 'fb', () => 'The President calls you personally. In the Panhandle, the farm families hold a press conference in a church basement.');

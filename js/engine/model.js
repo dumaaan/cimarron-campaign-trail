@@ -37,8 +37,11 @@ function score(s, cid, f, rid) {
   for (const e in s.runoff?.endorse || {}) if (s.runoff.endorse[e] === cid) v += (topFactions(e).includes(f) ? TUNE.endorseTop : 0) + TUNE.endorseAll;
   return v;
 }
+// In a war the Republican electorate splinters: loyalties loosen and every race tightens.
+const warSpread = s => s?.war ? 1 + WAR.spread * Math.min(1, (s.step - s.war.start + 1) / WAR.rampSteps) : 1;
 function softmax(s, f, rid, cands, noise) {
-  const ex = cands.map(c => Math.exp((score(s, c, f, rid) + (noise ? noise[c] : 0)) / TUNE.T));
+  const T = TUNE.T * warSpread(s);
+  const ex = cands.map(c => Math.exp((score(s, c, f, rid) + (noise ? noise[c] : 0)) / T));
   const sum = ex.reduce((a, b) => a + b, 0);
   return ex.map(e => e / sum);
 }

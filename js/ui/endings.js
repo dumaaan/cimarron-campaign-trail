@@ -51,8 +51,8 @@ function consequences(s) {
 function generalLine(s, w, margin) {
   const rPct = 50 + margin / 2 - .7, dPct = 100 - rPct - 1.4;
   return `<p class="q-text">On November 5, ${displayName(s, w)} faces the Democratic nominee, ${DEMOCRAT.name}, ${DEMOCRAT.desc}.</p>
-    <div class="ge"><div style="width:${rPct}%;background:${colorOf(w)}">${esc(shortName(s, w))} ${rPct.toFixed(1)}%</div><div style="width:${dPct}%;background:#2c5aa0">Lindqvist ${dPct.toFixed(1)}%</div></div>
-    <p class="muted small">Other candidates: 1.4%. ${margin < 15 ? 'This is the smallest margin for a Republican governor in Cimarron in twenty years, a sign that the primary cost the party support among independents.' : 'The result was never in doubt.'}</p>`;
+    <div class="ge"><div style="width:${rPct}%;background:#b3202a">${esc(shortName(s, w))} ${rPct.toFixed(1)}%</div><div style="width:${dPct}%;background:#2c5aa0">Lindqvist ${dPct.toFixed(1)}%</div></div>
+    <p class="muted small">Other candidates: 1.4%. ${s.war ? 'The war and the price of diesel made this the closest governor\'s race in Cimarron in a generation.' : margin < 15 ? 'This is the smallest margin for a Republican governor in Cimarron in twenty years, a sign that the primary cost the party support among independents.' : 'The result was never in doubt.'}</p>`;
 }
 
 function renderEnding(s) {
@@ -60,7 +60,7 @@ function renderEnding(s) {
   const final = rr ? rr.total : e.total;
   let sections = '';
   if (won) {
-    const margin = clamp(27 - s.rino * .6 - (s.flags.tape2 ? 3 : 0) - (s.flags.donor_deal ? 2 : 0), 6, 34);
+    const margin = clamp(27 - s.rino * .6 - (s.flags.tape2 ? 3 : 0) - (s.flags.donor_deal ? 2 : 0) - (s.war ? WAR.general : 0), 4, 34);
     const start = new Date(2031, 0, 12);
     const days = s.promises.slice(0, 12).map((p, i) => [new Date(start.getTime() + i * 8 * 864e5).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), p]);
     if (days.length < 3) days.push(...(isGov(s) ? [['Feb 1', 'Presented a budget that continues the policies of your first term.'], ['Mar 15', 'Signed the legislature\'s tax and public safety package.']]
@@ -82,7 +82,7 @@ function renderEnding(s) {
     sections = `
       <div class="panel-title">Your Concession</div><blockquote><p>${esc(con.speech(displayName(s, w), obj, s))}</p></blockquote>
       <div class="panel-title">${esc(displayName(s, w))}'s Victory Speech</div><blockquote>${rivalSpeech(s, w).map(p => `<p>${esc(p)}</p>`).join('')}</blockquote>
-      <div class="panel-title">The General Election</div>${generalLine(s, w, clamp(o.general + con.general, 4, 34))}
+      <div class="panel-title">The General Election</div>${generalLine(s, w, clamp(o.general + con.general - (s.war ? WAR.general : 0), 2, 34))}
       <div class="panel-title">${esc(CAND[w].short)}'s First 100 Days</div>${hundredDays(o.days)}
       <div class="panel-title">One Year Later</div><p class="q-text">${esc(o.later)}</p>
       <div class="panel-title">Your Future</div><p class="q-text">${esc(concessionFuture(s, con))}</p>
