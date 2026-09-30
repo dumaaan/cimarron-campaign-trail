@@ -240,6 +240,34 @@ ok('A runoff is called only when nobody reaches 40%', !!e.needsRunoff === (sorte
   S = null;
 }
 
+// --- The President's endorsement ---
+{
+  standardGame(21); S.step = SCHEDULE.indexOf('endorse');
+  const sh = stateShares(S);
+  const weak = sorted(sh).map(e => e[0]).filter(id => id !== 'you' && id !== 'whitlock').pop();
+  S.presOverride[weak] = 100;
+  const pick1 = presidentsChoice(S);
+  ok('President: never endorses a rival who cannot win', sh[weak] >= PRES_ENDORSE.viable || pick1 !== weak, `${CAND[weak].short} ${sh[weak].toFixed(1)}% → ${pick1}`);
+  S.pres = PRES_ENDORSE.youNeed - 1; addAll(S, 'you', 30);
+  ok('President: does not endorse you below the required opinion', presidentsChoice(S) !== 'you');
+  S.pres = 100; for (const id in S.presOverride) S.presOverride[id] = 0;
+  ok('President: endorses you when he trusts you and you can win', presidentsChoice(S) === 'you');
+  standardGame(22); S.step = 20; S.endorsed = sorted(stateShares(S)).map(e => e[0]).filter(id => id !== 'you' && id !== 'whitlock').pop();
+  addAll(S, S.endorsed, -60);
+  checkDropouts(S);
+  ok('President: his candidate never drops out', !S.dropped.includes(S.endorsed), CAND[S.endorsed].short);
+  standardGame(23); S.step = 20;
+  const without = factionShares(S, 'maga').krantz; S.endorsed = 'krantz'; const before = factionShares(S, 'maga').krantz;
+  ok('President: the MAGA base moves strongly to his candidate', before > without * 2, `Krantz ${without.toFixed(1)}% → ${before.toFixed(1)}% of MAGA voters`);
+  const favorSteps = [];
+  for (let seed = 1; seed <= 40; seed++) {
+    standardGame(seed); S.seed = seed;
+    for (let st = 0; st < SCHEDULE.length; st++) if (SCHEDULE[st] === 'event') { S.step = st; const e = pickEvent(S); if (e) { S.seenEvents.push(e.id); if (FAVORS.includes(e.id)) favorSteps.push(st); } }
+  }
+  ok('Every game has a favor for the President\'s circle before his endorsement', favorSteps.length === 40 && favorSteps.every(st => st < SCHEDULE.indexOf('endorse')), `${favorSteps.length}/40`);
+  S = null;
+}
+
 // --- Difficulty ---
 {
   const e = newState('E', 5150, 'easy'), eSc = e.scenario, eWar = e.warPlanned, eMoney = e.money, ePos = TUNE.posMult;

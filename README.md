@@ -22,6 +22,7 @@ After every decision, the cable news chyrons and the posters online react.
 
 ## Tips
 
+- **The President's endorsement is the biggest prize in the race.** The MAGA base unites behind his choice, and his candidate never drops out. He endorses you only if his opinion of you is very high (the status bar shows how close you are), and his circle will ask for favors that can cost you with other voters.
 - **Watch the RINO label.** Moderate answers raise it, and it costs you with almost everyone.
 - **Turnout decides primaries.** Older voters and evangelicals vote in large numbers. Young online activists are loud, but many of them stay home. Click **State Profile** to see who actually votes, and click any region on the map for its details.
 - **Every promise counts.** What you promise on the trail becomes your first 100 days, if you win.

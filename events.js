@@ -19,6 +19,10 @@ const inRace = (s, id) => active(s).includes(id);
 const topRival = s => sorted(stateShares(s)).map(e => e[0]).find(id => id !== 'you');
 // Your lead over the strongest rival, in points (negative when you trail), and your place in the race (1 = first).
 const leadOver = s => { const sh = stateShares(s); return sh.you - sh[topRival(s)]; };
+// One favor event for the President's circle per game, chosen by the seed. It runs as a follow-up in the first event slot
+// from step 7 on, so it always comes before the President's endorsement.
+const FAVORS = ['favor_pardon', 'favor_drones'];
+const isFavor = (s, id) => FAVORS[s.seed % FAVORS.length] === id && s.step >= 7 && s.step < SCHEDULE.indexOf('endorse');
 const placeOf = s => sorted(stateShares(s)).findIndex(e => e[0] === 'you') + 1;
 
 const EVENT_KINDS = {
@@ -532,6 +536,47 @@ const EVENTS = [
           lose: { fx: {}, fb: 'She refuses. "If I am going to lose, I will lose saying what I believe."' } } },
       { text: 'Decline politely.', fx: {}, fb: 'She stays in the race.' },
       { text: 'Leak the offer to embarrass her.', fx: { maga: 2, seniors: -1, opp: { whitlock: -2 } }, fb: 'The base enjoys it. Older voters think it was petty.' },
+    ] },
+
+  // ---------------- A FAVOR FOR THE PRESIDENT'S CIRCLE (one per game, always before his endorsement) ----------------
+  { id: 'favor_pardon', kind: 'Party', title: 'The Golf Partner', priority: true, cond: s => isFavor(s, 'favor_pardon'),
+    text: 'Cal Renner, a Cimarron oilman and the President\'s golf partner for thirty years, is sentenced to six years in state prison. A jury found that he cheated 200 Panhandle farm families out of $11 million in oil royalties. The President\'s political director calls. "The President thinks Cal was treated very unfairly. He would consider a pardon a personal kindness. He will remember it."',
+    advice: [
+      ['wade', 'This is the endorsement. Nothing else you do this year will matter as much to him.'],
+      ['dana', 'The victims are farm families in the Panhandle. They are our voters, and their neighbors are too.'],
+      ['pryce', 'A pardon for a rich man who stole from farmers. Imagine that sentence in a Dunmore ad. Then imagine it in the general election.'],
+      ['tom', 'Several of those families are in our churches. The pastors know their names.'],
+    ],
+    choices: [
+      { text: 'Pardon Renner.', fx: { pres: 16, maga: 1, farm: -5, seniors: -3, faith: -1, flag: 'renner_pardon' },
+        fb: 'Renner walks out of prison the same day. The President calls you personally. In the Panhandle, the families hold a press conference in a church basement.' },
+      { text: 'Reduce his prison sentence, but keep the order to repay the families.', fx: { pres: 8, farm: -2, seniors: -1 },
+        fb: 'A half-favor. The White House says "thank you" in a tone that means "not enough."' },
+      { text: 'Refuse: "The farm families deserve justice."', fx: { pres: -8, farm: 3, seniors: 1, faith: 1 },
+        fb: 'The call ends quickly. The farm families never learn how close it was.' },
+      { text: 'Say you will "look at it carefully after the primary."', fx: {},
+        risk: { p: .45,
+          win: { fx: { pres: 4 }, fb: 'The White House accepts the delay. It takes your answer as a yes.' },
+          lose: { fx: { pres: -6 }, fb: '"The President does not like to wait," the political director says. He does not call again.' } } },
+    ] },
+  { id: 'favor_drones', kind: 'Party', title: 'Liberty Drone Systems', priority: true, cond: s => isFavor(s, 'favor_drones'),
+    text: 'Liberty Drone Systems, a company in which the President\'s son is a partner, offers the state police a $140 million contract for surveillance drones, without competitive bidding. The President\'s son calls you himself. "Dad asked me to call. He really likes you." The drones have never been used by any police force.',
+    advice: [
+      ['pryce', 'A no-bid contract for the President\'s son. The Ledger will have it in a week. So will the Liberty Caucus.'],
+      ['wade', 'The son is the closest person to the President. Whatever he tells his father tonight is what his father believes.'],
+      ['dana', 'The Liberty Caucus opposes surveillance of any kind. Everyone else just hates no-bid contracts.'],
+    ],
+    choices: [
+      { text: 'Sign the no-bid contract.', fx: { pres: 15, money: .8, liberty: -4, seniors: -2, chamber: -2, flag: 'drone_deal' },
+        fb: 'The President\'s son hosts a fundraiser for you in Palm Beach the next week. The Liberty Caucus calls the drones "the President\'s family watching Cimarron."' },
+      { text: 'Open the contract to bidding, and invite Liberty Drone to compete.', fx: {},
+        risk: { p: .5,
+          win: { fx: { pres: 8, liberty: -1 }, fb: 'Liberty Drone wins the bid, fairly, by a small margin. Everyone is happy, and nobody can prove anything.' },
+          lose: { fx: { pres: -5, chamber: 1 }, fb: 'A company from Pratt Junction wins the bid. The President\'s son stops returning your calls.' } } },
+      { text: 'Sign a small pilot contract for $10 million.', fx: { pres: 6, liberty: -1, seniors: -1 },
+        fb: 'A gesture. The son says his father "appreciates the start."' },
+      { text: 'Refuse: "Cimarron does not need surveillance drones."', fx: { pres: -8, liberty: 3, seniors: 1 },
+        fb: 'The Liberty Caucus is impressed. The President\'s son tells reporters you are "not a team player."' },
     ] },
 
   // ---------------- MEDIA & STRATEGY ----------------
