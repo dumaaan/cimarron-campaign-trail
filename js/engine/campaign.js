@@ -18,8 +18,22 @@ function pickEvent(s) {
   return pool.find(e => e.priority) || pool.find(e => e.due && s.step >= e.due) || (open.length ? pickWeighted(s, open) : null);
 }
 // A choice that spends money (fx.money < 0) is locked when the war chest cannot pay for it.
+// A candidate who self-funds (Vaskel) can always pay: what the war chest cannot cover comes from his own fortune,
+// and every $1M of it raises his weak-spot label (see selfFund in candidates.js).
 const costOf = a => Math.max(0, -(a?.fx?.money || 0));
-const canAfford = (s, a) => costOf(a) <= s.money + 1e-9;
+const selfFunds = s => !!PLAYER_INFO[s?.player]?.selfFund;
+const shortfall = (s, cost) => Math.max(0, cost - s.money);
+const canAfford = (s, a) => selfFunds(s) || costOf(a) <= s.money + 1e-9;
+// Pay a cost: from the war chest first, then (for a self-funder) from his own fortune.
+function spend(s, cost) {
+  const own = selfFunds(s) ? shortfall(s, cost) : 0;
+  s.money = Math.max(0, s.money - cost);
+  if (own > 0) {
+    s.selfFunded = (s.selfFunded || 0) + own;
+    s.label = (s.label || 0) + Math.max(1, Math.round(own));
+  }
+  return own;
+}
 // Choices with a cond appear only when it is true. The list is fixed when the event starts, so indices never change.
 const shownChoices = (s, list) => list.map((ch, i) => i).filter(i => !list[i].cond || list[i].cond(s));
 function pickQuestion(s) {

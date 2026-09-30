@@ -92,7 +92,7 @@ function renderStop(s) {
     <div class="q-text">Where will the campaign go this week? <b>Click a region on the map</b>, then choose an action.</div>
     ${r ? `<div class="sel-region"><b>${r.name}</b> · ${(regionWeight(r) / TOTAL_WEIGHT() * 100).toFixed(0)}% of the expected statewide vote · expected turnout ${(regionTurnout(r) * 100).toFixed(0)}%
       <div class="muted small">${esc(r.desc)}</div></div>` : ''}
-    <div class="answers">${STOP_ACTIONS.map(a => `<label class="answer ${a.cost > s.money ? 'locked' : ''}"><input type="radio" name="stop" value="${a.id}" ${c.action === a.id ? 'checked' : ''} ${a.cost > s.money ? 'disabled' : ''}>
+    <div class="answers">${STOP_ACTIONS.map(a => `<label class="answer ${a.cost > s.money && !selfFunds(s) ? 'locked' : ''}"><input type="radio" name="stop" value="${a.id}" ${c.action === a.id ? 'checked' : ''} ${a.cost > s.money && !selfFunds(s) ? 'disabled' : ''}>
       <span><b>${a.name}.</b> ${a.desc}</span></label>`).join('')}</div>
     <button class="btn" id="go" ${c.region ? '' : 'disabled'}>Go</button>`;
 }

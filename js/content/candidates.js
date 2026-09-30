@@ -38,8 +38,9 @@ const PLAYER_INFO = {
     start: 1,
   },
   vaskel: {
-    label: 'Carpetbagger', labelDesc: 'A Californian who wants to buy a state. It rises every time your money or your companies become the story.',
+    label: 'Carpetbagger', labelDesc: 'A Californian who wants to buy a state. It rises when your money or your companies become the story, and by 1 for every $1M you pay from your own fortune', labelDesc: 'A Californian who wants to buy a state. It rises every time your money or your companies become the story.',
     level: 'Standard', pitch: 'The tech investor from California. Almost unlimited money, and every dollar you spend proves what your rivals say about you.',
+    selfFund: true, money: 3,   // starts with $3M more, and pays from his own fortune when the war chest is empty
     openingTitle: 'Your Portfolio', openingIntro: 'You moved to Cimarron four years ago with a thesis. Which project proves it?',
     mateIntro: 'You need someone who makes you look like you belong here. Choose your running mate.',
     start: 19,  // his base appeal is low with the factions that vote most

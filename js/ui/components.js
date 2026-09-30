@@ -104,6 +104,7 @@ function chips(s, fx) {
   if (fx.rino) out.push([`RINO Label ${fx.rino > 0 ? '+' : ''}${fx.rino}`, fx.rino > 0 ? 'down' : 'up']);
   if (fx.label) out.push([`"${PLAYER_INFO[s?.player || 'castellano'].label}" Label ${fx.label > 0 ? '+' : ''}${fx.label}`, fx.label > 0 ? 'down' : 'up']);
   if (fx.pres) out.push([`The President ${arrow(fx.pres)}`, fx.pres > 0 ? 'up' : 'down']);
+  if (fx.ownMoney) out.push([`Own fortune $${fx.ownMoney.toFixed(2)}M · "${PLAYER_INFO[s.player].label}" +${fx.ownLabel}`, 'down']);
   if (fx.money) out.push([`War Chest ${fx.money > 0 ? '+' : '−'}$${Math.abs(fx.money).toFixed(2)}M`, fx.money > 0 ? 'up' : 'down']);
   for (const id in fx.opp || {}) out.push([`${CAND[id].short} ${arrow(fx.opp[id])}`, fx.opp[id] < 0 ? 'up' : 'down']);
   if (fx.oppLeader) out.push(['Race leader ▼', 'up']);
@@ -129,6 +130,8 @@ const breakingBox = c => c?.breaking?.length ? c.breaking.map(b => `<div class="
 function costTag(s, a, c) {
   const cost = costOf(a);
   if (!cost) return '';
+  const own = c.answered == null && selfFunds(s) ? shortfall(s, cost) : 0;
+  if (own > 0) return `<span class="risk-tag broke" title="Your war chest is short. The rest comes from your own fortune, and every million raises your label.">YOUR OWN MONEY · $${own.toFixed(1)}M · "${esc(PLAYER_INFO[s.player].label)}" +${Math.max(1, Math.round(own))}</span> `;
   const short = c.answered == null && !canAfford(s, a);
   return `<span class="risk-tag ${short ? 'broke' : 'cost'}" title="${short ? 'Your war chest cannot pay for this.' : 'This choice spends money from your war chest.'}">${short ? 'NOT ENOUGH MONEY · ' : ''}COSTS $${cost.toFixed(1)}M</span> `;
 }
