@@ -34,14 +34,14 @@ function pickPost(s, pool) {
 }
 // Every decision has its own posts and chyron in REACTIONS (reactions.js). A gamble can have a second set for failure.
 // The generic pools in media.js are only a fallback, and never quote the decision.
-function reactionFor(key, outcome) {
-  const r = REACTIONS[key];
+function reactionFor(key, outcome, s) {
+  const r = (s && !isGov(s) && REACTIONS_CHALLENGER[key]) || REACTIONS[key];
   if (!r) return null;
   const [boomer, groyper, chyron] = outcome === 'lose' && r.length > 3 ? r.slice(3) : r;
   return { boomer, groyper, chyron };
 }
 function buildReactions(s, key, fx, text, outcome) {
-  const tags = reactionTags(fx || {}, outcome), spec = reactionFor(key, outcome) || {};
+  const tags = reactionTags(fx || {}, outcome), spec = reactionFor(key, outcome, s) || {};
   const src = EVENTS.find(e => e.id === key.replace(/:\d+$/, '')) || QUESTIONS.find(q => q.id === key.replace(/:\d+$/, ''));
   // A choice written for your own candidate (cond on s.player) keeps your name in its posts.
   const item = src && (src.answers || src.choices)?.[+key.split(':').pop()];
@@ -55,8 +55,10 @@ function buildReactions(s, key, fx, text, outcome) {
   const m = chyron && chyron.match(/^(fax|max):\s*/);
   if (m) { outlet = m[1]; chyron = chyron.slice(m[0].length); }
   if (!chyron) chyron = pickPost(s, CHYRONS[tags.has('fail') ? 'fail' : tags.has('rino') ? 'rino' : tags.has('attack') ? 'attack' : (fx?.maga || 0) >= 4 ? 'maga' : 'neutral']);
+  // A challenger cannot sign, pardon or fire anyone yet. In shared content, "SIGNS" becomes "WOULD SIGN".
+  const promised = t => !isGov(s) && !own && (!src || isShared(src)) ? promiseChyron(t, LAST) : t;
   return {
-    chyron: { outlet, text: fill(chyron) },
+    chyron: { outlet, text: promised(fill(chyron)) },
     boomer: fill(rv(spec.boomer || pickPost(s, BOOMER_POSTS[postStance('boomer', tags, fx || {})]))),   // rivalize before {last} is filled in
     groyper: fill(rv(spec.groyper || pickPost(s, GROYPER_POSTS[postStance('groyper', tags, fx || {})]))),
   };

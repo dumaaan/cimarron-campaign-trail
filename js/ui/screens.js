@@ -5,7 +5,7 @@
 function renderQuestion(s) {
   const c = s.cur, q = QUESTIONS.find(q => q.id === c.qid);
   let h = `<div class="q-meta"><span>Campaign Question</span><span>${esc(q.setting)}</span></div>
-    <div class="q-text">${esc(rivalize(s, textOf(s, q.text)))}</div>${answersList(q.answers, c)}`;
+    <div class="q-text">${esc(personal(s, textOf(s, q.text)))}</div>${answersList(q.answers, c)}`;
   if (c.answered == null) h += `<button class="btn" id="submit" ${c.sel == null ? 'disabled' : ''}>Answer</button>`;
   else {
     const a = q.answers[c.answered];
@@ -21,7 +21,7 @@ function renderEvent(s) {
   const text = typeof e.text === 'function' ? e.text(s) : e.text;
   let h = `<div class="q-meta"><span class="kind" style="background:${EVENT_KINDS[e.kind] || '#333'}">${e.kind}</span><span>${c.type === 'revent' ? `Runoff · ${fmtDate(runoffDate(s))}` : dateOf(s.step)}</span></div>
     <div class="event-title">${esc(textOf(s, e.title))}</div>
-    <div class="q-text">${esc(isShared(e) ? rivalize(s, text) : text)}</div>`;
+    <div class="q-text">${esc(isShared(e) ? personal(s, text) : text)}</div>`;
   const advice = adviceOf(s, e);
   if (advice.length) h += `<div class="advice"><div class="fb-head">Your Advisors</div>${advice.map(([id, t]) =>
     `<div class="adv">${staffBadge(id)}<div><b>${staffOf(id).name}</b> <span class="muted small">${staffOf(id).role}</span><div>${esc(isShared(e) ? rivalize(s, t) : t)}</div></div></div>`).join('')}</div>`;

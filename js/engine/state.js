@@ -70,6 +70,14 @@ function rivalize(s, t) {
   }
   return t;
 }
+// Headlines about acts only a governor can do, rewritten as promises for a challenger ("SIGNS" becomes "WOULD SIGN").
+const BASE_VERB = { SIGNS: 'SIGN', PARDONS: 'PARDON', FIRES: 'FIRE', VETOES: 'VETO', ORDERS: 'ORDER', DEPLOYS: 'DEPLOY', SUSPENDS: 'SUSPEND',
+  APPROVES: 'APPROVE', COMMUTES: 'COMMUTE', SENDS: 'SEND', CUTS: 'CUT', CREATES: 'CREATE', BANS: 'BAN', EXEMPTS: 'EXEMPT', HALTS: 'HALT', REPLACES: 'REPLACE', GIVES: 'GIVE' };
+function promiseChyron(t, who) {
+  if (!t.startsWith(who + ' ') || /PLEDGE|FIRES UP|OPENS DOOR/.test(t)) return t;
+  const rest = t.slice(who.length + 1), verb = rest.split(' ')[0];
+  return BASE_VERB[verb] ? `${who} WOULD ${BASE_VERB[verb]}${rest.slice(verb.length)}` : t;
+}
 // Shared content: everything except your own campaign's events, your running mate's story and your own questions.
 const isShared = x => !(x.kind === 'Running Mate' || x.kind === 'Record' || CAMPAIGN_KINDS[x.kind] || x.weight === OWN || /^q_/.test(x.id));
 // Choices and feedback may be written as functions of the game state.
@@ -99,6 +107,10 @@ const scenarioOf = s => SCENARIOS.find(x => x.id === s.scenario) || SCENARIOS[0]
 const displayName = (s, id) => CAND[id === 'you' ? (s?.player || 'castellano') : id].name;
 const shortName = (s, id) => CAND[id === 'you' ? (s?.player || 'castellano') : id].short;
 const initials = (s, id) => CAND[id === 'you' ? (s?.player || 'castellano') : id].initials;
+const ADDRESS = { castellano: 'Governor', dunmore: 'Lieutenant Governor', rick: 'Pastor', krantz: 'Sheriff', vaskel: 'Mr. Vaskel', whitlock: 'Senator' };
+const addressName = s => ADDRESS[s?.player] || 'Governor';
+// Shared text, ready to show: rival names become "your rival", then {you} becomes how people address you.
+const personal = (s, t) => typeof t === 'string' ? rivalize(s, t).replace(/\{you\}/g, addressName(s)).replace(/\{name\}/g, shortName(s, 'you')) : t;
 const headlineName = (s, id = 'you') => { const c = CAND[id === 'you' ? s.player : id]; return c.headline || c.short.toUpperCase(); };
 
 function addDelta(s, cid, fx, mult = 1) {

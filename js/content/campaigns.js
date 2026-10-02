@@ -1002,6 +1002,8 @@ const GOV_CHOICES = { church_arrest: [1, 3], tornado: [0, 1, 2], fbi_krantz: [3]
 for (const [id, idx] of Object.entries(GOV_CHOICES)) for (const i of idx) andCond(ev(id).choices[i], s => isGov(s));
 
 andCond(ev('leaked_audio'), s => ['castellano', 'vaskel', 'whitlock'].includes(s.player));
+// Whitlock would only make her offer to a candidate she could stand behind.
+andCond(ev('whitlock_offer'), s => ['castellano', 'vaskel'].includes(s.player));
 andCond(ev('rifle_q'), s => s.player !== 'krantz');
 andCond(ev('fox_townhall').choices[2], s => inRace(s, 'dunmore'));
 
@@ -1013,6 +1015,9 @@ forChallenger(ev('right_to_life'), 'text', t => t.replace('Your current law has'
 forChallenger(ev('president_call'), 'text', t => t.replace('You will fire your Secretary of State', 'You will promise to fire the Secretary of State on your first day').replace('And you will publicly support', 'And you will publicly support'));
 forChallenger(ev('president_call').choices[1], 'text', t => t.replace('Fire the Secretary', 'Promise to fire the Secretary'));
 forChallenger(ev('fox_townhall').choices[3], 'text', () => 'Decline. You are busy campaigning.');
+forChallenger(ev('donor_leak').choices[0], 'text', () => 'Return the $3 million and promise to sign the well-cleanup bill.');
+forChallenger(ev('favor_drones').choices[1].risk.win, 'fb', () => 'The President\'s son says open bidding is "fair," and that his company expects to win it. The White House is satisfied.');
+forChallenger(ev('favor_drones').choices[1].risk.lose, 'fb', () => 'The President\'s son hears a "no" in your answer. He stops returning your calls.');
 forChallenger(ev('growth_club').choices[0], 'fb', () => 'The Club endorses you and funds ads. Its lawyers send you a copy of the pledge, with your signature highlighted.');
 forChallenger(ev('favor_pardon'), 'text', t => t.replace('He would consider a pardon a personal kindness.', 'He would consider a public promise to pardon him, if you win, a personal kindness.'));
 forChallenger(ev('favor_pardon').choices[0], 'text', () => 'Promise to pardon Renner if you win.');
@@ -1070,6 +1075,11 @@ add('lawrenceville_murder',
 add('mideast_war',
   { cond: notGov, text: 'Call on the Governor to suspend the state gas tax.', fx: { farm: 2, seniors: 2, opp: { castellano: -1 } },
     fb: 'The Governor says the budget cannot afford it. Voters at the pump disagree.' });
+// A challenger who backed the war cannot suspend a tax. The Governor's choice is hidden, and the challenger can promise it.
+andCond(ev('hawk_diesel').choices[0], s => isGov(s));
+add('hawk_diesel',
+  { cond: notGov, text: 'Promise to suspend the state diesel tax on your first day, and ask the Governor to do it now.', fx: { farm: 3, seniors: 1, opp: { castellano: -1 } },
+    fb: 'The farmers like the promise, and they like watching the Governor squirm even more.' });
 add('oil_shock',
   { cond: notGov, text: 'Promise emergency fuel aid for farmers and seniors if you win.', fx: { farm: 2, seniors: 2, liberty: -2 },
     fb: 'A promise that sounds good at $6.80 a gallon.' });
@@ -1087,9 +1097,9 @@ for (const [id, i, fb] of [['voss_posts', 1, s => `${altMate(s).name} files on F
 for (const [id, rival] of [['deport', 'dunmore'], ['travel_ban', 'rick'], ['badminton', 'krantz'], ['christian_nat', 'rick'], ['wind', 'dunmore'], ['everify', 'dunmore']]) andCond(qu(id), s => inRace(s, rival));
 for (const id of ['alcatraz_citizen', 'btc_crash', 'dei_state', 'pardon_repeat', 'child_labor_followup', 'raw_milk_fda']) andCond(qu(id), s => isGov(s));
 for (const [id, i] of [['deport', 1], ['badminton', 3], ['stolen', 1], ['krantz_sheriff', 1]]) andCond(qu(id).answers[i], s => isGov(s));
-forChallenger(qu('stolen'), 'text', (t, s) => t.replace('"Governor, do you', `"${shortName(s, 'you')}, do you`));
+forChallenger(qu('stolen'), 'text', t => t.replace('"Governor, do you', '"{you}, do you'));
 forChallenger(qu('university'), 'text', t => t.replace('after your executive order', 'after the Governor\'s executive order'));
-forChallenger(qu('podcast'), 'text', (t, s) => t.replace('"Is the Governor Really a Conservative?"', `"Is ${shortName(s, 'you')} Really a Conservative?"`));
+forChallenger(qu('podcast'), 'text', t => t.replace('"Is the Governor Really a Conservative?"', '"Is {name} Really a Conservative?"'));
 
 // Questions that only one candidate is asked.
 QUESTIONS.push(

@@ -450,6 +450,18 @@ const bad = Object.keys(PROMISES).filter(k => {
 });
 ok('Every promise points at a real answer', bad.length === 0, bad.join(', '));
 
+// --- Challenger wording (QA pass) ---
+const badRxc = Object.keys(REACTIONS_CHALLENGER).filter(k => { const [id, i] = k.split(':'); const e = EVENTS.find(e => e.id === id) || QUESTIONS.find(q => q.id === id); return !e || !(e.choices || e.answers)[+i]; });
+ok('Every challenger reaction points at a real choice', badRxc.length === 0, badRxc.join(', '));
+ok('A challenger chyron promises the act', promiseChyron('KRANTZ PARDONS ALL CAPITOL PROTESTERS', 'KRANTZ') === 'KRANTZ WOULD PARDON ALL CAPITOL PROTESTERS');
+ok('A pledge chyron is unchanged', promiseChyron('KRANTZ SIGNS TAX PLEDGE', 'KRANTZ') === 'KRANTZ SIGNS TAX PLEDGE');
+const sk = newState('krantz', 5, 'normal'), sVas = newState('vaskel', 5, 'normal');
+const stolen = personal(sk, textOf(sk, QUESTIONS.find(q => q.id === 'stolen').text));
+ok('A challenger is addressed by title, not as "your rival"', stolen.includes('Sheriff, do you') && !/your rival/i.test(stolen), stolen.slice(0, 80));
+const wo = EVENTS.find(e => e.id === 'whitlock_offer');
+ok('Whitlock makes her offer only to Castellano or Vaskel', PLAYABLE.filter(p => p !== 'whitlock').every(p => { const t = newState(p, 5, 'normal'); return ['castellano', 'vaskel'].includes(p) || !wo.cond(t); }));
+ok('The Governor-only diesel choice is hidden from a challenger', shownChoices(sVas, EVENTS.find(e => e.id === 'hawk_diesel').choices).join() === '1,2,3');
+
 // --- Output ---
 const failed = results.filter(r => !r.pass).length;
 document.getElementById('summary').innerHTML = failed ? `<span class="fail">${failed} of ${results.length} checks failed.</span>` : `<span class="pass">All ${results.length} checks passed.</span>`;

@@ -510,7 +510,7 @@ const QUESTIONS = [
     answers: [
       { text: 'Yes. Cimarron will be the most crypto-friendly state in America.',
         fx: { liberty: 5, online: 4, seniors: -3, chamber: -2 },
-        fb: 'Vaskel\'s supporters notice. Older voters see it as speculation with public money.' },
+        fb: 'The Liberty Caucus and young investors notice. Older voters see it as speculation with public money.' },
       { text: 'Accept crypto for payments, but no public investment.',
         fx: { liberty: 2, online: 2 },
         fb: 'A limited step that few voters object to.' },
