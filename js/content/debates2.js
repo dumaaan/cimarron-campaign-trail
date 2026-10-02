@@ -5,7 +5,8 @@
 // Rival answers may be functions of the game state (for example, the endorsed rival answers differently).
 // ============================================================
 
-const who2 = s => shortName(s, 'you');
+// How the moderator addresses you: "Governor", "Sheriff Krantz", "Senator Whitlock"...
+const who2 = s => ({ castellano: 'Governor', dunmore: 'Lieutenant Governor', rick: 'Pastor Rick', krantz: 'Sheriff Krantz', vaskel: 'Mr. Vaskel', whitlock: 'Senator Whitlock' })[s.player];
 const leaderOf = s => sorted(stateShares(s))[0][0];
 const pr = (s, id) => id === 'whitlock' ? 'her' : 'him';
 // Only the strongest rivals go on the attack; the others answer without attacking.
@@ -142,7 +143,7 @@ DEBATE_QUESTIONS.push(
       coburn: { text: '"My teammates\' kids watch him. I wish they didn\'t."', fx: { seniors: 2 } },
     } },
   { id: 'd2_label', round: 2, cond: s => (s.label || 0) >= 2,
-    text: s => `MODERATOR: "${who2(s)}, your rivals call you a ${PLAYER_INFO[s.player].label.toLowerCase()}. Tonight, answer them."`,
+    text: s => { const L = PLAYER_INFO[s.player].label.toLowerCase(); return `MODERATOR: "${who2(s)}, your rivals call you ${/less$/.test(L) ? L : `a ${L}`}. Tonight, answer them."`; },
     answers: [
       { text: '"I have made mistakes this year, and I have owned every one of them."', fx: { seniors: 2, label: -1 }, fb: 'An honest answer. It takes some of the sting out of the label.' },
       { text: '"Name-calling is what candidates do when they cannot beat your record."', fx: { maga: 2, online: 1 }, fb: 'A fighter\'s answer. The label stays where it is.' },

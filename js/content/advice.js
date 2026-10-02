@@ -28,6 +28,7 @@ const ADVICE_FOR = {
     straw_poll: [['wade', 'This room is your room. Delegates are activists.'], ['dana', 'Do not confuse the convention with the primary. The delegates love you. The voters are older.']],
     white_house_trip: [['wade', 'Four nights on Air Force One. The show basically produces itself.'], ['dana', 'Cimarron voters notice when you are not in Cimarron.'], ['pryce', 'The Governor will be here every day while you are gone.']],
     coburn_dui: [['wade', 'Do not go after a football hero. Your audience loves him.'], ['kyle', 'Ask who dismissed the case. Let the audience do the rest.']],
+    staff_split: [['wade', 'Bigger rallies. Every county. Primaries are won by the angriest voters, and they are ours.'], ['dana', 'Persuade older and undecided voters. They decide close primaries, and they do not listen to the show.'], ['pryce', 'Spend on turnout, Travis. Downloads do not vote. People in cars do.']],
   },
   // Pastor Rick: Josh Dollins (his son), Beth Carraway (pollster), Elder Ray Sutton (Council), Kaylee Morrow (media), Deb Farris (treasurer).
   rick: {

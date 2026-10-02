@@ -280,7 +280,7 @@ rx('raw_milk_fda', [
   [`FEDS OFF OUR FARMS!!! Proud of {last} today 🐄🇺🇸`, `State troopers standing up to the feds. This is what sovereignty looks like. More.`, `max:STANDOFF: CIMARRON TROOPERS BLOCK FEDERAL AGENTS AT DAIRY`],
   [`Let people buy milk from a farmer. What happened to this country?? Good law.`, `Food Freedom Act. Raw milk is the red pill of dairy.`, `fax:{LAST} SIGNS "FOOD FREEDOM ACT" FOR RAW MILK`],
   [`I drank raw milk as a boy on my grandpa's farm and I turned out fine!! Disappointed.`, `{last} sided with the FDA against a farmer. Remember this.`, `max:{LAST} STAYS OUT OF FDA RAID ON AMISH DAIRY`],
-  [`Abolish the FDA? Who checks my medicine then? I am on six pills a day.`, `Abolish the FDA. The MAHA dream, live from the Governor's office.`, `max:{LAST} CALLS FOR ABOLISHING THE FDA`],
+  [`Abolish the FDA? Who checks my medicine then? I am on six pills a day.`, `Abolish the FDA. The MAHA dream, live from the {last} campaign.`, `max:{LAST} CALLS FOR ABOLISHING THE FDA`],
 ]);
 rx('h1b', [
   [`American jobs for AMERICANS!!! Why is this even a question?? 🇺🇸`, REMOVED_POST('97,000'), `max:{LAST} CALLS FOR END OF H-1B PROGRAM`],
@@ -807,7 +807,7 @@ rx('d_prove', [
   [`Fighting every day. OK. But what did you DO?`, `"Fought the left every day." A vibe, not an achievement.`, `max:DEBATE: {LAST} "FOUGHT THE LEFT EVERY DAY"`],
 ]);
 rx('d_bible', [
-  [`God's law first. Amen 🙏`, `Scripture as the law of the land, from the Governor. Rick has competition.`, `max:DEBATE: {LAST} BACKS "GOD'S LAW" IN STATE LAW`],
+  [`God's law first. Amen 🙏`, `Scripture as the law of the land, from {last}. Rick has competition.`, `max:DEBATE: {LAST} BACKS "GOD'S LAW" IN STATE LAW`],
   [`Good question for Rick. Which laws? Who decides? He did not really answer.`, `Asked Rick which laws. He froze. Clinical.`, `fax:DEBATE: {LAST} PRESSES RICK ON "BIBLICAL LAW"`],
   [`Our founders were believers AND they wrote the Constitution. PERFECT answer 📜🙏`, `Constitution first, men of faith. Threading the needle.`, `fax:DEBATE: {LAST}: CONSTITUTION FIRST`],
   [`Bringing up the church money on stage? Kind of low. True though.`, `Hit Rick's finances in front of his flock. The crowd gasped.`, `max:DEBATE: {LAST} HITS RICK'S CHURCH FINANCES`],
@@ -1639,4 +1639,20 @@ rx('d2_coburn', [
   [`Skipped seven primaries and wants to be Governor?? TRUE.`, `Hit Coburn's voting record hard. His fans booed. Worth it.`, `max:DEBATE: {LAST} HITS COBURN'S VOTING RECORD`],
   [`You do not start your career as Governor. Ha. Polite and true.`, `The entry-level line. Gracious and brutal.`, `fax:DEBATE: {LAST}: GOVERNOR "NOT AN ENTRY-LEVEL JOB"`],
   [`Lots of folks gave up on voting. That is true, I almost did.`, `Defended the non-voters. The disengaged right is listening.`, `fax:DEBATE: {LAST} DEFENDS COBURN'S NON-VOTING`],
+]);
+
+// ---------------- Reactions when a challenger only PROMISES what the Governor could do ----------------
+// REACTIONS_CHALLENGER['key'] replaces REACTIONS['key'] when you are not the Governor.
+const REACTIONS_CHALLENGER = {
+  'favor_pardon:0': [`Promise to pardon a man who stole from FARMERS? 200 families!! I love the President but this is wrong.`, `Promised a pardon to the President's golf buddy before even winning. Loyalty in advance.`, `max:{LAST} PROMISES PARDON FOR PRESIDENT'S FRIEND`],
+  'favor_pardon:1': [`Less prison if {last} wins, but he still pays the families. That is a fair promise.`, `Promised half a pardon. The White House hates half of anything.`, `fax:{LAST} WOULD CUT RENNER SENTENCE, KEEP RESTITUTION`],
+  'president_call:0': [`Whatever the President needs. He has done so much for us 🇺🇸🇺🇸`, `Promised to fire the Secretary of State on day one and backed the tariffs. Full loyalty, paid in advance.`, `max:{LAST} PROMISES TO FIRE SECRETARY OF STATE, BACKS POTASH TARIFFS`],
+  'president_call:1': [`Promised to fire the Secretary of State. OK. But what about the potash tariffs? Farmers need fertilizer.`, `Half the deal, and only a promise. Trump-world remembers halves.`, `fax:{LAST} WOULD FIRE SECRETARY OF STATE AT WHITE HOUSE REQUEST`],
+  'pardons:0': [`They were protesting a TAX. Americans have done that since 1773!! Promise to pardon them all 🇺🇸`, `All twelve would walk free on day one. {last} said it with a straight face. Respect.`, `max:{LAST} PROMISES TO PARDON ALL CAPITOL PROTESTERS`],
+  'donor_leak:0': [`Gave all the money back AND promised to sign the cleanup bill. That is how you fix a mistake.`, `Returned the oil money and promised the farmers their bill. Folded, but cleanly.`, `fax:{LAST} RETURNS $3M, PROMISES TO SIGN WELL-CLEANUP BILL`],
+  'favor_drones:1': [`Open bidding, fair and square. That is the American way 👍`, `Promised an open bid. The President's son thinks he will win it anyway.`, `fax:{LAST} PROMISES OPEN BIDDING ON DRONE CONTRACT`,
+    `The President's son is not happy. You do not say no to that family.`, `Said "open bidding" and the son heard "no." Ghosted by the royal family.`, `max:PRESIDENT'S SON COOLS ON {LAST}`],
+};
+rx('hawk_diesel', [null, null, null,
+  [`Suspend the diesel tax on day one!! And make the Governor do it now. Farmers need help 🚜`, `Promising tax relief and daring the Governor to match it. Clean populism.`, `fax:{LAST} PROMISES DIESEL TAX HOLIDAY, PRESSES GOVERNOR`],
 ]);
